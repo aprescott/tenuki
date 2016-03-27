@@ -1,0 +1,16 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+
+<head>
+  <link rel="stylesheet" href="../build/tenuki.css"></link>
+  <script src="../build/tenuki.js"></script>
+</head>
+
+<div class="board"></div>
+
+<script>
+  boardElement = document.querySelector(".board");
+  window.board = new tenuki.Board(boardElement);
+  window.board.setup();
+</script>
