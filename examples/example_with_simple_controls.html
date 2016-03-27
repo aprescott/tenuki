@@ -1,0 +1,129 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+
+<head>
+  <link rel="stylesheet" href="../build/tenuki.css"></link>
+  <script src="../build/tenuki.js"></script>
+
+  <style>
+    .controls {
+      position: relative;
+      top: 0;
+      left: calc(100% + 10px);
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .controls a + a {
+      margin-left: 1em;
+    }
+
+    .controls .game-info {
+      padding: 0.3em 0.5em;
+    }
+
+    .controls .text-info {
+      clear: both;
+      height: 90%;
+      overflow: auto;
+      padding: 0.5em;
+    }
+
+    .controls a {
+      display: inline-block;
+      height: 100%;
+      font-size: 1em;
+      text-decoration: none;
+      color: inherit;
+      padding: 0.3em 0.5em;
+      border-radius: 7px;
+      background: gray;
+      color: white;
+    }
+
+    .controls p {
+      margin-top: 1em;
+    }
+</style>
+</head>
+
+<div class="board">
+  <div class="controls">
+    <div class="buttons">
+      <a class="pass" href="#">Pass</a>
+      <a class="undo" href="#">Undo</a>
+      <a class="textured" href="#">Textured</a>
+    </div>
+
+    <div class="game-info">&nbsp;</div>
+    <div class="text-info"></div>
+  </div>
+</div>
+
+<script>
+// An example setup showing how buttons could be set to board functionality.
+ExampleBoardControls = function(element, board) {
+  this.element = element;
+  this.board = board;
+  this.textInfo = element.querySelector(".text-info");
+  this.gameInfo = element.querySelector(".game-info");
+
+  this.setText = function(str) {
+    this.textInfo.innerText = str;
+  };
+
+  this.updateStats = function() {
+    this.gameInfo.innerText = "Move " + this.board.moves.length + ". Black stones captured: " + this.board.captures["black"] + ". White stones captured: " + this.board.captures["white"];
+
+    var currentMove = this.board.currentMove();
+
+    if (typeof currentMove != "undefined" && currentMove.pass) {
+      this.setText(currentMove.color[0].toUpperCase() + currentMove.color.substr(1) + " passes.")
+    } else {
+      this.setText("");
+    }
+  };
+
+  this.setup = function() {
+    var controls = this;
+
+    var passButton = document.querySelector(".pass");
+    var undoButton = document.querySelector(".undo");
+    var texturedButton = document.querySelector(".textured");
+
+    passButton.addEventListener("click", function(e) {
+      e.preventDefault();
+
+      var player = controls.board.currentPlayer;
+      controls.board.pass();
+      controls.updateStats();
+    });
+
+    undoButton.addEventListener("click", function(e) {
+      e.preventDefault();
+
+      controls.board.undo();
+    });
+
+    texturedButton.addEventListener("click", function(e) {
+      e.preventDefault();
+
+      controls.board.element.classList.toggle("textured");
+    });
+  }
+};
+
+boardElement = document.querySelector(".board");
+window.board = new tenuki.Board(boardElement);
+window.board.setup();
+
+var controlElement = document.querySelector(".controls");
+var controls = new ExampleBoardControls(controlElement, board);
+controls.setup();
+
+window.board.callbacks.postRender = function(board) {
+	controls.updateStats();
+};
+</script>
