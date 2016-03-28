@@ -112,7 +112,7 @@
   opacity: 0.5;
 }
 
-.tenuki-board .tenuki-board.white-to-play .intersection.empty:hover .highlight {
+.tenuki-board.white-to-play .intersection.empty:hover .highlight {
   background: white;
 }
 
