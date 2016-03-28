@@ -1,0 +1,278 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<link rel="stylesheet" href="build/tenuki.css"></link>
+<script src="build/tenuki.js"></script>
+
+<div id="test-board" class="board"></div>
+
+<script>
+var boardElement = document.querySelector(".board");
+board = window.board = new tenuki.Board(boardElement);
+board.setup();
+
+resetTests = window.resetTests = function () {
+  board.element.innerHTML = "";
+  board = new tenuki.Board(board.element, board.size);
+  board.setup();
+};
+
+// black and white alternate
+resetTests();
+
+board.grid.flatten().forEach(function(pointElement) {
+  if (!tenuki.utils.hasClass(pointElement, "empty")) {
+    throw "tests failed";
+  }
+});
+
+board.grid[5][5].click(); // b
+board.grid[5][6].click(); // w
+board.grid[5][7].click(); // b
+board.grid[5][8].click(); // w
+board.grid[5][9].click(); // b
+
+if (!tenuki.utils.hasClass(board.grid[5][5], "black")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[5][6], "white")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[5][7], "black")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[5][8], "white")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[5][9], "black")) {
+  throw "tests failed";
+}
+
+// marker indicator
+resetTests();
+
+if (board.element.querySelectorAll(".marker").length != 0) {
+  throw "tests failed";
+}
+
+board.grid[1][1].click();
+if (board.element.querySelectorAll(".marker").length == 0 || !tenuki.utils.hasClass(board.grid[1][1], "marker")) {
+  throw "tests failed";
+}
+
+board.grid[2][2].click();
+if (board.element.querySelectorAll(".marker").length == 0 || tenuki.utils.hasClass(board.grid[1][1], "marker") || !tenuki.utils.hasClass(board.grid[2][2], "marker")) {
+  throw "tests failed";
+}
+
+// multi-stone group capture
+resetTests();
+
+board.grid[0][0].click(); // b
+board.grid[0][1].click(); // w
+board.grid[1][0].click(); // b
+board.grid[1][1].click(); // w
+board.grid[5][5].click(); // b tenuki
+board.grid[2][0].click(); // w
+
+if (!tenuki.utils.hasClass(board.grid[0][0], "empty")) {
+  throw "tests failed";
+}
+
+if (!tenuki.utils.hasClass(board.grid[1][0], "empty")) {
+  throw "tests failed";
+}
+
+// simple ko
+resetTests();
+
+board.grid[3][3].click(); // b
+board.grid[3][2].click(); // w
+board.grid[4][2].click(); // b
+board.grid[4][1].click(); // w
+board.grid[5][3].click(); // b
+board.grid[5][2].click(); // w
+board.grid[4][4].click(); // b
+board.grid[4][3].click(); // w
+
+if (!tenuki.utils.hasClass(board.grid[4][2], "empty") || !tenuki.utils.hasClass(board.grid[4][2], "ko")) {
+  throw "tests failed";
+}
+
+if (!board.isBlackPlaying()) {
+  throw "tests failed";
+}
+
+board.grid[4][2].click();
+
+if (!tenuki.utils.hasClass(board.grid[4][2], "empty") || !tenuki.utils.hasClass(board.grid[4][2], "ko")) {
+  throw "tests failed";
+}
+
+if (!board.isBlackPlaying()) {
+  throw "tests failed";
+}
+
+board.grid[10][10].click();
+
+if (!tenuki.utils.hasClass(board.grid[4][2], "empty")) {
+  throw "tests failed";
+}
+
+if (tenuki.utils.hasClass(board.grid[4][2], "ko")) {
+  throw "tests failed";
+}
+
+if (!board.isWhitePlaying()) {
+  throw "tests failed";
+}
+
+board.grid[4][2].click();
+
+if (!tenuki.utils.hasClass(board.grid[4][2], "white")) {
+  throw "tests failed";
+}
+
+// corner, ko, undo
+resetTests();
+
+board.grid[0][0].click(); // b
+board.grid[0][1].click(); // w
+board.grid[1][1].click(); // b
+board.grid[1][0].click(); // w
+board.grid[0][2].click(); // b
+board.grid[1][2].click(); // w
+board.grid[0][0].click(); // b
+
+if (!tenuki.utils.hasClass(board.grid[0][1], "empty") || !tenuki.utils.hasClass(board.grid[0][1], "ko")) {
+  throw "tests failed";
+}
+
+board.undo();
+
+// verify ko gets undone
+if (tenuki.utils.hasClass(board.grid[0][1], "ko")) {
+  throw "tests failed";
+}
+
+if (!tenuki.utils.hasClass(board.grid[0][0], "empty")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[0][1], "white")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[0][2], "black")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[1][0], "white")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[1][1], "black")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[1][2], "white")) {
+  throw "tests failed";
+}
+
+// passing removes a ko
+resetTests();
+
+board.grid[0][0].click(); // b
+board.grid[0][1].click(); // w
+board.grid[1][1].click(); // b
+board.grid[1][0].click(); // w
+board.grid[0][2].click(); // b
+board.grid[1][2].click(); // w
+board.grid[0][0].click(); // b
+
+board.pass();
+
+if (tenuki.utils.hasClass(board.grid[0][1], "ko")) {
+  throw "tests failed";
+}
+
+// no suicide in the corner
+resetTests();
+
+board.grid[0][1].click(); // b
+board.grid[0][2].click(); // w
+board.grid[1][0].click(); // b
+board.grid[2][0].click(); // w
+board.grid[15][15].click(); // b tenuki
+board.grid[1][1].click(); // w
+
+if (!tenuki.utils.hasClass(board.grid[0][0], "empty")) {
+  throw "tests failed";
+}
+board.grid[0][0].click();
+if (!tenuki.utils.hasClass(board.grid[0][0], "empty")) {
+  throw "tests failed";
+}
+
+if (!board.isBlackPlaying()) {
+  throw "tests failed";
+}
+
+board.grid[9][9].click(); // b tenuki
+board.grid[0][0].click();
+
+if (!tenuki.utils.hasClass(board.grid[0][0], "white")) {
+  throw "tests failed";
+}
+
+if (!tenuki.utils.hasClass(board.grid[0][1], "empty")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(board.grid[1][0], "empty")) {
+  throw "tests failed";
+}
+
+// TODO: captures accumulate correctly and roll back on undo
+
+// fancy "pass" print
+resetTests();
+board.grid[3][2].className += " stone black";
+board.grid[3][3].className += " stone black";
+board.grid[3][4].className += " stone black";
+board.grid[3][6].className += " stone black";
+board.grid[3][7].className += " stone black";
+board.grid[3][8].className += " stone black";
+board.grid[3][10].className += " stone black";
+board.grid[3][11].className += " stone black";
+board.grid[3][12].className += " stone black";
+board.grid[3][14].className += " stone black";
+board.grid[3][15].className += " stone black";
+board.grid[3][16].className += " stone black";
+board.grid[4][2].className += " stone black";
+board.grid[4][4].className += " stone black";
+board.grid[4][6].className += " stone black";
+board.grid[4][8].className += " stone black";
+board.grid[4][10].className += " stone black";
+board.grid[4][14].className += " stone black";
+board.grid[5][2].className += " stone black";
+board.grid[5][3].className += " stone black";
+board.grid[5][4].className += " stone black";
+board.grid[5][6].className += " stone black";
+board.grid[5][7].className += " stone black";
+board.grid[5][8].className += " stone black";
+board.grid[5][10].className += " stone black";
+board.grid[5][11].className += " stone black";
+board.grid[5][12].className += " stone black";
+board.grid[5][14].className += " stone black";
+board.grid[5][15].className += " stone black";
+board.grid[5][16].className += " stone black";
+board.grid[6][2].className += " stone black";
+board.grid[6][6].className += " stone black";
+board.grid[6][8].className += " stone black";
+board.grid[6][12].className += " stone black";
+board.grid[6][16].className += " stone black";
+board.grid[7][2].className += " stone black";
+board.grid[7][6].className += " stone black";
+board.grid[7][8].className += " stone black";
+board.grid[7][10].className += " stone black";
+board.grid[7][11].className += " stone black";
+board.grid[7][12].className += " stone black";
+board.grid[7][14].className += " stone black";
+board.grid[7][15].className += " stone black";
+board.grid[7][16].className += " stone black";
+</script>
