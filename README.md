@@ -12,14 +12,15 @@ For live examples, see `examples/`, or view them on GitHub:
 Create a new `tenuki.Board` instance with a DOM element, then call `setup()`:
 
 ```html
+<link rel="stylesheet" href="build/tenuki.css">
+<script src="build/tenuki.js"></script>
+
 <div class="board"></div>
 
 <script>
-window.addEventListener("load", function() {
   boardElement = document.querySelector(".board");
   window.board = new tenuki.Board(boardElement);
   window.board.setup();
-}, false)
 </script>
 ```
 
