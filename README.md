@@ -44,4 +44,4 @@ board.callbacks.postRender = function(board) {
 
 # Running tests
 
-Open `test.html` in your browser.
+Open [`test.html`](https://aprescott.github.io/tenuki.js/test.html) in your browser.
