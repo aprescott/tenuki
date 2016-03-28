@@ -1,9 +1,9 @@
-.board {
+.tenuki-board {
   position: relative;
   background: rgb(226, 188, 106);
 }
 
-.lines {
+.tenuki-board .lines {
   position: absolute;
   top: 0;
   left: 0;
@@ -11,28 +11,28 @@
   margin: 18px;
 }
 
-.line {
+.tenuki-board .line {
   background: rgb(135, 113, 63);
 }
 
-.line.horizontal {
+.tenuki-board .line.horizontal {
   height: 1px;
   width: 100%;
   margin-bottom: 28px;
 }
 
-.line.vertical {
+.tenuki-board .line.vertical {
   width: 1px;
   height: 100%;
   float: left;
   margin-right: 28px;
 }
 
-.line.vertical:last-child {
+.tenuki-board .line.vertical:last-child {
   margin-right: -1px;
 }
 
-.hoshi {
+.tenuki-board .hoshi {
   width: calc(2 * 2px + 1px);
   height: calc(2 * 2px + 1px);
   border-radius: calc(2 * 2px + 1px);
@@ -40,23 +40,23 @@
   position: absolute;
 }
 
-.intersections {
+.tenuki-board .intersections {
   position: absolute;
   top: calc(18px - 28px/2);
   left: calc(18px - 28px/2);
 }
 
-.intersection {
+.tenuki-board .intersection {
   position: absolute;
 }
 
-.intersection.empty {
+.tenuki-board .intersection.empty {
   /* intersections are wider to account for hover overlaps so they're flush */
   width: calc(28px + 1px);
   height: calc(28px + 1px);
 }
 
-.intersection.stone.marker:after {
+.tenuki-board .intersection.stone.marker:after {
   content: "";
   display: block;
   width: calc(28px/4);
@@ -70,15 +70,15 @@
   margin-top: calc(-28px/4 + 1px);
 }
 
-.intersection.white.stone.marker:after {
+.tenuki-board .intersection.white.stone.marker:after {
   color: black;
 }
 
-.intersection.black.stone.marker:after {
+.tenuki-board .intersection.black.stone.marker:after {
   color: white;
 }
 
-.stone {
+.tenuki-board .stone {
   content: "";
   display: block;
   width: calc(28px - 1px);
@@ -87,22 +87,22 @@
   border: 1px solid black;
 }
 
-.stone.white {
+.tenuki-board .stone.white {
   background: white;
   border-color: #676767;
 }
 
-.stone.black {
+.tenuki-board .stone.black {
   background: black;
 }
 
-.intersection .highlight {
+.tenuki-board .intersection .highlight {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.intersection.empty:hover .highlight {
+.tenuki-board .intersection.empty:hover .highlight {
   display: block;
   width: calc(28px - 1px);
   height: calc(28px - 1px);
@@ -112,11 +112,11 @@
   opacity: 0.5;
 }
 
-.board.white-to-play .intersection.empty:hover .highlight {
+.tenuki-board .tenuki-board.white-to-play .intersection.empty:hover .highlight {
   background: white;
 }
 
-.intersection.ko .highlight {
+.tenuki-board .intersection.ko .highlight {
   background: none !important;
   width: 11px !important;
   height: 11px !important;
@@ -130,28 +130,28 @@
   margin-left: calc(-1px - 6px);
 }
 
-.intersection.suicide .highlight {
+.tenuki-board .intersection.suicide .highlight {
   background: none !important;
   border: none !important;
 }
 
-.board.textured .stone {
+.tenuki-board.textured .stone {
   box-shadow: 0px 2px 1px rgba(62, 62, 62, 0.38);
 }
 
-.board.textured .stone.black,
-.board.textured .intersection.empty:hover .highlight {
+.tenuki-board.textured .stone.black,
+.tenuki-board.textured .intersection.empty:hover .highlight {
   border-color: #565656;
   background: radial-gradient(circle at 50% 120%, #000000, #484848 10%, #101010 80%, #FFFFFF 100%);
 }
 
-.board.textured .stone.white,
-.board.textured.white-to-play .intersection.empty:hover .highlight {
+.tenuki-board.textured .stone.white,
+.tenuki-board.textured.white-to-play .intersection.empty:hover .highlight {
   border-color: #DEDEDE;
   background: radial-gradient(circle at 50% 120%, #ECEAEA, #D6D6D6 10%, #EAEAEA 80%, #FFFFFF 100%);
 }
 
-.board.textured .stone:before {
+.tenuki-board.textured .stone:before {
   content: "";
   position: absolute;
   top: 1%;
@@ -163,10 +163,10 @@
   z-index: 2;
 }
 
-.board.textured .stone.white:before {
+.tenuki-board.textured .stone.white:before {
   background: radial-gradient(circle at 50% 0px, #FFFFFF, rgba(255, 255, 255, 0) 58%);
 }
 
-.board.textured .marker {
+.tenuki-board.textured .marker {
   opacity: 0.9;
 }
