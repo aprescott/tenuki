@@ -4,11 +4,11 @@
 <link rel="stylesheet" href="build/tenuki.css"></link>
 <script src="build/tenuki.js"></script>
 
-<div id="test-board" class="board"></div>
+<div id="test-board" class="tenuki-board"></div>
 
 <script>
-var boardElement = document.querySelector(".board");
-board = window.board = new tenuki.Board(boardElement);
+var boardElement = document.querySelector(".tenuki-board");
+var board = window.board = new tenuki.Board(boardElement);
 board.setup();
 
 resetTests = window.resetTests = function () {

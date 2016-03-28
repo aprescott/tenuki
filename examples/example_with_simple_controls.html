@@ -49,7 +49,7 @@
 </style>
 </head>
 
-<div class="board">
+<div class="tenuki-board">
   <div class="controls">
     <div class="buttons">
       <a class="pass" href="#">Pass</a>
@@ -115,15 +115,15 @@ ExampleBoardControls = function(element, board) {
   }
 };
 
-boardElement = document.querySelector(".board");
-window.board = new tenuki.Board(boardElement);
-window.board.setup();
+var boardElement = document.querySelector(".tenuki-board");
+var board = new tenuki.Board(boardElement);
+board.setup();
 
 var controlElement = document.querySelector(".controls");
 var controls = new ExampleBoardControls(controlElement, board);
 controls.setup();
 
-window.board.callbacks.postRender = function(board) {
+board.callbacks.postRender = function(board) {
 	controls.updateStats();
 };
 </script>

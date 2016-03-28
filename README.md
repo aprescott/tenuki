@@ -15,14 +15,20 @@ Create a new `tenuki.Board` instance with a DOM element, then call `setup()`:
 <link rel="stylesheet" href="build/tenuki.css">
 <script src="build/tenuki.js"></script>
 
-<div class="board"></div>
+<div class="tenuki-board"></div>
 
 <script>
-  boardElement = document.querySelector(".board");
-  window.board = new tenuki.Board(boardElement);
-  window.board.setup();
+  var boardElement = document.querySelector(".tenuki-board");
+  var board = new tenuki.Board(boardElement);
+  board.setup();
 </script>
 ```
+
+There are no other dependencies.
+
+# Browser support
+
+I've tested this on Chrome, Firefox, Safari and Opera.
 
 # Post-render callbacks
 
