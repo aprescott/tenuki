@@ -1,3 +1,8 @@
+/*!
+ * tenuki.js v0.0.1 (https://github.com/aprescott/tenuki.js)
+ * Copyright © 2016 Adam Prescott.
+ * Licensed under the MIT license.
+ */
 tenuki = window.tenuki || {};
 
 tenuki.MARGIN = 18;
@@ -470,21 +475,14 @@ tenuki.Board = function(element, size) {
     board.render();
   };
 };
-tenuki.BoardControls = function(element, board) {
+ExampleBoardControls = function(element, board) {
   this.element = element;
   this.board = board;
   this.textInfo = null;
   this.gameInfo = null;
 
   this.setText = function(str) {
-    this.textInfo.innerHTML = "";
-    this.appendText(str);
-  };
-
-  this.appendText = function(str) {
-    var paragraph = tenuki.utils.createElement("p");
-    paragraph.innerText = str;
-    tenuki.utils.appendElement(this.textInfo, paragraph);
+    this.textInfo.innerText = str;
   };
 
   this.updateStats = function() {
@@ -502,53 +500,38 @@ tenuki.BoardControls = function(element, board) {
   this.setup = function() {
     var controls = this;
 
-    var buttons = tenuki.utils.createElement("div", { class: "buttons" });
-    tenuki.utils.appendElement(controls.element, buttons);
+    var passButton = document.querySelector(".pass");
+    var undoButton = document.querySelector(".undo");
+    var texturedButton = document.querySelector(".textured");
 
-    controls.gameInfo = tenuki.utils.createElement("div", { class: "game-info" });
-    controls.gameInfo.innerHTML = "&nbsp;";
-    tenuki.utils.appendElement(controls.element, controls.gameInfo);
+    tenuki.utils.addEventListener(passButton, "click", function(e) {
+      e.preventDefault();
 
-    controls.textInfo = tenuki.utils.createElement("div", { class: "text-info" });
-    tenuki.utils.appendElement(controls.element, controls.textInfo);
-
-    var passButton = tenuki.utils.createElement("a", { class: "pass" });
-    passButton.href = "#";
-    passButton.innerText = "Pass";
-    tenuki.utils.addEventListener(passButton, "click", function(el) {
       var player = controls.board.currentPlayer;
       controls.board.pass();
       controls.updateStats();
     });
-    tenuki.utils.appendElement(buttons, passButton);
 
-    var undoButton = tenuki.utils.createElement("a", { class: "undo" });
-    undoButton.href = "#";
-    undoButton.innerText = "Undo";
-    tenuki.utils.addEventListener(undoButton, "click", function(el) {
+    tenuki.utils.addEventListener(undoButton, "click", function(e) {
+      e.preventDefault();
+
       controls.board.undo();
-
     });
-    tenuki.utils.appendElement(buttons, undoButton);
 
-    var texturedButton = tenuki.utils.createElement("a", { class: "textured" });
-    texturedButton.href = "#";
-    texturedButton.innerText = "Textured";
-    tenuki.utils.addEventListener(texturedButton, "click", function(el) {
+    tenuki.utils.addEventListener(texturedButton, "click", function(e) {
+      e.preventDefault();
+
       tenuki.utils.toggleClass(controls.board.element, "textured");
     });
-    tenuki.utils.appendElement(buttons, texturedButton);
 
     var controlLinks = controls.element.querySelectorAll("a");
     for (var i = 0; i < controlLinks.length; i++) {
       var linkEl = controlLinks.item(i);
 
       tenuki.utils.addEventListener(linkEl, "click", function(e) {
-        e.preventDefault();
       });
     }
   }
-  this.setup();
 };
 tenuki.Intersection = function(y, x, board) {
   this.y = y;
