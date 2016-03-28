@@ -2,7 +2,10 @@ Tenuki is a browser-based go board implementation in HTML, CSS and JavaScript.
 
 # Examples
 
-For live examples, see `examples/`.
+For live examples, see `examples/`, or view them on GitHub:
+
+* [`example.html`](https://aprescott.github.io/tenuki.js/examples/example.html) — Just the board.
+* [`example_with_controls.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) — Board with simple controls.
 
 # Simple usage
 
