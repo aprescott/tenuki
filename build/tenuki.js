@@ -293,9 +293,11 @@ tenuki.Board = function(element, size) {
   this.toggleDeadAt = function(y, x) {
     var board = this;
 
+    var alreadyDead = board.isDeadAt(y, x);
+
     board.groupAt(y, x).forEach(function(intersection) {
-      if (board.isDeadAt(y, x)) {
-        board.deadPoints = board.deadPoints.filter(function(dead) { return dead.y == y && dead.x == x });
+      if (alreadyDead) {
+        board.deadPoints = board.deadPoints.filter(function(dead) { return !(dead.y == intersection.y && dead.x == intersection.x) });
       } else {
         board.deadPoints.push({ y: intersection.y, x: intersection.x });
       }
@@ -561,13 +563,15 @@ tenuki.Board = function(element, size) {
   this.checkTerritory = function() {
     var board = this;
 
-    var emptyPoints = board.intersections.flatten().filter(function(intersection) {
+    board.territoryPoints = { black: [], white: [] };
+
+    var emptyOrDeadPoints = board.intersections.flatten().filter(function(intersection) {
       return intersection.isEmpty() || board.isDeadAt(intersection.y, intersection.x);
     });
 
     var checkedPoints = [];
 
-    emptyPoints.forEach(function(emptyPoint) {
+    emptyOrDeadPoints.forEach(function(emptyPoint) {
       if (checkedPoints.indexOf(emptyPoint) > -1) {
         // skip it, we already checked
       } else {
@@ -606,7 +610,7 @@ tenuki.Board = function(element, size) {
 
     var surroundingColors = tenuki.utils.unique(occupiedPoints.map(function(occupiedPoint) { return occupiedPoint.value }));
 
-    if (surroundingColors.length == 1) {
+    if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
       var territoryColor = surroundingColors[0];
 
       nonOccupiedPoints.forEach(function(nonOccupiedPoint) {

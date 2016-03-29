@@ -333,6 +333,27 @@ if (board.score().white != 8*19 - 2 + 1 + 2) {
   throw "tests failed";
 }
 
+// marking multi-stone groups as dead, and then toggling it
+resetTests();
+
+board.grid[0][9].click(); // b
+board.grid[0][8].click(); // w
+board.grid[1][9].click(); // b
+board.pass();
+board.pass();
+
+board.grid[0][9].click(); // mark the 2-stone black group as dead
+
+if (!tenuki.utils.hasClass(board.grid[0][9], "dead") || !tenuki.utils.hasClass(board.grid[1][9], "dead")) {
+  throw "tests failed";
+}
+
+board.grid[0][9].click(); // unmark it dead
+
+if (tenuki.utils.hasClass(board.grid[0][9], "dead") || tenuki.utils.hasClass(board.grid[1][9], "dead")) {
+  throw "tests failed";
+}
+
 // fancy "pass" print
 resetTests();
 board.grid[3][2].className += " stone black";
