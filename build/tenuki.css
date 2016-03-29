@@ -167,6 +167,6 @@
   background: radial-gradient(circle at 50% 0px, #FFFFFF, rgba(255, 255, 255, 0) 58%);
 }
 
-.tenuki-board.textured .marker {
+.tenuki-board.textured .marker:after {
   opacity: 0.9;
 }
