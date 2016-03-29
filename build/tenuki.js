@@ -39,6 +39,9 @@ tenuki.Board = function(element, size) {
   this.callbacks = {
     postRender: function() {}
   };
+  this.deadPoints = [];
+  this.territoryPoints = { black: [], white: [] };
+
   this.setup = function() {
     var board = this;
 
@@ -139,7 +142,11 @@ tenuki.Board = function(element, size) {
         var playedYPosition = Number(intersectionElement.getAttribute("data-position-y"));
         var playedXPosition = Number(intersectionElement.getAttribute("data-position-x"));
 
-        board.playAt(playedYPosition, playedXPosition);
+        if (board.isGameOver()) {
+          board.toggleDeadAt(playedYPosition, playedXPosition);
+        } else {
+          board.playAt(playedYPosition, playedXPosition);
+        }
       });
     });
 
@@ -221,14 +228,6 @@ tenuki.Board = function(element, size) {
     return this.currentPlayer == "black";
   };
 
-  this.changePlayer = function() {
-    var board = this;
-    var previousPlayer = (board.currentPlayer == "black" ? "white" : "black");
-
-    tenuki.utils.removeClass(board.element, previousPlayer + "-to-play");
-    tenuki.utils.addClass(board.element, board.currentPlayer + "-to-play");
-  };
-
   this.inAtari = function(y, x) {
     return this.libertiesAt(y, x) == 1;
   }
@@ -274,9 +273,52 @@ tenuki.Board = function(element, size) {
   };
 
   this.pass = function() {
-    this.moves.push(this.stateForPass())
-    this.render();
+    if (!this.isGameOver()) {
+      this.moves.push(this.stateForPass())
+      this.render();
+    }
   };
+
+  this.isGameOver = function() {
+    if (this.moves.length < 2) {
+      return false;
+    }
+
+    var currentMove = this.currentMove();
+    var previousMove = this.moves[this.moves.length - 2];
+
+    return currentMove.pass && previousMove.pass;
+  };
+
+  this.toggleDeadAt = function(y, x) {
+    var board = this;
+
+    board.groupAt(y, x).forEach(function(intersection) {
+      if (board.isDeadAt(y, x)) {
+        board.deadPoints = board.deadPoints.filter(function(dead) { return dead.y == y && dead.x == x });
+      } else {
+        board.deadPoints.push({ y: intersection.y, x: intersection.x });
+      }
+    });
+
+    board.render();
+  }
+
+  this.isDeadAt = function(y, x) {
+    return board.deadPoints.some(function(dead) {
+      return dead.y == y && dead.x == x;
+    });
+  };
+
+  this.score = function() {
+    var blackDeadAsCaptures = this.deadPoints.filter(function(deadPoint) { return board.intersections[deadPoint.y][deadPoint.x].isBlack(); });
+    var whiteDeadAsCaptures = this.deadPoints.filter(function(deadPoint) { return board.intersections[deadPoint.y][deadPoint.x].isWhite(); });
+
+    return {
+      black: this.territoryPoints.black.length + this.captures.white + whiteDeadAsCaptures.length,
+      white: this.territoryPoints.white.length + this.captures.black + blackDeadAsCaptures.length
+    };
+  }
 
   this.isKoFrom = function(y, x, captures) {
     var board = this;
@@ -402,74 +444,190 @@ tenuki.Board = function(element, size) {
     var board = this;
     var currentMove = board.currentMove();
 
-    // TODO: this is bad, we're not fully updating the board's state to be empty,
-    // e.g., ko points, which causes an issue if we ever jump back more than 1 move.
-    // maybe represent the initial board state and allow moving directly back to
-    // that. that way we can DRY up what means it to capture a board state
-    // and just do that at the beginning
+    if (!board.isGameOver()) {
+      board.removeScoringState();
+    }
+
+    board.renderStonesPlayed();
+
     if (!currentMove) {
       board.currentPlayer = "black";
-      board.changePlayer();
       board.captures = { black: 0, white: 0 };
-      return;
-    }
-
-    if (currentMove.color == "black") {
-      board.currentPlayer = "white";
     } else {
-      board.currentPlayer = "black";
-    }
-    board.changePlayer();
-
-    currentMove.points.forEach(function(intersection) {
-      board.intersections[intersection.y][intersection.x] = intersection.duplicate();
-      var intersectionEl = board.grid[intersection.y][intersection.x];
-      intersectionEl.className = ""; // be clear that we're removing all classes
-      intersectionEl.className += " intersection";
-
-      if (intersection.isEmpty()) {
-        intersectionEl.className += " empty";
+      if (currentMove.color == "black") {
+        board.currentPlayer = "white";
       } else {
-        intersectionEl.className += " stone";
-
-        if (intersection.isBlack()) {
-          intersectionEl.className += " black";
-        } else {
-          intersectionEl.className += " white";
-        }
+        board.currentPlayer = "black";
       }
 
-      if (board.wouldBeSuicide(intersection.y, intersection.x)) {
-        intersectionEl.className += " suicide";
+      if (currentMove.koPoint) {
+        tenuki.utils.addClass(board.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
+      }
+
+      if (!currentMove.pass) {
+        tenuki.utils.addClass(board.grid[currentMove.y][currentMove.x], "marker");
+      }
+
+      board.captures = {
+        black: currentMove.blackStonesCaptured,
+        white: currentMove.whiteStonesCaptured
+      }
+    }
+
+    var previousPlayer = (board.currentPlayer == "black" ? "white" : "black");
+    tenuki.utils.removeClass(board.element, previousPlayer + "-to-play");
+    tenuki.utils.addClass(board.element, board.currentPlayer + "-to-play");
+
+    if (board.isGameOver()) {
+      tenuki.utils.removeClass(board.element, "black-to-play");
+      tenuki.utils.removeClass(board.element, "white-to-play");
+
+      board.renderTerritory();
+    }
+
+    board.callbacks.postRender(board);
+  };
+
+  this.removeScoringState = function() {
+    this.deadPoints = [];
+    this.territoryPoints = { black: [], white: [] };
+  }
+
+  this.renderStonesPlayed = function() {
+    var board = this;
+    var currentMove = board.currentMove();
+
+    var points = currentMove ? currentMove.points : board.intersections.flatten();
+
+    if (!currentMove) {
+      points.forEach(function(p) { p.setEmpty(); });
+    }
+
+    points.forEach(function(intersection) {
+      board.intersections[intersection.y][intersection.x] = intersection.duplicate();
+      board.renderIntersection(intersection);
+    });
+  };
+
+  this.renderIntersection = function(intersection) {
+    var board = this;
+
+    var intersectionEl = board.grid[intersection.y][intersection.x];
+    intersectionEl.className = ""; // be clear that we're removing all classes
+    tenuki.utils.addClass(intersectionEl, "intersection");
+
+    if (intersection.isEmpty()) {
+      tenuki.utils.addClass(intersectionEl, "empty");
+    } else {
+      tenuki.utils.addClass(intersectionEl, "stone");
+
+      if (intersection.isBlack()) {
+        tenuki.utils.addClass(intersectionEl, "black");
+      } else {
+        tenuki.utils.addClass(intersectionEl, "white");
+      }
+    }
+
+    if (board.wouldBeSuicide(intersection.y, intersection.x)) {
+      tenuki.utils.addClass(intersectionEl, "suicide");
+    }
+  };
+
+  this.renderTerritory = function() {
+    var board = this;
+
+    board.intersections.flatten().forEach(function(intersection) {
+      tenuki.utils.removeClass(board.grid[intersection.y][intersection.x], "territory-black");
+      tenuki.utils.removeClass(board.grid[intersection.y][intersection.x], "territory-white");
+
+      if (board.isDeadAt(intersection.y, intersection.x)) {
+        tenuki.utils.addClass(board.grid[intersection.y][intersection.x], "dead");
+      } else {
+        tenuki.utils.removeClass(board.grid[intersection.y][intersection.x], "dead");
       }
     });
 
-    if (currentMove.koPoint) {
-      board.grid[currentMove.koPoint.y][currentMove.koPoint.x].className += " ko";
-      board.koPoint = board.intersections[currentMove.koPoint.y][currentMove.koPoint.x];
-    } else {
-      board.koPoint = null;
+    board.checkTerritory();
+
+    board.territoryPoints.black.forEach(function(territoryPoint) {
+      tenuki.utils.addClass(board.grid[territoryPoint.y][territoryPoint.x], "territory-black");
+    });
+
+    board.territoryPoints.white.forEach(function(territoryPoint) {
+      tenuki.utils.addClass(board.grid[territoryPoint.y][territoryPoint.x], "territory-white");
+    });
+  };
+
+  this.checkTerritory = function() {
+    var board = this;
+
+    var emptyPoints = board.intersections.flatten().filter(function(intersection) {
+      return intersection.isEmpty() || board.isDeadAt(intersection.y, intersection.x);
+    });
+
+    var checkedPoints = [];
+
+    emptyPoints.forEach(function(emptyPoint) {
+      if (checkedPoints.indexOf(emptyPoint) > -1) {
+        // skip it, we already checked
+      } else {
+        checkedPoints = checkedPoints.concat(board.checkTerritoryStartingAt(emptyPoint.y, emptyPoint.x));
+      }
+    });
+  };
+
+  this.checkTerritoryStartingAt = function(y, x, accumulated) {
+    accumulated || (accumulated = []);
+
+    var board = this;
+    var point = board.intersections[y][x];
+
+    if (accumulated.indexOf(point) > -1) {
+      return accumulated;
     }
 
-    if (currentMove.pass) {
-      // no markers
-    } else {
-      board.grid[currentMove.y][currentMove.x].className += " marker";
+    accumulated.push(point);
+
+    board.neighborsFor(point.y, point.x).forEach(function(neighbor) {
+      if (neighbor.isEmpty() || board.isDeadAt(neighbor.y, neighbor.x)) {
+        board.checkTerritoryStartingAt(neighbor.y, neighbor.x, accumulated);
+      } else {
+        accumulated.push(neighbor);
+      }
+    });
+
+    var occupiedPoints = accumulated.filter(function(checkedPoint) {
+      return !board.isDeadAt(checkedPoint.y, checkedPoint.x) && !checkedPoint.isEmpty();
+    });
+
+    var nonOccupiedPoints = accumulated.filter(function(checkedPoint) {
+      return board.isDeadAt(checkedPoint.y, checkedPoint.x) || checkedPoint.isEmpty();
+    });
+
+    var surroundingColors = tenuki.utils.unique(occupiedPoints.map(function(occupiedPoint) { return occupiedPoint.value }));
+
+    if (surroundingColors.length == 1) {
+      var territoryColor = surroundingColors[0];
+
+      nonOccupiedPoints.forEach(function(nonOccupiedPoint) {
+        board.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor);
+      });
     }
 
-    board.captures = {
-      black: currentMove.blackStonesCaptured,
-      white: currentMove.whiteStonesCaptured
+    return nonOccupiedPoints;
+  };
+
+  this.markTerritory = function(y, x, color) {
+    var board = this;
+    var pointIsMarkedTerritory = board.territoryPoints[color].some(function(point) { return point.y == y && point.x == x; });
+
+    if (!pointIsMarkedTerritory) {
+      board.territoryPoints[color].push({ y: y, x: x });
     }
-    board.callbacks.postRender(board);
   };
 
   this.undo = function() {
     var board = this;
-
-    if (board.moves.length == 0) {
-      return;
-    }
 
     board.moves.pop();
     board.render();
@@ -565,6 +723,10 @@ tenuki.Intersection = function(y, x, board) {
   this.isBlack = function() {
     return this.value === "black";
   };
+
+  this.isWhite = function() {
+    return this.value === "white";
+  }
 
   this.setEmpty = function() {
     this.value = "empty";

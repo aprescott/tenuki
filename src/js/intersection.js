@@ -31,6 +31,10 @@ tenuki.Intersection = function(y, x, board) {
     return this.value === "black";
   };
 
+  this.isWhite = function() {
+    return this.value === "white";
+  }
+
   this.setEmpty = function() {
     this.value = "empty";
   };

@@ -229,6 +229,110 @@ if (!tenuki.utils.hasClass(board.grid[1][0], "empty")) {
 
 // TODO: captures accumulate correctly and roll back on undo
 
+// Territory scoring, with captures and dead stone marking
+resetTests();
+
+// divide the board down the middle, black on the right
+board.grid[0][9].click(); // b
+board.grid[0][8].click(); // w
+board.grid[1][9].click(); // b
+board.grid[1][8].click(); // w
+board.grid[2][9].click(); // b
+board.grid[2][8].click(); // w
+board.grid[3][9].click(); // b
+board.grid[3][8].click(); // w
+board.grid[4][9].click(); // b
+board.grid[4][8].click(); // w
+board.grid[5][9].click(); // b
+board.grid[5][8].click(); // w
+board.grid[6][9].click(); // b
+board.grid[6][8].click(); // w
+board.grid[7][9].click(); // b
+board.grid[7][8].click(); // w
+board.grid[8][9].click(); // b
+board.grid[8][8].click(); // w
+board.grid[9][9].click(); // b
+board.grid[9][8].click(); // w
+board.grid[10][9].click(); // b
+board.grid[10][8].click(); // w
+board.grid[11][9].click(); // b
+board.grid[11][8].click(); // w
+board.grid[12][9].click(); // b
+board.grid[12][8].click(); // w
+board.grid[13][9].click(); // b
+board.grid[13][8].click(); // w
+board.grid[14][9].click(); // b
+board.grid[14][8].click(); // w
+board.grid[15][9].click(); // b
+board.grid[15][8].click(); // w
+board.grid[16][9].click(); // b
+board.grid[16][8].click(); // w
+board.grid[17][9].click(); // b
+board.grid[17][8].click(); // w
+board.grid[18][9].click(); // b
+board.grid[18][8].click(); // w
+board.pass(); // b
+board.pass(); // w
+
+if (!board.isGameOver()) {
+  throw "tests failed";
+}
+
+if (board.score().black != 9*19) {
+  throw "tests failed";
+}
+
+if (board.score().white != 8*19) {
+  throw "tests failed";
+}
+
+board.undo();
+
+if (board.isGameOver()) {
+  throw "tests failed";
+}
+
+board.undo();
+
+// play in the corner so white captures a stone and leaves 2 black stones dead
+board.grid[0][0].click(); // b
+board.grid[0][1].click(); // w
+board.grid[1][1].click(); // b
+board.grid[1][0].click(); // w
+board.grid[0][2].click(); // b
+board.pass(); // w
+board.pass(); // b
+
+// territory + captured stones, but with ambiguous territory remaining
+if (board.score().black != 9*19) {
+  throw "tests failed";
+}
+
+// 1 "unambiguous point of territory", 1 captured stone
+if (board.score().white != 1 + 1) {
+  throw "tests failed";
+}
+
+// mark dead stones
+board.grid[1][1].click();
+board.grid[0][2].click();
+
+if (!tenuki.utils.hasClass(board.grid[1][1], "dead") || !tenuki.utils.hasClass(board.grid[0][2], "dead")) {
+  throw "tests failed";
+}
+
+if (board.score().black != 9*19) {
+  throw "tests failed";
+}
+
+// rectangle territory, 8*19
+// 2 white stones played inside the territory, -2
+// 1 captured black stone, +1,
+// 2 dead stones, +2
+if (board.score().white != 8*19 - 2 + 1 + 2) {
+  throw "tests failed";
+}
+
 // fancy "pass" print
 resetTests();
 board.grid[3][2].className += " stone black";
