@@ -43,6 +43,8 @@ For a textured board, add the class `textured-board-textured`:
 <div class="tenuki-board textured-board-textured"></div>
 ```
 
+<img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board-textured.png" width="151" height="150">
+
 # Other board sizes
 
 You can pass a second argument to `new tenuki.Board` to specify the board size. If no size is given, the default of 19 is used. In theory any size should work, although star points have only been designed for 9x9, 13x13 and 19x19 boards.
