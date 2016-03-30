@@ -580,31 +580,16 @@ tenuki.Board = function(element, size) {
     });
   };
 
-  this.checkTerritoryStartingAt = function(y, x, accumulated) {
-    accumulated || (accumulated = []);
-
+  this.checkTerritoryStartingAt = function(y, x) {
     var board = this;
-    var point = board.intersections[y][x];
 
-    if (accumulated.indexOf(point) > -1) {
-      return accumulated;
-    }
+    var pointsWithBoundary = board.surroundedPointsWithBoundaryAt(y, x);
 
-    accumulated.push(point);
-
-    board.neighborsFor(point.y, point.x).forEach(function(neighbor) {
-      if (neighbor.isEmpty() || board.isDeadAt(neighbor.y, neighbor.x)) {
-        board.checkTerritoryStartingAt(neighbor.y, neighbor.x, accumulated);
-      } else {
-        accumulated.push(neighbor);
-      }
-    });
-
-    var occupiedPoints = accumulated.filter(function(checkedPoint) {
+    var occupiedPoints = pointsWithBoundary.filter(function(checkedPoint) {
       return !board.isDeadAt(checkedPoint.y, checkedPoint.x) && !checkedPoint.isEmpty();
     });
 
-    var nonOccupiedPoints = accumulated.filter(function(checkedPoint) {
+    var nonOccupiedPoints = pointsWithBoundary.filter(function(checkedPoint) {
       return board.isDeadAt(checkedPoint.y, checkedPoint.x) || checkedPoint.isEmpty();
     });
 
@@ -619,6 +604,29 @@ tenuki.Board = function(element, size) {
     }
 
     return nonOccupiedPoints;
+  };
+
+  this.surroundedPointsWithBoundaryAt = function(y, x, accumulated) {
+    accumulated || (accumulated = []);
+
+    var board = this;
+    var point = board.intersections[y][x];
+
+    if (accumulated.indexOf(point) > -1) {
+      return accumulated;
+    }
+
+    accumulated.push(point);
+
+    board.neighborsFor(point.y, point.x).forEach(function(neighbor) {
+      if (neighbor.isEmpty() || board.isDeadAt(neighbor.y, neighbor.x)) {
+        board.surroundedPointsWithBoundaryAt(neighbor.y, neighbor.x, accumulated);
+      } else {
+        accumulated.push(neighbor);
+      }
+    });
+
+    return accumulated;
   };
 
   this.markTerritory = function(y, x, color) {

@@ -354,6 +354,19 @@ if (tenuki.utils.hasClass(board.grid[0][9], "dead") || tenuki.utils.hasClass(boa
   throw "tests failed";
 }
 
+// contrived territory marking case where two stones are alive on the board with nothing else
+// which should lead to no territory marked
+resetTests();
+
+board.grid[0][9].click(); // b
+board.grid[0][10].click(); // w
+board.pass();
+board.pass();
+
+if (board.element.querySelectorAll(".territory-black").length + board.element.querySelectorAll(".territory-white").length > 0) {
+  throw "tests failed";
+}
+
 // fancy "pass" print
 resetTests();
 board.grid[3][2].className += " stone black";
