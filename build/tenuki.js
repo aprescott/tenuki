@@ -1,5 +1,5 @@
 /*!
- * tenuki.js v0.0.5 (https://github.com/aprescott/tenuki.js)
+ * tenuki.js v0.0.6 (https://github.com/aprescott/tenuki.js)
  * Copyright © 2016 Adam Prescott.
  * Licensed under the MIT license.
  */
@@ -462,6 +462,12 @@ tenuki.Board = function(element, size) {
         board.currentPlayer = "black";
       }
 
+      board.intersections.flatten().forEach(function(intersection) {
+        if (board.wouldBeSuicide(intersection.y, intersection.x)) {
+          tenuki.utils.addClass(board.grid[intersection.y][intersection.x], "suicide");
+        }
+      });
+
       if (currentMove.koPoint) {
         tenuki.utils.addClass(board.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
       }
@@ -528,10 +534,6 @@ tenuki.Board = function(element, size) {
       } else {
         tenuki.utils.addClass(intersectionEl, "white");
       }
-    }
-
-    if (board.wouldBeSuicide(intersection.y, intersection.x)) {
-      tenuki.utils.addClass(intersectionEl, "suicide");
     }
   };
 
