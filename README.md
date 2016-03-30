@@ -1,5 +1,7 @@
 Tenuki is a browser-based go board implementation in HTML, CSS and JavaScript.
 
+<img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board.png" width="151" height="150">
+
 Features:
 
   * Ko rule.
