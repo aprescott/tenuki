@@ -80,7 +80,16 @@ ExampleBoardControls = function(element, board) {
     var currentMove = this.board.currentMove();
 
     if (typeof currentMove != "undefined" && currentMove.pass) {
-      this.setText(currentMove.color[0].toUpperCase() + currentMove.color.substr(1) + " passes.")
+      var str = currentMove.color[0].toUpperCase() + currentMove.color.substr(1) + " passes.";
+
+      if (this.board.isGameOver()) {
+        str += " Game over.";
+        str += "\n"
+        str += "Black scores " + this.board.score().black + "\n";
+        str += "White scores " + this.board.score().white;
+      }
+
+      this.setText(str)
     } else {
       this.setText("");
     }

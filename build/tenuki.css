@@ -107,9 +107,13 @@
   width: calc(28px - 1px);
   height: calc(28px - 1px);
   border-radius: 50%;
+  opacity: 0.5;
+}
+
+.tenuki-board.white-to-play .intersection.empty:hover .highlight,
+.tenuki-board.black-to-play .intersection.empty:hover .highlight {
   background: black;
   border: 1px solid black;
-  opacity: 0.5;
 }
 
 .tenuki-board.white-to-play .intersection.empty:hover .highlight {
@@ -133,6 +137,43 @@
 .tenuki-board .intersection.suicide .highlight {
   background: none !important;
   border: none !important;
+}
+
+.tenuki-board .intersection.stone.black.dead,
+.tenuki-board .intersection.stone.black.white {
+  border-color: rgba(0, 0, 0, 0.5);
+}
+
+.tenuki-board .intersection.stone.black.dead {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.tenuki-board .intersection.stone.white.dead {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.tenuki-board .intersection.territory-black:after,
+.tenuki-board .intersection.territory-white:after {
+  content: "";
+  display: block;
+  width: calc(28px/4);
+  height: calc(28px/4);
+  border: 2px solid;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: calc(-28px/4 + 1px);
+  margin-top: calc(-28px/4 + 1px);
+}
+
+.tenuki-board .intersection.territory-black:after {
+  color: black;
+  background: black;
+}
+
+.tenuki-board .intersection.territory-white:after {
+  color: white;
+  background: white;
 }
 
 .tenuki-board.textured .stone {
