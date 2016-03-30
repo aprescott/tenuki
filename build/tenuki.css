@@ -64,10 +64,16 @@
   border-radius: 50%;
   border: 2px solid;
   position: absolute;
-  left: 50%;
-  top: 50%;
-  margin-left: calc(-28px/4 + 1px);
-  margin-top: calc(-28px/4 + 1px);
+  /*
+   * total occupying stone width is (28 - 1 == 27)px stone width, + 2px for the border on the stone, for 29px total.
+   * the midpoint of the 29px width is then (29px + 1px)/2.
+   * this brings us 1 pixel to the right of, and 1 pixel below the intersection we want.
+   */
+  left: calc((28px - 1px + 2px + 1px)/2);
+  top: calc((28px - 1px + 2px + 1px)/2);
+  /* now correct by the 1 pixel, plus half the width of the marker, accounting for 2*2px border */
+  margin-left: calc(-1 * (((28px/4 + 2*2px) + 1px)/2 + 1px));
+  margin-top: calc(-1 * (((28px/4 + 2*2px) + 1px)/2 + 1px));
 }
 
 .tenuki-board .intersection.white.stone.marker:after {
