@@ -201,7 +201,7 @@ board.grid[2][0].click(); // w
 board.grid[15][15].click(); // b tenuki
 board.grid[1][1].click(); // w
 
-if (!tenuki.utils.hasClass(board.grid[0][0], "empty")) {
+if (!tenuki.utils.hasClass(board.grid[0][0], "empty") || !tenuki.utils.hasClass(board.grid[0][0], "suicide")) {
   throw "tests failed";
 }
 board.grid[0][0].click();
