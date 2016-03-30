@@ -139,13 +139,16 @@
   border: none !important;
 }
 
-.tenuki-board .intersection.stone.black.dead {
+.tenuki-board .intersection.stone.black.dead,
+.tenuki-board .intersection.stone.black.white {
   border-color: rgba(0, 0, 0, 0.5);
+}
+
+.tenuki-board .intersection.stone.black.dead {
   background: rgba(0, 0, 0, 0.5);
 }
 
 .tenuki-board .intersection.stone.white.dead {
-  border-color: rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, 0.5);
 }
 
