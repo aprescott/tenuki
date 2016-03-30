@@ -176,23 +176,23 @@
   background: white;
 }
 
-.tenuki-board.textured .stone {
+.tenuki-board-textured .stone {
   box-shadow: 0px 2px 1px rgba(62, 62, 62, 0.38);
 }
 
-.tenuki-board.textured .stone.black,
-.tenuki-board.textured .intersection.empty:hover .highlight {
+.tenuki-board-textured .stone.black,
+.tenuki-board-textured.black-to-play .intersection.empty:hover .highlight {
   border-color: #565656;
   background: radial-gradient(circle at 50% 120%, #000000, #484848 10%, #101010 80%, #FFFFFF 100%);
 }
 
-.tenuki-board.textured .stone.white,
-.tenuki-board.textured.white-to-play .intersection.empty:hover .highlight {
+.tenuki-board-textured .stone.white,
+.tenuki-board-textured.white-to-play .intersection.empty:hover .highlight {
   border-color: #DEDEDE;
   background: radial-gradient(circle at 50% 120%, #ECEAEA, #D6D6D6 10%, #EAEAEA 80%, #FFFFFF 100%);
 }
 
-.tenuki-board.textured .stone:before {
+.tenuki-board-textured .stone:before {
   content: "";
   position: absolute;
   top: 1%;
@@ -204,10 +204,10 @@
   z-index: 2;
 }
 
-.tenuki-board.textured .stone.white:before {
+.tenuki-board-textured .stone.white:before {
   background: radial-gradient(circle at 50% 0px, #FFFFFF, rgba(255, 255, 255, 0) 58%);
 }
 
-.tenuki-board.textured .marker:after {
+.tenuki-board-textured .marker:after {
   opacity: 0.9;
 }

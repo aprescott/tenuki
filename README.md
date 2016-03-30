@@ -35,6 +35,12 @@ Create a new `tenuki.Board` instance with a DOM element, then call `setup()`, wh
 
 There are no other dependencies.
 
+For a textured board, add the class `textured-board-textured`:
+
+```html
+<div class="tenuki-board textured-board-textured"></div>
+```
+
 # Other board sizes
 
 You can pass a second argument to `new tenuki.Board` to specify the board size. If no size is given, the default of 19 is used. In theory any size should work, although star points have only been designed for 9x9, 13x13 and 19x19 boards.
