@@ -37,10 +37,10 @@ Create a new `tenuki.Board` instance with a DOM element, then call `setup()`, wh
 
 There are no other dependencies.
 
-For a textured board, add the class `textured-board-textured`:
+For a textured board, add the class `tenuki-board-textured`:
 
 ```html
-<div class="tenuki-board textured-board-textured"></div>
+<div class="tenuki-board tenuki-board-textured"></div>
 ```
 
 <img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board-textured.png" width="151" height="150">
@@ -60,7 +60,7 @@ I've tested this on Chrome, Firefox, Safari and Opera.
 
 # Known problems
 
-Because the browser is rendered with pure CSS and no images, there are some pixel rounding issues when the the browser's zoom level is not 100%. This can create positioning/alignment problems, for instance, at 110%, because widths and lines on the board are not consistent with each other.
+Because the browser is rendered with pure CSS and no images, there are some pixel rounding issues when the browser's zoom level is not 100%. This can create positioning/alignment problems, for instance, at 110%, because widths and lines on the board are not consistent with each other.
 
 # Board play functions
 
