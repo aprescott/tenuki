@@ -1,5 +1,5 @@
 /*!
- * tenuki.js v0.0.6 (https://github.com/aprescott/tenuki.js)
+ * tenuki.js v0.0.7 (https://github.com/aprescott/tenuki.js)
  * Copyright © 2016 Adam Prescott.
  * Licensed under the MIT license.
  */
