@@ -14,6 +14,9 @@ The go board provides a JavaScript interface to perform various functions, but t
 # Installation
 
 * With bower: `bower install tenuki`
+* With npm: `npm install tenuki`
+
+You can also clone this repo and use the contents of `build/` for the latest version.
 
 # Examples
 
@@ -65,6 +68,28 @@ I've tested this on Chrome, Firefox, Safari and Opera.
 # Known problems
 
 Because the browser is rendered with pure CSS and no images, there are some pixel rounding issues when the browser's zoom level is not 100%. This can create positioning/alignment problems, for instance, at 110%, because widths and lines on the board are not consistent with each other.
+
+# Usage outside of a browser
+
+The full browser environment is not required in order to use the representation of the board in JavaScript. For example, if you have a node app, you can simply create a new board without passing an element:
+
+```js
+var Board = require("tenuki").Board;
+board = new Board();
+// board.size = 13;
+board.setup();
+// undefined
+board.intersectionAt(0, 0).value;
+// 'empty'
+board.currentPlayer;
+// 'black'
+board.isGameOver();
+// false
+board.playAt(0, 0);
+// true
+board.intersectionAt(0, 0).value;
+// 'black'
+```
 
 # Board play functions
 

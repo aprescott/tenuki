@@ -1,0 +1,28 @@
+{
+  "name": "tenuki",
+  "version": "0.0.7",
+  "description": "A JavaScript implementation of the game of go/baduk/weiqi with full support for HTML rendering out of the box.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aprescott/tenuki.js.git"
+  },
+  "keywords": [
+    "go",
+    "baduk",
+    "weiqi",
+    "board",
+    "game",
+    "html",
+    "css"
+  ],
+  "author": "Adam Prescott",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aprescott/tenuki.js/issues"
+  },
+  "homepage": "https://github.com/aprescott/tenuki.js#readme"
+}
