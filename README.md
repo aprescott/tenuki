@@ -68,12 +68,12 @@ Because the browser is rendered with pure CSS and no images, there are some pixe
 
 # Board play functions
 
-The following functions are available on a `tenuki.Board` object, and can be used to control the gameplay.
+The following functions are available on a `Board` object, and can be used to control the gameplay.
 
 Note that all functions which take two integer coordinates (`y` and `x`) are measured from the top of the board and left of the board. So `y = 0` is the top-most row, and `x = 0` is the left-most row. On a 19x19 board, the top left star point (4-4) is thus at `y = 3` and `x = 3`.
 
 * `pass()`: passes for the current player.
-* `playAt(y, x)`: attempts to play a stone at `(y, x)` for the current player. If the move is illegal (because of ko, suicide, etc.), then nothing will happen.
+* `playAt(y, x)`: attempts to play a stone at `(y, x)` for the current player. If the move is illegal (because of ko, suicide, etc.), then nothing will happen. Returns `true` if the move is successful, otherwise `false`.
 * `isGameOver()`: returns `true` if the most recent 2 moves were passes, otherwise `false`.
 * `toggleDeadAt(y, x)`: sets the group of stones at `(y, x)` to be dead as part of marking territory. Only useful if `isGameOver()` is `true`.
 * `score()`: returns an object containing score information, e.g., `{ black: 150, white: 130 }`. Only useful if `isGameOver()` is `true`, since it requires dead stone marking to be accurate.

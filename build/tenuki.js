@@ -327,7 +327,7 @@ var Board = function(element, size) {
     var board = this;
 
     if (board.isIllegalAt(y, x)) {
-      return true;
+      return false;
     }
 
     board[board.currentPlayer + "At"](y, x);
@@ -336,6 +336,8 @@ var Board = function(element, size) {
 
     board.moves.push(board.stateFor(y, x, captures));
     board.render();
+
+    return true;
   };
 
   this.currentMove = function() {
