@@ -20,10 +20,12 @@ resetTests = window.resetTests = function () {
 // black and white alternate
 resetTests();
 
-board.renderer.grid.flatten().forEach(function(pointElement) {
-  if (!tenuki.utils.hasClass(pointElement, "empty")) {
-    throw "tests failed";
-  }
+board.renderer.grid.forEach(function(row) {
+  row.forEach(function(pointElement) {
+    if (!tenuki.utils.hasClass(pointElement, "empty")) {
+      throw "tests failed";
+    }
+  })
 });
 
 board.renderer.grid[5][5].click(); // b

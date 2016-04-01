@@ -3,28 +3,16 @@
  * Copyright © 2016 Adam Prescott.
  * Licensed under the MIT license.
  */
-tenuki = window.tenuki || {};
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.tenuki = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+exports.Board = require("./lib/board");
+exports.utils = require("./lib/utils");
 
-tenuki.MARGIN = 18;
-tenuki.STONE_WIDTH = 28;
-if (!Array.prototype.flatMap) {
-  Array.prototype.flatMap = function(lambda) {
-    return Array.prototype.concat.apply([], this.map(lambda));
-  };
-}
+},{"./lib/board":3,"./lib/utils":5}],2:[function(require,module,exports){
+var utils = require("./utils");
 
-if (!Array.prototype.flatten) {
-  Array.prototype.flatten = function() {
-    return this.reduce(function(a, b) { return a.concat(b); })
-  }
-}
-
-if (!Array.prototype.sample) {
-  Array.prototype.sample = function() {
-    return this[Math.floor(Math.random() * this.length)];
-  }
-}
-tenuki.BoardRenderer = function(board, boardElement) {
+var BoardRenderer = function(board, boardElement) {
+  this.MARGIN = 18;
+  this.STONE_WIDTH = 28;
   this.board = board;
   this.boardElement = boardElement;
   this.grid = [];
@@ -33,68 +21,68 @@ tenuki.BoardRenderer = function(board, boardElement) {
     var renderer = this;
     var board = renderer.board;
 
-    tenuki.utils.appendElement(boardElement, tenuki.utils.createElement("div", { class: "lines horizontal" }));
-    tenuki.utils.appendElement(boardElement, tenuki.utils.createElement("div", { class: "lines vertical" }));
-    tenuki.utils.appendElement(boardElement, tenuki.utils.createElement("div", { class: "hoshi-points" }));
-    tenuki.utils.appendElement(boardElement, tenuki.utils.createElement("div", { class: "intersections" }));
+    utils.appendElement(boardElement, utils.createElement("div", { class: "lines horizontal" }));
+    utils.appendElement(boardElement, utils.createElement("div", { class: "lines vertical" }));
+    utils.appendElement(boardElement, utils.createElement("div", { class: "hoshi-points" }));
+    utils.appendElement(boardElement, utils.createElement("div", { class: "intersections" }));
 
     var hoshiOffset = board.size > 9 ? 3 : 2;
 
     for (var hoshiY = 0; hoshiY < 3; hoshiY++) {
       for (var hoshiX = 0; hoshiX < 3; hoshiX++) {
-        var hoshi = tenuki.utils.createElement("div", { class: "hoshi" });
+        var hoshi = utils.createElement("div", { class: "hoshi" });
 
         var hoshiStyleAttributeName;
         var hoshiStyleAttributeValue;
 
         if (hoshiY == 0) {
-          hoshi.style.top = "calc(" + (tenuki.MARGIN) + "px + " + hoshiOffset + "* " + (tenuki.STONE_WIDTH + 1) + "px - 2px)";
+          hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
         }
 
         if (hoshiY == 1) {
-          hoshi.style.top = "calc(" + (tenuki.MARGIN) + "px + " + ((board.size + 1)/2 - 1) + "* " + (tenuki.STONE_WIDTH + 1) + "px - 2px)";
+          hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + ((board.size + 1)/2 - 1) + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
         }
 
         if (hoshiY == 2) {
-          hoshi.style.top = "calc(" + (tenuki.MARGIN) + "px + " + (board.size - hoshiOffset - 1) + "* " + (tenuki.STONE_WIDTH + 1) + "px - 2px)";
+          hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (board.size - hoshiOffset - 1) + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
         }
 
         if (hoshiX == 0) {
-          hoshi.style.left = "calc(" + (tenuki.MARGIN) + "px + " + hoshiOffset + "* " + (tenuki.STONE_WIDTH + 1) + "px - 2px)";
+          hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
         }
 
         if (hoshiX == 1) {
-          hoshi.style.left = "calc(" + (tenuki.MARGIN) + "px + " + ((board.size + 1)/2 - 1) + "* " + (tenuki.STONE_WIDTH + 1) + "px - 2px)";
+          hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + ((board.size + 1)/2 - 1) + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
         }
 
         if (hoshiX == 2) {
-          hoshi.style.left = "calc(" + (tenuki.MARGIN) + "px + " + (board.size - hoshiOffset - 1) + "* " + (tenuki.STONE_WIDTH + 1) + "px - 2px)";
+          hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + (board.size - hoshiOffset - 1) + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
         }
 
-        tenuki.utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
+        utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
       }
     }
 
     for (var y = 0; y < board.size; y++) {
-      var horizontalLine = tenuki.utils.createElement("div", { class: "line horizontal" });
-      tenuki.utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
+      var horizontalLine = utils.createElement("div", { class: "line horizontal" });
+      utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
 
-      var verticalLine = tenuki.utils.createElement("div", { class: "line vertical" });
-      tenuki.utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
+      var verticalLine = utils.createElement("div", { class: "line vertical" });
+      utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
 
       for (var x = 0; x < board.size; x++) {
-        var intersectionElement = tenuki.utils.createElement("div", { class: "intersection empty" });
-        var highlightElement = tenuki.utils.createElement("div", { class: "highlight" });
-        tenuki.utils.appendElement(intersectionElement, highlightElement);
+        var intersectionElement = utils.createElement("div", { class: "intersection empty" });
+        var highlightElement = utils.createElement("div", { class: "highlight" });
+        utils.appendElement(intersectionElement, highlightElement);
 
         intersectionElement.setAttribute("data-position-x", x);
         intersectionElement.setAttribute("data-position-y", y);
         intersectionElement.board = board;
 
-        intersectionElement.style.left = (x * (tenuki.STONE_WIDTH + 1)) + "px";
-        intersectionElement.style.top = (y * (tenuki.STONE_WIDTH + 1)) + "px";
+        intersectionElement.style.left = (x * (renderer.STONE_WIDTH + 1)) + "px";
+        intersectionElement.style.top = (y * (renderer.STONE_WIDTH + 1)) + "px";
 
-        tenuki.utils.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
+        utils.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
 
         renderer.grid[y] || (renderer.grid[y] = []);
         renderer.grid[y][x] = intersectionElement;
@@ -102,26 +90,26 @@ tenuki.BoardRenderer = function(board, boardElement) {
     }
 
     // prevent the text-selection cursor
-    tenuki.utils.addEventListener(boardElement.querySelector(".lines.horizontal"), "mousedown", function(e) {
+    utils.addEventListener(boardElement.querySelector(".lines.horizontal"), "mousedown", function(e) {
       e.preventDefault();
     });
-    tenuki.utils.addEventListener(boardElement.querySelector(".lines.vertical"), "mousedown", function(e) {
+    utils.addEventListener(boardElement.querySelector(".lines.vertical"), "mousedown", function(e) {
       e.preventDefault();
     });
 
-    boardElement.querySelector(".lines.horizontal").style.width = ((tenuki.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
-    boardElement.querySelector(".lines.horizontal").style.height = ((tenuki.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
-    boardElement.querySelector(".lines.vertical").style.width = ((tenuki.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
-    boardElement.querySelector(".lines.vertical").style.height = ((tenuki.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
+    boardElement.querySelector(".lines.horizontal").style.width = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
+    boardElement.querySelector(".lines.horizontal").style.height = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
+    boardElement.querySelector(".lines.vertical").style.width = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
+    boardElement.querySelector(".lines.vertical").style.height = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
 
-    var boardWidth = ((tenuki.STONE_WIDTH * (board.size - 1)) + (board.size)*1 + (tenuki.MARGIN)*2);
-    var boardHeight = ((tenuki.STONE_WIDTH * (board.size - 1)) + (board.size)*1 + (tenuki.MARGIN)*2);
+    var boardWidth = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1 + (renderer.MARGIN)*2);
+    var boardHeight = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1 + (renderer.MARGIN)*2);
 
     boardElement.style.width = boardWidth + "px";
     boardElement.style.height = boardHeight + "px";
 
-    renderer.grid.flatten().forEach(function(intersectionEl) {
-      tenuki.utils.addEventListener(intersectionEl, "click", function() {
+    utils.flatten(renderer.grid).forEach(function(intersectionEl) {
+      utils.addEventListener(intersectionEl, "click", function() {
         var intersectionElement = this;
         var playedYPosition = Number(intersectionElement.getAttribute("data-position-y"));
         var playedXPosition = Number(intersectionElement.getAttribute("data-position-x"));
@@ -149,7 +137,7 @@ tenuki.BoardRenderer = function(board, boardElement) {
     var renderer = this;
     var board = renderer.board;
     var currentMove = board.currentMove();
-    var points = currentMove ? currentMove.points : board.intersections.flatten();
+    var points = currentMove ? currentMove.points : board.intersections();
 
     points.forEach(function(intersection) {
       renderer.renderIntersection(intersection);
@@ -165,30 +153,30 @@ tenuki.BoardRenderer = function(board, boardElement) {
       return;
     }
 
-    board.intersections.flatten().forEach(function(intersection) {
+    board.intersections().forEach(function(intersection) {
       if (board.wouldBeSuicide(intersection.y, intersection.x)) {
-        tenuki.utils.addClass(renderer.grid[intersection.y][intersection.x], "suicide");
+        utils.addClass(renderer.grid[intersection.y][intersection.x], "suicide");
       }
     });
 
     if (currentMove.koPoint) {
-      tenuki.utils.addClass(renderer.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
+      utils.addClass(renderer.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
     }
 
     if (!currentMove.pass) {
-      tenuki.utils.addClass(renderer.grid[currentMove.y][currentMove.x], "marker");
+      utils.addClass(renderer.grid[currentMove.y][currentMove.x], "marker");
     }
   };
 
   this.updateCurrentPlayer = function() {
     var board = this.board;
     var previousPlayer = (board.currentPlayer == "black" ? "white" : "black");
-    tenuki.utils.removeClass(boardElement, previousPlayer + "-to-play");
-    tenuki.utils.addClass(boardElement, board.currentPlayer + "-to-play");
+    utils.removeClass(boardElement, previousPlayer + "-to-play");
+    utils.addClass(boardElement, board.currentPlayer + "-to-play");
 
     if (board.isGameOver()) {
-      tenuki.utils.removeClass(boardElement, "black-to-play");
-      tenuki.utils.removeClass(boardElement, "white-to-play");
+      utils.removeClass(boardElement, "black-to-play");
+      utils.removeClass(boardElement, "white-to-play");
     }
   };
 
@@ -198,17 +186,17 @@ tenuki.BoardRenderer = function(board, boardElement) {
 
     var intersectionEl = renderer.grid[intersection.y][intersection.x];
     intersectionEl.className = ""; // be clear that we're removing all classes
-    tenuki.utils.addClass(intersectionEl, "intersection");
+    utils.addClass(intersectionEl, "intersection");
 
     if (intersection.isEmpty()) {
-      tenuki.utils.addClass(intersectionEl, "empty");
+      utils.addClass(intersectionEl, "empty");
     } else {
-      tenuki.utils.addClass(intersectionEl, "stone");
+      utils.addClass(intersectionEl, "stone");
 
       if (intersection.isBlack()) {
-        tenuki.utils.addClass(intersectionEl, "black");
+        utils.addClass(intersectionEl, "black");
       } else {
-        tenuki.utils.addClass(intersectionEl, "white");
+        utils.addClass(intersectionEl, "white");
       }
     }
   };
@@ -217,37 +205,45 @@ tenuki.BoardRenderer = function(board, boardElement) {
     var renderer = this;
     var board = this.board;
 
-    board.intersections.flatten().forEach(function(intersection) {
-      tenuki.utils.removeClass(renderer.grid[intersection.y][intersection.x], "territory-black");
-      tenuki.utils.removeClass(renderer.grid[intersection.y][intersection.x], "territory-white");
+    board.intersections().forEach(function(intersection) {
+      utils.removeClass(renderer.grid[intersection.y][intersection.x], "territory-black");
+      utils.removeClass(renderer.grid[intersection.y][intersection.x], "territory-white");
 
       if (board.isDeadAt(intersection.y, intersection.x)) {
-        tenuki.utils.addClass(renderer.grid[intersection.y][intersection.x], "dead");
+        utils.addClass(renderer.grid[intersection.y][intersection.x], "dead");
       } else {
-        tenuki.utils.removeClass(renderer.grid[intersection.y][intersection.x], "dead");
+        utils.removeClass(renderer.grid[intersection.y][intersection.x], "dead");
       }
     });
 
     board.territoryPoints.black.forEach(function(territoryPoint) {
-      tenuki.utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-black");
+      utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-black");
     });
 
     board.territoryPoints.white.forEach(function(territoryPoint) {
-      tenuki.utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-white");
+      utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
   };
-}
-tenuki.Board = function(element, size) {
+};
+
+module.exports = BoardRenderer;
+
+},{"./utils":5}],3:[function(require,module,exports){
+var utils = require("./utils");
+var BoardRenderer = require("./board-renderer");
+var Intersection = require("./intersection");
+
+var Board = function(element, size) {
   this.defaultSize = 19;
   this.size = size || this.defaultSize;
-  this.intersections = [];
+  this.intersectionGrid = [];
   this.currentPlayer = "black";
   this.moves = [];
   this.captures = {
     black: 0,
     white: 0
   };
-  this.renderer = new tenuki.BoardRenderer(this, element);
+  this.renderer = new BoardRenderer(this, element);
   this.callbacks = {
     postRender: function() {}
   };
@@ -261,13 +257,21 @@ tenuki.Board = function(element, size) {
 
     for (var y = 0; y < board.size; y++) {
       for (var x = 0; x < board.size; x++) {
-        var intersection = new tenuki.Intersection(y, x, board);
-        board.intersections[y] || (board.intersections[y] = []);
-        board.intersections[y][x] = intersection;
+        var intersection = new Intersection(y, x, board);
+        board.intersectionGrid[y] || (board.intersectionGrid[y] = []);
+        board.intersectionGrid[y][x] = intersection;
       }
     }
 
     board.render();
+  };
+
+  this.intersectionAt = function(y, x) {
+    return this.intersectionGrid[y][x];
+  };
+
+  this.intersections = function() {
+    return utils.flatten(this.intersectionGrid);
   };
 
   this.stateFor = function(y, x, captures) {
@@ -278,7 +282,7 @@ tenuki.Board = function(element, size) {
       x: x,
       color: board.currentPlayer,
       pass: false,
-      points: board.intersections.flatten().map(function(i) { return i.duplicate(); }),
+      points: board.intersections().map(function(i) { return i.duplicate(); }),
       blackStonesCaptured: board.captures.black,
       whiteStonesCaptured: board.captures.white,
       capturedPositions: captures.map(function(capturedStone) {
@@ -296,13 +300,13 @@ tenuki.Board = function(element, size) {
   };
 
   this.whiteAt = function(y, x) {
-    this.intersections[y][x].setWhite();
+    this.intersectionAt(y, x).setWhite();
   };
   this.blackAt = function(y, x) {
-    this.intersections[y][x].setBlack();
+    this.intersectionAt(y, x).setBlack();
   };
   this.removeAt = function(y, x) {
-    this.intersections[y][x].setEmpty();
+    this.intersectionAt(y, x).setEmpty();
   };
 
   this.stateForPass = function() {
@@ -311,7 +315,7 @@ tenuki.Board = function(element, size) {
       x: null,
       color: board.currentPlayer,
       pass: true,
-      points: board.intersections.flatten().map(function(i) { return i.duplicate(); }),
+      points: board.intersections().map(function(i) { return i.duplicate(); }),
       blackStonesCaptured: board.captures.black,
       whiteStonesCaptured: board.captures.white,
       capturedPositions: []
@@ -351,7 +355,7 @@ tenuki.Board = function(element, size) {
 
   this.wouldBeSuicide = function(y, x) {
     var board = this;
-    var intersection = board.intersections[y][x];
+    var intersection = board.intersectionAt(y, x);
     var surroundedEmptyPoint = intersection.isEmpty() && board.neighborsFor(intersection.y, intersection.x).filter(function(neighbor) { return neighbor.isEmpty() }).length == 0;
 
     if (!surroundedEmptyPoint) {
@@ -424,14 +428,16 @@ tenuki.Board = function(element, size) {
   }
 
   this.isDeadAt = function(y, x) {
+    var board = this;
+
     return board.deadPoints.some(function(dead) {
       return dead.y == y && dead.x == x;
     });
   };
 
   this.score = function() {
-    var blackDeadAsCaptures = this.deadPoints.filter(function(deadPoint) { return board.intersections[deadPoint.y][deadPoint.x].isBlack(); });
-    var whiteDeadAsCaptures = this.deadPoints.filter(function(deadPoint) { return board.intersections[deadPoint.y][deadPoint.x].isWhite(); });
+    var blackDeadAsCaptures = this.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
+    var whiteDeadAsCaptures = this.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
 
     return {
       black: this.territoryPoints.black.length + this.captures.white + whiteDeadAsCaptures.length,
@@ -441,16 +447,16 @@ tenuki.Board = function(element, size) {
 
   this.isKoFrom = function(y, x, captures) {
     var board = this;
-    var point = board.intersections[y][x];
+    var point = board.intersectionAt(y, x);
 
     return captures.length == 1 && this.groupAt(point.y, point.x).length == 1 && board.inAtari(point.y, point.x);
   };
 
   this.libertiesAt = function(y, x) {
     var board = this;
-    var point = board.intersections[y][x];
+    var point = board.intersectionAt(y, x);
 
-    var emptyPoints = this.groupAt(point.y, point.x).flatMap(function(groupPoint) {
+    var emptyPoints = utils.flatMap(this.groupAt(point.y, point.x), function(groupPoint) {
       return board.neighborsFor(groupPoint.y, groupPoint.x).filter(function(intersection) {
         return intersection.isEmpty();
       })
@@ -458,14 +464,14 @@ tenuki.Board = function(element, size) {
 
     // this is not great, but we need a representation that will be unique-able,
     // and Y-X does the job.
-    return tenuki.utils.unique(emptyPoints.map(function(emptyPoint) { return emptyPoint.y + "-" + emptyPoint.x; })).length;
+    return utils.unique(emptyPoints.map(function(emptyPoint) { return emptyPoint.y + "-" + emptyPoint.x; })).length;
   };
 
   this.groupAt = function(y, x, accumulated) {
     accumulated || (accumulated = []);
 
     var board = this;
-    var point = board.intersections[y][x];
+    var point = board.intersectionAt(y, x);
 
     if (accumulated.indexOf(point) > -1) {
       return accumulated
@@ -488,19 +494,19 @@ tenuki.Board = function(element, size) {
     var neighbors = [];
 
     if (x > 0) {
-      neighbors.push(this.intersections[y][x - 1]);
+      neighbors.push(this.intersectionAt(y, x - 1));
     }
 
     if (x < (this.size - 1)) {
-      neighbors.push(this.intersections[y][x + 1]);
+      neighbors.push(this.intersectionAt(y, x + 1));
     }
 
     if (y > 0) {
-      neighbors.push(this.intersections[y - 1][x]);
+      neighbors.push(this.intersectionAt(y - 1, x));
     }
 
     if (y < (this.size - 1)) {
-      neighbors.push(this.intersections[y + 1][x]);
+      neighbors.push(this.intersectionAt(y + 1, x));
     }
 
     return neighbors;
@@ -508,7 +514,7 @@ tenuki.Board = function(element, size) {
 
   this.hasCapturesFor = function(y, x) {
     var board = this;
-    var point = board.intersections[y][x];
+    var point = board.intersectionAt(y, x);
 
     var capturedNeighbors = board.neighborsFor(point.y, point.x).filter(function(neighbor) {
       return !neighbor.isEmpty && !neighbor.sameColorAs(point) && board.libertiesAt(neighbor.y, neighbor.x) == 0;
@@ -519,13 +525,13 @@ tenuki.Board = function(element, size) {
 
   this.clearCapturesFor = function(y, x) {
     var board = this;
-    var point = board.intersections[y][x];
+    var point = board.intersectionAt(y, x);
 
     var capturedNeighbors = board.neighborsFor(point.y, point.x).filter(function(neighbor) {
       return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && board.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
-    var capturedStones = capturedNeighbors.flatMap(function(neighbor) {
+    var capturedStones = utils.flatMap(capturedNeighbors, function(neighbor) {
       return board.groupAt(neighbor.y, neighbor.x);
     });
 
@@ -548,7 +554,7 @@ tenuki.Board = function(element, size) {
     }
 
     var board = this;
-    var intersection = board.intersections[y][x];
+    var intersection = board.intersectionAt(y, x);
 
     var isEmpty = intersection.isEmpty();
     var isCapturing = this.hasCapturesFor(y, x);
@@ -567,12 +573,12 @@ tenuki.Board = function(element, size) {
       board.removeScoringState();
     }
 
-    board.intersections.flatten().forEach(function(intersection) {
+    board.intersections().forEach(function(intersection) {
       if (!currentMove) {
         intersection.setEmpty();
       }
 
-      board.intersections[intersection.y][intersection.x] = intersection.duplicate();
+      board.intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
     });
 
     if (!currentMove) {
@@ -606,7 +612,7 @@ tenuki.Board = function(element, size) {
 
     board.territoryPoints = { black: [], white: [] };
 
-    var emptyOrDeadPoints = board.intersections.flatten().filter(function(intersection) {
+    var emptyOrDeadPoints = board.intersections().filter(function(intersection) {
       return intersection.isEmpty() || board.isDeadAt(intersection.y, intersection.x);
     });
 
@@ -634,7 +640,7 @@ tenuki.Board = function(element, size) {
       return board.isDeadAt(checkedPoint.y, checkedPoint.x) || checkedPoint.isEmpty();
     });
 
-    var surroundingColors = tenuki.utils.unique(occupiedPoints.map(function(occupiedPoint) { return occupiedPoint.value }));
+    var surroundingColors = utils.unique(occupiedPoints.map(function(occupiedPoint) { return occupiedPoint.value }));
 
     if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
       var territoryColor = surroundingColors[0];
@@ -651,7 +657,7 @@ tenuki.Board = function(element, size) {
     accumulated || (accumulated = []);
 
     var board = this;
-    var point = board.intersections[y][x];
+    var point = board.intersectionAt(y, x);
 
     if (accumulated.indexOf(point) > -1) {
       return accumulated;
@@ -686,14 +692,18 @@ tenuki.Board = function(element, size) {
     board.render();
   };
 };
-tenuki.Intersection = function(y, x, board) {
+
+module.exports = Board;
+
+},{"./board-renderer":2,"./intersection":4,"./utils":5}],4:[function(require,module,exports){
+var Intersection = function(y, x, board) {
   this.y = y;
   this.x = x;
   this.value = "empty";
   this.board = board;
 
   this.duplicate = function() {
-    var duplicateIntersection = new tenuki.Intersection(this.y, this.x, this.board);
+    var duplicateIntersection = new Intersection(this.y, this.x, this.board);
     duplicateIntersection.value = this.value;
 
     return duplicateIntersection;
@@ -735,7 +745,19 @@ tenuki.Intersection = function(y, x, board) {
     return this.value === otherIntersection.value;
   };
 };
-tenuki.utils = {
+
+module.exports = Intersection;
+
+},{}],5:[function(require,module,exports){
+var utils = {
+  flatten: function(ary) {
+    return ary.reduce(function(a, b) { return a.concat(b); })
+  },
+
+  flatMap: function(ary, lambda) {
+    return Array.prototype.concat.apply([], ary.map(lambda));
+  },
+
   createElement: function(elementName, options) {
     element = document.createElement(elementName);
 
@@ -780,3 +802,8 @@ tenuki.utils = {
     return Array.from(new Set(ary));
   }
 };
+
+module.exports = utils;
+
+},{}]},{},[1])(1)
+});

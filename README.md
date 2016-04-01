@@ -1,4 +1,4 @@
-Tenuki is a browser-based go board implementation in HTML, CSS and JavaScript.
+Tenuki is a browser-based go board in HTML, CSS and JavaScript.
 
 <img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board.png" width="151" height="150">
 
@@ -100,4 +100,8 @@ Open [`test.html`](https://aprescott.github.io/tenuki.js/test.html) in your brow
 
 # Developing
 
-Individual files in `src/` should be updated with the relevant changes. Run `./build.sh` to concatenate individual files together into `build/js/tenuki.js` and `build/css/tenuki.css`. Then use `test.html` and the `examples/` to check that things still work.
+You'll need [`browserify`](http://browserify.org/). You can install it with [`npm`](https://www.npmjs.com/) by running `npm install -g browserify`.
+
+To make changes, update individual files in `lib/` and `css/`. Then, run `./build.sh` to generate `build/js/tenuki.js` and `build/css/tenuki.css`, suitable for use in a browser.
+
+To test changes, use `test.html` and the files in `examples/` to check that things still work.

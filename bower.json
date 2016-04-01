@@ -1,6 +1,6 @@
 {
   "name": "tenuki",
-  "description": "A browser-based go board implementation in HTML, CSS and JavaScript.",
+  "description": "A browser-based go board in HTML, CSS and JavaScript.",
   "main": "build/js/tenuki.js",
   "authors": [
     "Adam Prescott"
