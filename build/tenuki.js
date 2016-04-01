@@ -7,7 +7,7 @@
 exports.Board = require("./lib/board");
 exports.utils = require("./lib/utils");
 
-},{"./lib/board":3,"./lib/utils":5}],2:[function(require,module,exports){
+},{"./lib/board":3,"./lib/utils":6}],2:[function(require,module,exports){
 var utils = require("./utils");
 
 var BoardRenderer = function(board, boardElement) {
@@ -228,9 +228,10 @@ var BoardRenderer = function(board, boardElement) {
 
 module.exports = BoardRenderer;
 
-},{"./utils":5}],3:[function(require,module,exports){
+},{"./utils":6}],3:[function(require,module,exports){
 var utils = require("./utils");
 var BoardRenderer = require("./board-renderer");
+var NullRenderer = require("./null-renderer");
 var Intersection = require("./intersection");
 
 var Board = function(element, size) {
@@ -243,7 +244,7 @@ var Board = function(element, size) {
     black: 0,
     white: 0
   };
-  this.renderer = new BoardRenderer(this, element);
+  this.renderer = (element ? new BoardRenderer(this, element) : new NullRenderer());
   this.callbacks = {
     postRender: function() {}
   };
@@ -695,7 +696,7 @@ var Board = function(element, size) {
 
 module.exports = Board;
 
-},{"./board-renderer":2,"./intersection":4,"./utils":5}],4:[function(require,module,exports){
+},{"./board-renderer":2,"./intersection":4,"./null-renderer":5,"./utils":6}],4:[function(require,module,exports){
 var Intersection = function(y, x, board) {
   this.y = y;
   this.x = x;
@@ -749,6 +750,14 @@ var Intersection = function(y, x, board) {
 module.exports = Intersection;
 
 },{}],5:[function(require,module,exports){
+var NullRenderer = function() {
+  this.setup = function() {};
+  this.render = function() {};
+}
+
+module.exports = NullRenderer;
+
+},{}],6:[function(require,module,exports){
 var utils = {
   flatten: function(ary) {
     return ary.reduce(function(a, b) { return a.concat(b); })
