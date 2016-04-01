@@ -1,4 +1,4 @@
-Tenuki is a browser-based go board in HTML, CSS and JavaScript.
+Tenuki is a JavaScript implementation of the game of go/baduk/weiqi with full support for HTML rendering out of the box.
 
 <img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board.png" width="151" height="150">
 
@@ -10,6 +10,10 @@ Features:
   * End-game detection, dead stone marking, with territory scoring rules.
 
 The go board provides a JavaScript interface to perform various functions, but the UI for individual controls is left to you.
+
+# Installation
+
+* With bower: `bower install tenuki`
 
 # Examples
 
