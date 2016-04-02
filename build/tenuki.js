@@ -11,8 +11,9 @@ exports.utils = require("./lib/utils");
 var utils = require("./utils");
 
 var BoardRenderer = function(board, boardElement) {
-  this.MARGIN = 18;
   this.STONE_WIDTH = 28;
+  this.GUTTER_MARGIN = 25;
+  this.MARGIN = boardElement.hasAttribute("data-include-gutter") ? 18 + this.GUTTER_MARGIN : 18;
   this.board = board;
   this.boardElement = boardElement;
   this.grid = [];
@@ -65,9 +66,11 @@ var BoardRenderer = function(board, boardElement) {
 
     for (var y = 0; y < board.size; y++) {
       var horizontalLine = utils.createElement("div", { class: "line horizontal" });
+      horizontalLine.setAttribute("data-left-gutter", board.yCoordinateFor(y));
       utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
 
       var verticalLine = utils.createElement("div", { class: "line vertical" });
+      verticalLine.setAttribute("data-top-gutter", board.xCoordinateFor(y))
       utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
 
       for (var x = 0; x < board.size; x++) {
@@ -254,6 +257,10 @@ var Board = function(element, size) {
   this.setup = function() {
     var board = this;
 
+    if (board.size > 19) {
+      throw "cannot generate a board size greater than 19";
+    }
+
     board.renderer.setup();
 
     for (var y = 0; y < board.size; y++) {
@@ -275,12 +282,23 @@ var Board = function(element, size) {
     return utils.flatten(this.intersectionGrid);
   };
 
+  this.yCoordinateFor = function(y) {
+    return board.size - y;
+  };
+
+  this.xCoordinateFor = function(x) {
+    letters = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"];
+
+    return letters[x];
+  };
+
   this.stateFor = function(y, x, captures) {
     var board = this;
 
     var moveInfo = {
       y: y,
       x: x,
+      coordinates: this.xCoordinateFor(x) + this.yCoordinateFor(y),
       color: board.currentPlayer,
       pass: false,
       points: board.intersections().map(function(i) { return i.duplicate(); }),
@@ -314,6 +332,7 @@ var Board = function(element, size) {
     return {
       y: null,
       x: null,
+      coordinates: null,
       color: board.currentPlayer,
       pass: true,
       points: board.intersections().map(function(i) { return i.duplicate(); }),
