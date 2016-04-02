@@ -343,6 +343,8 @@ var Game = function(boardElement, boardSize) {
   };
 
   this.stateForPass = function() {
+    var game = this;
+
     return {
       y: null,
       x: null,
