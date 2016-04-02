@@ -66,10 +66,10 @@
 </div>
 
 <script>
-// An example setup showing how buttons could be set to board functionality.
-ExampleBoardControls = function(element, board) {
+// An example setup showing how buttons could be set to board/game functionality.
+ExampleGameControls = function(element, game) {
   this.element = element;
-  this.board = board;
+  this.game = game;
   this.textInfo = element.querySelector(".text-info p");
   this.gameInfo = element.querySelector(".game-info p");
 
@@ -79,15 +79,15 @@ ExampleBoardControls = function(element, board) {
 
   this.updateStats = function() {
     var newGameInfo = "";
-    newGameInfo += "Black stones captured: " + this.board.captures["black"];
+    newGameInfo += "Black stones captured: " + this.game.captures["black"];
     newGameInfo += "\n\n";
-    newGameInfo +=  "White stones captured: " + this.board.captures["white"];
-    newGameInfo += "\n\n";
-
-    newGameInfo += "Move " + this.board.moves.length;
+    newGameInfo +=  "White stones captured: " + this.game.captures["white"];
     newGameInfo += "\n\n";
 
-    var currentMove = this.board.currentMove();
+    newGameInfo += "Move " + this.game.moves.length;
+    newGameInfo += "\n\n";
+
+    var currentMove = this.game.currentMove();
 
     if (currentMove) {
       var player = currentMove.color[0].toUpperCase() + currentMove.color.substr(1);
@@ -102,16 +102,16 @@ ExampleBoardControls = function(element, board) {
     if (typeof currentMove != "undefined" && currentMove.pass) {
       var str = "";
 
-      if (this.board.isGameOver()) {
+      if (this.game.isOver()) {
         str += "Game over.";
         str += "\n\n"
-        str += "Territory scoring: Black has " + this.board.territoryScore().black;
+        str += "Territory scoring: Black has " + this.game.territoryScore().black;
         str += "\n\n";
-        str += "Territory scoring: White has " + this.board.territoryScore().white;
+        str += "Territory scoring: White has " + this.game.territoryScore().white;
         str += "\n\n"
-        str += "Area scoring: Black has " + this.board.areaScore().black;
+        str += "Area scoring: Black has " + this.game.areaScore().black;
         str += "\n\n"
-        str += "Area scoring: White has " + this.board.areaScore().white;
+        str += "Area scoring: White has " + this.game.areaScore().white;
       }
 
       this.setText(str)
@@ -130,34 +130,34 @@ ExampleBoardControls = function(element, board) {
     passButton.addEventListener("click", function(e) {
       e.preventDefault();
 
-      var player = controls.board.currentPlayer;
-      controls.board.pass();
+      var player = controls.game.currentPlayer;
+      controls.game.pass();
       controls.updateStats();
     });
 
     undoButton.addEventListener("click", function(e) {
       e.preventDefault();
 
-      controls.board.undo();
+      controls.game.undo();
     });
 
     texturedButton.addEventListener("click", function(e) {
       e.preventDefault();
 
-      controls.board.renderer.boardElement.classList.toggle("tenuki-board-textured");
+      controls.game.renderer.boardElement.classList.toggle("tenuki-board-textured");
     });
   }
 };
 
 var boardElement = document.querySelector(".tenuki-board");
-var board = new tenuki.Board(boardElement);
-board.setup();
+var game = new tenuki.Game(boardElement);
+game.setup();
 
 var controlElement = document.querySelector(".controls");
-var controls = new ExampleBoardControls(controlElement, board);
+var controls = new ExampleGameControls(controlElement, game);
 controls.setup();
 
-board.callbacks.postRender = function(board) {
+game.callbacks.postRender = function(game) {
 	controls.updateStats();
 };
 </script>

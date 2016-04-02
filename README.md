@@ -27,7 +27,7 @@ For live examples, see `examples/`, or view them on GitHub:
 
 # Simple usage
 
-Create a new `tenuki.Board` instance with a DOM element, then call `setup()`, which displays the board itself and configures click handlers on each intersection:
+Create a new `tenuki.Game` instance with a DOM element, then call `setup()`, which displays the board itself and configures click handlers on each intersection:
 
 ```html
 <link rel="stylesheet" href="build/tenuki.css">
@@ -37,8 +37,8 @@ Create a new `tenuki.Board` instance with a DOM element, then call `setup()`, wh
 
 <script>
   var boardElement = document.querySelector(".tenuki-board");
-  var board = new tenuki.Board(boardElement);
-  board.setup();
+  var game = new tenuki.Game(boardElement);
+  game.setup();
 </script>
 ```
 
@@ -54,11 +54,11 @@ For a textured board, add the class `tenuki-board-textured`:
 
 # Other board sizes
 
-You can pass a second argument to `new tenuki.Board` to specify the board size. If no size is given, the default of 19 is used. All sizes between 1x1 and 19x19 should work. Sizes above 19x19 will error and won't render.
+You can pass a second argument to `new tenuki.Game` to specify the board size. If no size is given, the default of 19 is used. All sizes between 1x1 and 19x19 should work. Sizes above 19x19 will error and won't render.
 
 ```js
 // use a 13x13 board
-new tenuki.Board(boardElement, 13);
+new tenuki.Game(boardElement, 13);
 ```
 
 # Browser support
@@ -71,37 +71,41 @@ Because the browser is rendered with pure CSS and no images, there are some pixe
 
 # Usage outside of a browser
 
-The full browser environment is not required in order to use the representation of the board in JavaScript. For example, if you have a node app, you can simply create a new board without passing an element:
+The full browser environment is not required in order to use the representation of the game in JavaScript. For example, if you have a node app, you can simply create a new game without passing an element:
 
 ```js
-var Board = require("tenuki").Board;
-board = new Board();
-// board.size = 13;
-board.setup();
-// undefined
-board.intersectionAt(0, 0).value;
+var Game = require("tenuki").Game;
+game = new Game();
+// game.boardSize = 13;
+game.setup();
+```
+
+From there, the JavaScript interface is the same as in a browser console:
+
+```js
+game.intersectionAt(0, 0).value;
 // 'empty'
-board.currentPlayer;
+game.currentPlayer;
 // 'black'
-board.isGameOver();
+game.isOver();
 // false
-board.playAt(0, 0);
+game.playAt(0, 0);
 // true
-board.intersectionAt(0, 0).value;
+game.intersectionAt(0, 0).value;
 // 'black'
 ```
 
-# Board play functions
+# Game play functions
 
-The following functions are available on a `Board` object, and can be used to control the gameplay.
+The following functions are available on a `Game` object, and can be used to control the gameplay.
 
 Note that all functions which take two integer coordinates (`y` and `x`) are measured from the top of the board and left of the board. So `y = 0` is the top-most row, and `x = 0` is the left-most row. On a 19x19 board, the top left star point (4-4) is thus at `y = 3` and `x = 3`.
 
 * `pass()`: passes for the current player.
 * `playAt(y, x)`: attempts to play a stone at `(y, x)` for the current player. If the move is illegal (because of ko, suicide, etc.), then nothing will happen. Returns `true` if the move is successful, otherwise `false`.
-* `isGameOver()`: returns `true` if the most recent 2 moves were passes, otherwise `false`.
-* `toggleDeadAt(y, x)`: sets the group of stones at `(y, x)` to be dead as part of marking territory. Only useful if `isGameOver()` is `true`.
-* `territoryScore()` and `areaScore()`: return an object containing score information, e.g., `{ black: 150, white: 130 }`. Only useful if `isGameOver()` is `true`, since proper scoring requires dead stone marking at the end of the game.
+* `isOver()`: returns `true` if the most recent 2 moves were passes, indicating the game is over, otherwise `false`.
+* `toggleDeadAt(y, x)`: sets the group of stones at `(y, x)` to be dead as part of marking territory. Only useful if `isOver()` is `true`.
+* `territoryScore()` and `areaScore()`: return an object containing score information, e.g., `{ black: 150, white: 130 }`. Only useful if `isOver()` is `true`, since proper scoring requires dead stone marking at the end of the game.
 * `undo()`: undo the most recent move.
 
 # Post-render callbacks
@@ -111,14 +115,14 @@ There is a configurable callback, `postRender`, which is fired each time the boa
 This is useful if you want to update some other state:
 
 ```js
-var board = new tenuki.Board(boardElement);
-board.setup();
+var game = new tenuki.Game(boardElement);
+game.setup();
 
-board.callbacks.postRender = function(board) {
-  if (board.currentMove().pass) {
-    console.log(board.currentMove().color + " passed");
+game.callbacks.postRender = function(game) {
+  if (game.currentMove().pass) {
+    console.log(game.currentMove().color + " passed");
   } else {
-    console.log(board.currentMove().color + " played " + board.currentMove().y + "," + board.currentMove().x);
+    console.log(game.currentMove().color + " played " + game.currentMove().y + "," + game.currentMove().x);
   }
 };
 ```
