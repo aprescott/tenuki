@@ -10,7 +10,7 @@ exports.utils = require("./lib/utils");
 },{"./lib/game":3,"./lib/utils":7}],2:[function(require,module,exports){
 var utils = require("./utils");
 
-var DomRenderer = function(game, boardElement) {
+var DOMRenderer = function(game, boardElement) {
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
   this.BASE_MARGIN = this.INTERSECTION_GAP_SIZE - 10;
@@ -243,7 +243,7 @@ var DomRenderer = function(game, boardElement) {
   };
 };
 
-module.exports = DomRenderer;
+module.exports = DOMRenderer;
 
 },{"./utils":7}],3:[function(require,module,exports){
 var utils = require("./utils");
