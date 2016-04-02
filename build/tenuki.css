@@ -7,29 +7,88 @@
   position: absolute;
   top: 0;
   left: 0;
-
   margin: 18px;
+}
+
+.tenuki-board[data-include-gutter=true] .lines {
+  margin: calc(18px + 25px);
 }
 
 .tenuki-board .line {
   background: rgb(135, 113, 63);
+  float: left;
+  position: relative;
 }
 
 .tenuki-board .line.horizontal {
   height: 1px;
   width: 100%;
   margin-bottom: 28px;
+  clear: left;
 }
 
 .tenuki-board .line.vertical {
   width: 1px;
   height: 100%;
-  float: left;
   margin-right: 28px;
 }
 
 .tenuki-board .line.vertical:last-child {
   margin-right: -1px;
+}
+
+.tenuki-board[data-include-gutter=true] .line.vertical:before,
+.tenuki-board[data-include-gutter=true] .line.vertical:after,
+.tenuki-board[data-include-gutter=true] .line.horizontal:before,
+.tenuki-board[data-include-gutter=true] .line.horizontal:after {
+  width: calc(25px - 5px);
+  height: calc(25px - 5px);
+  text-align: center;
+  line-height: calc(25px - 5px);
+  font-family: sans-serif;
+  color: rgb(135, 113, 63);
+  display: block;
+  font-size: 14px;
+}
+
+.tenuki-board[data-include-gutter=true] .line.vertical:before,
+.tenuki-board[data-include-gutter=true] .line.vertical:after {
+  content: attr(data-top-gutter);
+}
+
+.tenuki-board[data-include-gutter=true] .line.horizontal:before,
+.tenuki-board[data-include-gutter=true] .line.horizontal:after {
+  content: attr(data-left-gutter);
+}
+
+.tenuki-board[data-include-gutter=true] .line.vertical:before {
+  margin-left: calc(-1*(25px - 5px)/2);
+  /* take off the width of 1 stone, then extra distance */
+  margin-top: calc(-1*(25px - 5px)/2 - 28px);
+}
+
+.tenuki-board[data-include-gutter=true] .line.vertical:after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin-left: calc(-1*(25px - 5px)/2);
+  /* take off the width of 1 stone, then extra distance */
+  margin-bottom: calc(-1*(25px - 5px)/2 - 28px);
+}
+
+.tenuki-board[data-include-gutter=true] .line.horizontal:before {
+  /* take off the width of 1 stone, then extra distance */
+  margin-left: calc(-1*(25px - 5px)/2 - 28px);
+  margin-top: calc(-1*(25px - 5px)/2);
+}
+
+.tenuki-board[data-include-gutter=true] .line.horizontal:after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  /* take off the width of 1 stone, then extra distance */
+  margin-right: calc(-1*(25px - 5px)/2 - 28px);
+  margin-top: calc(-1*(25px - 5px)/2);
 }
 
 .tenuki-board .hoshi {
@@ -44,6 +103,11 @@
   position: absolute;
   top: calc(18px - 28px/2);
   left: calc(18px - 28px/2);
+}
+
+.tenuki-board[data-include-gutter=true] .intersections {
+  margin-top: 25px;
+  margin-left: 25px;
 }
 
 .tenuki-board .intersection {

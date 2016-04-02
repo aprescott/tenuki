@@ -52,7 +52,7 @@
 </style>
 </head>
 
-<div class="tenuki-board"></div>
+<div class="tenuki-board" data-include-gutter=true></div>
 
 <div class="controls">
   <div class="buttons">
@@ -92,7 +92,9 @@ ExampleBoardControls = function(element, board) {
     if (currentMove) {
       var player = currentMove.color[0].toUpperCase() + currentMove.color.substr(1);
 
-      if (currentMove.pass) {
+      if (!currentMove.pass) {
+        newGameInfo += player + " played " + currentMove.coordinates;
+      } else {
         newGameInfo += player + " passed."
       }
     }
@@ -153,6 +155,6 @@ var controls = new ExampleBoardControls(controlElement, board);
 controls.setup();
 
 board.callbacks.postRender = function(board) {
-	controls.updateStats();
+  controls.updateStats();
 };
 </script>
