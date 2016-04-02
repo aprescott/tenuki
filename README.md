@@ -15,8 +15,9 @@ The go board provides a JavaScript interface to perform various functions, but t
 
 * With bower: `bower install tenuki`
 * With npm: `npm install tenuki`
+* Download the `zip` or `tar.gz` file for a specific version from [the releases page](https://github.com/aprescott/tenuki.js/releases), then use `build/` however you want.
 
-You can also clone this repo and use the contents of `build/` for the latest version.
+You can also clone this repo and get the `build/` files that way.
 
 # Examples
 
