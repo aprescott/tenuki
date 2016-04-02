@@ -11,9 +11,10 @@ exports.utils = require("./lib/utils");
 var utils = require("./utils");
 
 var BoardRenderer = function(board, boardElement) {
-  this.STONE_WIDTH = 28;
-  this.GUTTER_MARGIN = 25;
-  this.MARGIN = boardElement.hasAttribute("data-include-gutter") ? 18 + this.GUTTER_MARGIN : 18;
+  this.INTERSECTION_GAP_SIZE = 28;
+  this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
+  this.BASE_MARGIN = this.INTERSECTION_GAP_SIZE - 10;
+  this.MARGIN = boardElement.hasAttribute("data-include-gutter") ? this.BASE_MARGIN + this.GUTTER_MARGIN : this.BASE_MARGIN;
   this.board = board;
   this.boardElement = boardElement;
   this.grid = [];
@@ -27,40 +28,53 @@ var BoardRenderer = function(board, boardElement) {
     utils.appendElement(boardElement, utils.createElement("div", { class: "hoshi-points" }));
     utils.appendElement(boardElement, utils.createElement("div", { class: "intersections" }));
 
-    var hoshiOffset = board.size > 9 ? 3 : 2;
-
-    for (var hoshiY = 0; hoshiY < 3; hoshiY++) {
-      for (var hoshiX = 0; hoshiX < 3; hoshiX++) {
+    if (board.size < 7) {
+      if (board.size > 1 && board.size % 2 == 1) {
         var hoshi = utils.createElement("div", { class: "hoshi" });
-
-        var hoshiStyleAttributeName;
-        var hoshiStyleAttributeValue;
-
-        if (hoshiY == 0) {
-          hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
-        }
-
-        if (hoshiY == 1) {
-          hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + ((board.size + 1)/2 - 1) + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
-        }
-
-        if (hoshiY == 2) {
-          hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (board.size - hoshiOffset - 1) + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
-        }
-
-        if (hoshiX == 0) {
-          hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
-        }
-
-        if (hoshiX == 1) {
-          hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + ((board.size + 1)/2 - 1) + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
-        }
-
-        if (hoshiX == 2) {
-          hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + (board.size - hoshiOffset - 1) + "* " + (renderer.STONE_WIDTH + 1) + "px - 2px)";
-        }
+        hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (board.size - 1)/2 + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+        hoshi.style.left = hoshi.style.top;
 
         utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
+      } else {
+        // no hoshi
+      }
+    } else {
+      var hoshiOffset = board.size > 11 ? 3 : 2;
+
+      for (var hoshiY = 0; hoshiY < 3; hoshiY++) {
+        for (var hoshiX = 0; hoshiX < 3; hoshiX++) {
+          if ((board.size == 7 || board.size % 2 == 0) && (hoshiY == 1 || hoshiX == 1)) {
+            continue;
+          }
+
+          var hoshi = utils.createElement("div", { class: "hoshi" });
+
+          if (hoshiY == 0) {
+            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+          }
+
+          if (hoshiY == 1) {
+            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + ((board.size + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+          }
+
+          if (hoshiY == 2) {
+            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (board.size - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+          }
+
+          if (hoshiX == 0) {
+            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+          }
+
+          if (hoshiX == 1) {
+            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + ((board.size + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+          }
+
+          if (hoshiX == 2) {
+            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + (board.size - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+          }
+
+          utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
+        }
       }
     }
 
@@ -82,8 +96,8 @@ var BoardRenderer = function(board, boardElement) {
         intersectionElement.setAttribute("data-position-y", y);
         intersectionElement.board = board;
 
-        intersectionElement.style.left = (x * (renderer.STONE_WIDTH + 1)) + "px";
-        intersectionElement.style.top = (y * (renderer.STONE_WIDTH + 1)) + "px";
+        intersectionElement.style.left = (x * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
+        intersectionElement.style.top = (y * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
 
         utils.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
 
@@ -100,13 +114,13 @@ var BoardRenderer = function(board, boardElement) {
       e.preventDefault();
     });
 
-    boardElement.querySelector(".lines.horizontal").style.width = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
-    boardElement.querySelector(".lines.horizontal").style.height = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
-    boardElement.querySelector(".lines.vertical").style.width = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
-    boardElement.querySelector(".lines.vertical").style.height = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1) + "px";
+    boardElement.querySelector(".lines.horizontal").style.width = ((renderer.INTERSECTION_GAP_SIZE * (board.size - 1)) + (board.size)*1) + "px";
+    boardElement.querySelector(".lines.horizontal").style.height = ((renderer.INTERSECTION_GAP_SIZE * (board.size - 1)) + (board.size)*1) + "px";
+    boardElement.querySelector(".lines.vertical").style.width = ((renderer.INTERSECTION_GAP_SIZE * (board.size - 1)) + (board.size)*1) + "px";
+    boardElement.querySelector(".lines.vertical").style.height = ((renderer.INTERSECTION_GAP_SIZE * (board.size - 1)) + (board.size)*1) + "px";
 
-    var boardWidth = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1 + (renderer.MARGIN)*2);
-    var boardHeight = ((renderer.STONE_WIDTH * (board.size - 1)) + (board.size)*1 + (renderer.MARGIN)*2);
+    var boardWidth = ((renderer.INTERSECTION_GAP_SIZE * (board.size - 1)) + (board.size)*1 + (renderer.MARGIN)*2);
+    var boardHeight = ((renderer.INTERSECTION_GAP_SIZE * (board.size - 1)) + (board.size)*1 + (renderer.MARGIN)*2);
 
     boardElement.style.width = boardWidth + "px";
     boardElement.style.height = boardHeight + "px";

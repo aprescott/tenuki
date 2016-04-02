@@ -54,7 +54,7 @@ For a textured board, add the class `tenuki-board-textured`:
 
 # Other board sizes
 
-You can pass a second argument to `new tenuki.Board` to specify the board size. If no size is given, the default of 19 is used. All sizes between 1x1 and 19x19 should work, although star points have only been designed for 9x9, 13x13 and 19x19 boards. Sizes above 19x19 will error and won't render.
+You can pass a second argument to `new tenuki.Board` to specify the board size. If no size is given, the default of 19 is used. All sizes between 1x1 and 19x19 should work. Sizes above 19x19 will error and won't render.
 
 ```js
 // use a 13x13 board
