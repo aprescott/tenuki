@@ -280,11 +280,21 @@ if (!board.isGameOver()) {
   throw "tests failed";
 }
 
-if (board.score().black != 9*19) {
+// territory
+if (board.territoryScore().black != 9*19) {
   throw "tests failed";
 }
 
-if (board.score().white != 8*19) {
+if (board.territoryScore().white != 8*19) {
+  throw "tests failed";
+}
+
+// area
+if (board.areaScore().black != 10*19) {
+  throw "tests failed";
+}
+
+if (board.areaScore().white != 9*19) {
   throw "tests failed";
 }
 
@@ -306,12 +316,22 @@ board.pass(); // w
 board.pass(); // b
 
 // territory + captured stones, but with ambiguous territory remaining
-if (board.score().black != 9*19) {
+if (board.territoryScore().black != 9*19) {
   throw "tests failed";
 }
 
 // 1 "unambiguous point of territory", 1 captured stone
-if (board.score().white != 1 + 1) {
+if (board.territoryScore().white != 1 + 1) {
+  throw "tests failed";
+}
+
+// territory + stones on the board
+if (board.areaScore().black != 10*19 + 2) {
+  throw "tests failed";
+}
+
+// 1 point of territory + 2 stones played inside
+if (board.areaScore().white != 1 + 1*19 + 2) {
   throw "tests failed";
 }
 
@@ -323,7 +343,11 @@ if (!tenuki.utils.hasClass(board.renderer.grid[1][1], "dead") || !tenuki.utils.h
   throw "tests failed";
 }
 
-if (board.score().black != 9*19) {
+if (board.territoryScore().black != 9*19) {
+  throw "tests failed";
+}
+
+if (board.areaScore().black != 10*19 + 2) {
   throw "tests failed";
 }
 
@@ -331,7 +355,16 @@ if (board.score().black != 9*19) {
 // 2 white stones played inside the territory, -2
 // 1 captured black stone, +1,
 // 2 dead stones, +2
-if (board.score().white != 8*19 - 2 + 1 + 2) {
+if (board.territoryScore().white != 8*19 - 2 + 1 + 2) {
+  throw "tests failed";
+}
+
+// rectangle territory, 8*19
+// plus 1*19 for the stones on the board
+// 2 white stones played inside the territory, IGNORED
+// 1 captured black stone, IGNORED
+// 2 dead stones, IGNORED
+if (board.areaScore().white != 9*19) {
   throw "tests failed";
 }
 

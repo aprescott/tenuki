@@ -7,7 +7,7 @@ Features:
   * Ko rule.
   * Pass.
   * Undo.
-  * End-game detection, dead stone marking, with territory scoring rules.
+  * End-game detection: dead stone marking, area/territory scoring.
 
 The go board provides a JavaScript interface to perform various functions, but the UI for individual controls is left to you.
 
@@ -101,7 +101,7 @@ Note that all functions which take two integer coordinates (`y` and `x`) are mea
 * `playAt(y, x)`: attempts to play a stone at `(y, x)` for the current player. If the move is illegal (because of ko, suicide, etc.), then nothing will happen. Returns `true` if the move is successful, otherwise `false`.
 * `isGameOver()`: returns `true` if the most recent 2 moves were passes, otherwise `false`.
 * `toggleDeadAt(y, x)`: sets the group of stones at `(y, x)` to be dead as part of marking territory. Only useful if `isGameOver()` is `true`.
-* `score()`: returns an object containing score information, e.g., `{ black: 150, white: 130 }`. Only useful if `isGameOver()` is `true`, since it requires dead stone marking to be accurate.
+* `territoryScore()` and `areaScore()`: return an object containing score information, e.g., `{ black: 150, white: 130 }`. Only useful if `isGameOver()` is `true`, since proper scoring requires dead stone marking at the end of the game.
 * `undo()`: undo the most recent move.
 
 # Post-render callbacks

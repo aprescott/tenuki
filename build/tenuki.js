@@ -7,7 +7,7 @@
 exports.Board = require("./lib/board");
 exports.utils = require("./lib/utils");
 
-},{"./lib/board":3,"./lib/utils":6}],2:[function(require,module,exports){
+},{"./lib/board":3,"./lib/utils":7}],2:[function(require,module,exports){
 var utils = require("./utils");
 
 var BoardRenderer = function(board, boardElement) {
@@ -245,11 +245,12 @@ var BoardRenderer = function(board, boardElement) {
 
 module.exports = BoardRenderer;
 
-},{"./utils":6}],3:[function(require,module,exports){
+},{"./utils":7}],3:[function(require,module,exports){
 var utils = require("./utils");
 var BoardRenderer = require("./board-renderer");
 var NullRenderer = require("./null-renderer");
 var Intersection = require("./intersection");
+var Scorer = require("./scorer");
 
 var Board = function(element, size) {
   this.defaultSize = 19;
@@ -471,15 +472,13 @@ var Board = function(element, size) {
     });
   };
 
-  this.score = function() {
-    var blackDeadAsCaptures = this.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
-    var whiteDeadAsCaptures = this.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
+  this.territoryScore = function() {
+    return Scorer.territoryResultFor(this);
+  };
 
-    return {
-      black: this.territoryPoints.black.length + this.captures.white + whiteDeadAsCaptures.length,
-      white: this.territoryPoints.white.length + this.captures.black + blackDeadAsCaptures.length
-    };
-  }
+  this.areaScore = function() {
+    return Scorer.areaResultFor(this);
+  };
 
   this.isKoFrom = function(y, x, captures) {
     var board = this;
@@ -731,7 +730,7 @@ var Board = function(element, size) {
 
 module.exports = Board;
 
-},{"./board-renderer":2,"./intersection":4,"./null-renderer":5,"./utils":6}],4:[function(require,module,exports){
+},{"./board-renderer":2,"./intersection":4,"./null-renderer":5,"./scorer":6,"./utils":7}],4:[function(require,module,exports){
 var Intersection = function(y, x, board) {
   this.y = y;
   this.x = x;
@@ -793,6 +792,31 @@ var NullRenderer = function() {
 module.exports = NullRenderer;
 
 },{}],6:[function(require,module,exports){
+var Scorer = {
+  territoryResultFor: function(board) {
+    var blackDeadAsCaptures = board.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
+    var whiteDeadAsCaptures = board.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
+
+    return {
+      black: board.territoryPoints.black.length + board.captures.white + whiteDeadAsCaptures.length,
+      white: board.territoryPoints.white.length + board.captures.black + blackDeadAsCaptures.length
+    };
+  },
+
+  areaResultFor: function(board) {
+    var blackStonesOnTheBoard = board.intersections().filter(function(intersection) { return intersection.isBlack() });
+    var whiteStonesOnTheBoard = board.intersections().filter(function(intersection) { return intersection.isWhite() });
+
+    return {
+      black: board.territoryPoints.black.length + blackStonesOnTheBoard.length,
+      white: board.territoryPoints.white.length + whiteStonesOnTheBoard.length
+    };
+  }
+};
+
+module.exports = Scorer;
+
+},{}],7:[function(require,module,exports){
 var utils = {
   flatten: function(ary) {
     return ary.reduce(function(a, b) { return a.concat(b); })
