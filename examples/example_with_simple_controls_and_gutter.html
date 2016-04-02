@@ -107,8 +107,13 @@ ExampleBoardControls = function(element, board) {
       if (this.board.isGameOver()) {
         str += "Game over.";
         str += "\n\n"
-        str += "Black scores " + this.board.score().black + "\n\n";
-        str += "White scores " + this.board.score().white;
+        str += "Territory scoring: Black has " + this.board.territoryScore().black;
+        str += "\n\n";
+        str += "Territory scoring: White has " + this.board.territoryScore().white;
+        str += "\n\n"
+        str += "Area scoring: Black has " + this.board.areaScore().black;
+        str += "\n\n"
+        str += "Area scoring: White has " + this.board.areaScore().white;
       }
 
       this.setText(str)
