@@ -22,6 +22,7 @@ var DOMRenderer = function(game, boardElement) {
   this.setup = function() {
     var renderer = this;
     var game = renderer.game;
+    var boardElement = this.boardElement;
 
     utils.appendElement(boardElement, utils.createElement("div", { class: "lines horizontal" }));
     utils.appendElement(boardElement, utils.createElement("div", { class: "lines vertical" }));
