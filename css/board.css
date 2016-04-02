@@ -7,11 +7,13 @@
   position: absolute;
   top: 0;
   left: 0;
-  margin: 18px;
+  /* base margin */
+  margin: calc(28px - 10px);
 }
 
 .tenuki-board[data-include-gutter=true] .lines {
-  margin: calc(18px + 25px);
+  /* base margin + additional gutter margin */
+  margin: calc((28px - 10px) + (28px - 3px));
 }
 
 .tenuki-board .line {
@@ -23,6 +25,7 @@
 .tenuki-board .line.horizontal {
   height: 1px;
   width: 100%;
+  /* intersection gap size */
   margin-bottom: 28px;
   clear: left;
 }
@@ -30,6 +33,7 @@
 .tenuki-board .line.vertical {
   width: 1px;
   height: 100%;
+  /* intersection gap size */
   margin-right: 28px;
 }
 
@@ -41,10 +45,13 @@
 .tenuki-board[data-include-gutter=true] .line.vertical:after,
 .tenuki-board[data-include-gutter=true] .line.horizontal:before,
 .tenuki-board[data-include-gutter=true] .line.horizontal:after {
-  width: calc(25px - 5px);
-  height: calc(25px - 5px);
+  /* gutter margin, less 5px */
+  width: calc((28px - 3px) - 5px);
+  /* gutter margin, less 5px */
+  height: calc((28px - 3px) - 5px);
   text-align: center;
-  line-height: calc(25px - 5px);
+  /* gutter margin, less 5px */
+  line-height: calc((28px - 3px) - 5px);
   font-family: sans-serif;
   color: rgb(135, 113, 63);
   display: block;
@@ -62,33 +69,37 @@
 }
 
 .tenuki-board[data-include-gutter=true] .line.vertical:before {
-  margin-left: calc(-1*(25px - 5px)/2);
-  /* take off the width of 1 stone, then extra distance */
-  margin-top: calc(-1*(25px - 5px)/2 - 28px);
+  /* -1*width/2 */
+  margin-left: calc(-1*((28px - 3px) - 5px)/2);
+  /* -1*width/2, less the intersection gap size */
+  margin-top: calc(-1*((28px - 3px) - 5px)/2 - 28px);
 }
 
 .tenuki-board[data-include-gutter=true] .line.vertical:after {
   position: absolute;
   bottom: 0;
   left: 0;
-  margin-left: calc(-1*(25px - 5px)/2);
-  /* take off the width of 1 stone, then extra distance */
-  margin-bottom: calc(-1*(25px - 5px)/2 - 28px);
+  /* -1*width/2 */
+  margin-left: calc(-1*((28px - 3px) - 5px)/2);
+  /* -1*width/2, less the intersection gap size */
+  margin-bottom: calc(-1*((28px - 3px) - 5px)/2 - 28px);
 }
 
 .tenuki-board[data-include-gutter=true] .line.horizontal:before {
-  /* take off the width of 1 stone, then extra distance */
-  margin-left: calc(-1*(25px - 5px)/2 - 28px);
-  margin-top: calc(-1*(25px - 5px)/2);
+  /* -1*width/2, less the intersection gap size */
+  margin-left: calc(-1*((28px - 3px) - 5px)/2 - 28px);
+  /* -1*width/2 */
+  margin-top: calc(-1*((28px - 3px) - 5px)/2);
 }
 
 .tenuki-board[data-include-gutter=true] .line.horizontal:after {
   position: absolute;
   top: 0;
   right: 0;
-  /* take off the width of 1 stone, then extra distance */
-  margin-right: calc(-1*(25px - 5px)/2 - 28px);
-  margin-top: calc(-1*(25px - 5px)/2);
+  /* -1*width/2, less the intersection gap size */
+  margin-right: calc(-1*((28px - 3px) - 5px)/2 - 28px);
+  /* -1*width/2 */
+  margin-top: calc(-1*((28px - 3px) - 5px)/2);
 }
 
 .tenuki-board .hoshi {
@@ -101,13 +112,17 @@
 
 .tenuki-board .intersections {
   position: absolute;
-  top: calc(18px - 28px/2);
-  left: calc(18px - 28px/2);
+  /* base margin, less half the intersection gap size */
+  top: calc((28px - 10px) - 28px/2);
+  /* base margin, less half the intersection gap size */
+  left: calc((28px - 10px) - 28px/2);
 }
 
 .tenuki-board[data-include-gutter=true] .intersections {
-  margin-top: 25px;
-  margin-left: 25px;
+  /* additional gutter margin */
+  margin-top: calc(28px - 3px);
+  /* additional gutter margin */
+  margin-left: calc(28px - 3px);
 }
 
 .tenuki-board .intersection {
@@ -115,7 +130,7 @@
 }
 
 .tenuki-board .intersection.empty {
-  /* intersections are wider to account for hover overlaps so they're flush */
+  /* full stone width with border */
   width: calc(28px + 1px);
   height: calc(28px + 1px);
 }
@@ -174,7 +189,9 @@
 
 .tenuki-board .intersection.empty:hover .highlight {
   display: block;
+  /* stone width without border */
   width: calc(28px - 1px);
+  /* stone width without border */
   height: calc(28px - 1px);
   border-radius: 50%;
   opacity: 0.5;
