@@ -94,7 +94,7 @@
 .tenuki-board .hoshi {
   width: calc(2 * 2px + 1px);
   height: calc(2 * 2px + 1px);
-  border-radius: calc(2 * 2px + 1px);
+  border-radius: 50%;
   background: rgb(135, 113, 63);
   position: absolute;
 }
