@@ -229,8 +229,6 @@ if (!tenuki.utils.hasClass(game.renderer.grid[1][0], "empty")) {
   throw "tests failed";
 }
 
-// TODO: captures accumulate correctly and roll back on undo
-
 // Territory scoring, with captures and dead stone marking
 resetTests();
 
@@ -306,11 +304,25 @@ if (game.isOver()) {
 
 game.undo();
 
+if (game.captures.black != 0 || game.captures.white != 0) {
+  throw "tests failed";
+}
+
 // play in the corner so white captures a stone and leaves 2 black stones dead
 game.renderer.grid[0][0].click(); // b
 game.renderer.grid[0][1].click(); // w
 game.renderer.grid[1][1].click(); // b
+
+if (game.captures.black != 0 || game.captures.white != 0) {
+  throw "tests failed";
+}
+
 game.renderer.grid[1][0].click(); // w
+
+if (game.captures.black != 1 || game.captures.white != 0) {
+  throw "tests failed";
+}
+
 game.renderer.grid[0][2].click(); // b
 game.pass(); // w
 game.pass(); // b
@@ -365,6 +377,15 @@ if (game.territoryScore().white != 8*19 - 2 + 1 + 2) {
 // 1 captured black stone, IGNORED
 // 2 dead stones, IGNORED
 if (game.areaScore().white != 9*19) {
+  throw "tests failed";
+}
+
+game.undo();
+game.undo();
+game.undo();
+game.undo();
+
+if (game.captures.black != 0 || game.captures.white != 0) {
   throw "tests failed";
 }
 
