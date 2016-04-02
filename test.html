@@ -8,19 +8,19 @@
 
 <script>
 var boardElement = document.querySelector(".tenuki-board");
-var board = window.board = new tenuki.Board(boardElement);
-board.setup();
+var game = window.game = new tenuki.Game(boardElement);
+game.setup();
 
 resetTests = window.resetTests = function () {
   boardElement.innerHTML = "";
-  board = new tenuki.Board(boardElement, board.size);
-  board.setup();
+  game = new tenuki.Game(boardElement, game.boardSize);
+  game.setup();
 };
 
 // black and white alternate
 resetTests();
 
-board.renderer.grid.forEach(function(row) {
+game.renderer.grid.forEach(function(row) {
   row.forEach(function(pointElement) {
     if (!tenuki.utils.hasClass(pointElement, "empty")) {
       throw "tests failed";
@@ -28,25 +28,25 @@ board.renderer.grid.forEach(function(row) {
   })
 });
 
-board.renderer.grid[5][5].click(); // b
-board.renderer.grid[5][6].click(); // w
-board.renderer.grid[5][7].click(); // b
-board.renderer.grid[5][8].click(); // w
-board.renderer.grid[5][9].click(); // b
+game.renderer.grid[5][5].click(); // b
+game.renderer.grid[5][6].click(); // w
+game.renderer.grid[5][7].click(); // b
+game.renderer.grid[5][8].click(); // w
+game.renderer.grid[5][9].click(); // b
 
-if (!tenuki.utils.hasClass(board.renderer.grid[5][5], "black")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[5][5], "black")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[5][6], "white")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[5][6], "white")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[5][7], "black")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[5][7], "black")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[5][8], "white")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[5][8], "white")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[5][9], "black")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[5][9], "black")) {
   throw "tests failed";
 }
 
@@ -57,175 +57,175 @@ if (boardElement.querySelectorAll(".marker").length != 0) {
   throw "tests failed";
 }
 
-board.renderer.grid[1][1].click();
-if (boardElement.querySelectorAll(".marker").length == 0 || !tenuki.utils.hasClass(board.renderer.grid[1][1], "marker")) {
+game.renderer.grid[1][1].click();
+if (boardElement.querySelectorAll(".marker").length == 0 || !tenuki.utils.hasClass(game.renderer.grid[1][1], "marker")) {
   throw "tests failed";
 }
 
-board.renderer.grid[2][2].click();
-if (boardElement.querySelectorAll(".marker").length == 0 || tenuki.utils.hasClass(board.renderer.grid[1][1], "marker") || !tenuki.utils.hasClass(board.renderer.grid[2][2], "marker")) {
+game.renderer.grid[2][2].click();
+if (boardElement.querySelectorAll(".marker").length == 0 || tenuki.utils.hasClass(game.renderer.grid[1][1], "marker") || !tenuki.utils.hasClass(game.renderer.grid[2][2], "marker")) {
   throw "tests failed";
 }
 
 // multi-stone group capture
 resetTests();
 
-board.renderer.grid[0][0].click(); // b
-board.renderer.grid[0][1].click(); // w
-board.renderer.grid[1][0].click(); // b
-board.renderer.grid[1][1].click(); // w
-board.renderer.grid[5][5].click(); // b tenuki
-board.renderer.grid[2][0].click(); // w
+game.renderer.grid[0][0].click(); // b
+game.renderer.grid[0][1].click(); // w
+game.renderer.grid[1][0].click(); // b
+game.renderer.grid[1][1].click(); // w
+game.renderer.grid[5][5].click(); // b tenuki
+game.renderer.grid[2][0].click(); // w
 
-if (!tenuki.utils.hasClass(board.renderer.grid[0][0], "empty")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[0][0], "empty")) {
   throw "tests failed";
 }
 
-if (!tenuki.utils.hasClass(board.renderer.grid[1][0], "empty")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[1][0], "empty")) {
   throw "tests failed";
 }
 
 // simple ko
 resetTests();
 
-board.renderer.grid[3][3].click(); // b
-board.renderer.grid[3][2].click(); // w
-board.renderer.grid[4][2].click(); // b
-board.renderer.grid[4][1].click(); // w
-board.renderer.grid[5][3].click(); // b
-board.renderer.grid[5][2].click(); // w
-board.renderer.grid[4][4].click(); // b
-board.renderer.grid[4][3].click(); // w
+game.renderer.grid[3][3].click(); // b
+game.renderer.grid[3][2].click(); // w
+game.renderer.grid[4][2].click(); // b
+game.renderer.grid[4][1].click(); // w
+game.renderer.grid[5][3].click(); // b
+game.renderer.grid[5][2].click(); // w
+game.renderer.grid[4][4].click(); // b
+game.renderer.grid[4][3].click(); // w
 
-if (!tenuki.utils.hasClass(board.renderer.grid[4][2], "empty") || !tenuki.utils.hasClass(board.renderer.grid[4][2], "ko")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[4][2], "empty") || !tenuki.utils.hasClass(game.renderer.grid[4][2], "ko")) {
   throw "tests failed";
 }
 
-if (!board.isBlackPlaying()) {
+if (!game.isBlackPlaying()) {
   throw "tests failed";
 }
 
-board.renderer.grid[4][2].click();
+game.renderer.grid[4][2].click();
 
-if (!tenuki.utils.hasClass(board.renderer.grid[4][2], "empty") || !tenuki.utils.hasClass(board.renderer.grid[4][2], "ko")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[4][2], "empty") || !tenuki.utils.hasClass(game.renderer.grid[4][2], "ko")) {
   throw "tests failed";
 }
 
-if (!board.isBlackPlaying()) {
+if (!game.isBlackPlaying()) {
   throw "tests failed";
 }
 
-board.renderer.grid[10][10].click();
+game.renderer.grid[10][10].click();
 
-if (!tenuki.utils.hasClass(board.renderer.grid[4][2], "empty")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[4][2], "empty")) {
   throw "tests failed";
 }
 
-if (tenuki.utils.hasClass(board.renderer.grid[4][2], "ko")) {
+if (tenuki.utils.hasClass(game.renderer.grid[4][2], "ko")) {
   throw "tests failed";
 }
 
-if (!board.isWhitePlaying()) {
+if (!game.isWhitePlaying()) {
   throw "tests failed";
 }
 
-board.renderer.grid[4][2].click();
+game.renderer.grid[4][2].click();
 
-if (!tenuki.utils.hasClass(board.renderer.grid[4][2], "white")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[4][2], "white")) {
   throw "tests failed";
 }
 
 // corner, ko, undo
 resetTests();
 
-board.renderer.grid[0][0].click(); // b
-board.renderer.grid[0][1].click(); // w
-board.renderer.grid[1][1].click(); // b
-board.renderer.grid[1][0].click(); // w
-board.renderer.grid[0][2].click(); // b
-board.renderer.grid[1][2].click(); // w
-board.renderer.grid[0][0].click(); // b
+game.renderer.grid[0][0].click(); // b
+game.renderer.grid[0][1].click(); // w
+game.renderer.grid[1][1].click(); // b
+game.renderer.grid[1][0].click(); // w
+game.renderer.grid[0][2].click(); // b
+game.renderer.grid[1][2].click(); // w
+game.renderer.grid[0][0].click(); // b
 
-if (!tenuki.utils.hasClass(board.renderer.grid[0][1], "empty") || !tenuki.utils.hasClass(board.renderer.grid[0][1], "ko")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[0][1], "empty") || !tenuki.utils.hasClass(game.renderer.grid[0][1], "ko")) {
   throw "tests failed";
 }
 
-board.undo();
+game.undo();
 
 // verify ko gets undone
-if (tenuki.utils.hasClass(board.renderer.grid[0][1], "ko")) {
+if (tenuki.utils.hasClass(game.renderer.grid[0][1], "ko")) {
   throw "tests failed";
 }
 
-if (!tenuki.utils.hasClass(board.renderer.grid[0][0], "empty")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[0][0], "empty")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[0][1], "white")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[0][1], "white")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[0][2], "black")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[0][2], "black")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[1][0], "white")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[1][0], "white")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[1][1], "black")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[1][1], "black")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[1][2], "white")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[1][2], "white")) {
   throw "tests failed";
 }
 
 // passing removes a ko
 resetTests();
 
-board.renderer.grid[0][0].click(); // b
-board.renderer.grid[0][1].click(); // w
-board.renderer.grid[1][1].click(); // b
-board.renderer.grid[1][0].click(); // w
-board.renderer.grid[0][2].click(); // b
-board.renderer.grid[1][2].click(); // w
-board.renderer.grid[0][0].click(); // b
+game.renderer.grid[0][0].click(); // b
+game.renderer.grid[0][1].click(); // w
+game.renderer.grid[1][1].click(); // b
+game.renderer.grid[1][0].click(); // w
+game.renderer.grid[0][2].click(); // b
+game.renderer.grid[1][2].click(); // w
+game.renderer.grid[0][0].click(); // b
 
-board.pass();
+game.pass();
 
-if (tenuki.utils.hasClass(board.renderer.grid[0][1], "ko")) {
+if (tenuki.utils.hasClass(game.renderer.grid[0][1], "ko")) {
   throw "tests failed";
 }
 
 // no suicide in the corner
 resetTests();
 
-board.renderer.grid[0][1].click(); // b
-board.renderer.grid[0][2].click(); // w
-board.renderer.grid[1][0].click(); // b
-board.renderer.grid[2][0].click(); // w
-board.renderer.grid[15][15].click(); // b tenuki
-board.renderer.grid[1][1].click(); // w
+game.renderer.grid[0][1].click(); // b
+game.renderer.grid[0][2].click(); // w
+game.renderer.grid[1][0].click(); // b
+game.renderer.grid[2][0].click(); // w
+game.renderer.grid[15][15].click(); // b tenuki
+game.renderer.grid[1][1].click(); // w
 
-if (!tenuki.utils.hasClass(board.renderer.grid[0][0], "empty") || !tenuki.utils.hasClass(board.renderer.grid[0][0], "suicide")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[0][0], "empty") || !tenuki.utils.hasClass(game.renderer.grid[0][0], "suicide")) {
   throw "tests failed";
 }
-board.renderer.grid[0][0].click();
-if (!tenuki.utils.hasClass(board.renderer.grid[0][0], "empty")) {
-  throw "tests failed";
-}
-
-if (!board.isBlackPlaying()) {
+game.renderer.grid[0][0].click();
+if (!tenuki.utils.hasClass(game.renderer.grid[0][0], "empty")) {
   throw "tests failed";
 }
 
-board.renderer.grid[9][9].click(); // b tenuki
-board.renderer.grid[0][0].click();
-
-if (!tenuki.utils.hasClass(board.renderer.grid[0][0], "white")) {
+if (!game.isBlackPlaying()) {
   throw "tests failed";
 }
 
-if (!tenuki.utils.hasClass(board.renderer.grid[0][1], "empty")) {
+game.renderer.grid[9][9].click(); // b tenuki
+game.renderer.grid[0][0].click();
+
+if (!tenuki.utils.hasClass(game.renderer.grid[0][0], "white")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(board.renderer.grid[1][0], "empty")) {
+
+if (!tenuki.utils.hasClass(game.renderer.grid[0][1], "empty")) {
+  throw "tests failed";
+}
+if (!tenuki.utils.hasClass(game.renderer.grid[1][0], "empty")) {
   throw "tests failed";
 }
 
@@ -235,119 +235,119 @@ if (!tenuki.utils.hasClass(board.renderer.grid[1][0], "empty")) {
 resetTests();
 
 // divide the board down the middle, black on the right
-board.renderer.grid[0][9].click(); // b
-board.renderer.grid[0][8].click(); // w
-board.renderer.grid[1][9].click(); // b
-board.renderer.grid[1][8].click(); // w
-board.renderer.grid[2][9].click(); // b
-board.renderer.grid[2][8].click(); // w
-board.renderer.grid[3][9].click(); // b
-board.renderer.grid[3][8].click(); // w
-board.renderer.grid[4][9].click(); // b
-board.renderer.grid[4][8].click(); // w
-board.renderer.grid[5][9].click(); // b
-board.renderer.grid[5][8].click(); // w
-board.renderer.grid[6][9].click(); // b
-board.renderer.grid[6][8].click(); // w
-board.renderer.grid[7][9].click(); // b
-board.renderer.grid[7][8].click(); // w
-board.renderer.grid[8][9].click(); // b
-board.renderer.grid[8][8].click(); // w
-board.renderer.grid[9][9].click(); // b
-board.renderer.grid[9][8].click(); // w
-board.renderer.grid[10][9].click(); // b
-board.renderer.grid[10][8].click(); // w
-board.renderer.grid[11][9].click(); // b
-board.renderer.grid[11][8].click(); // w
-board.renderer.grid[12][9].click(); // b
-board.renderer.grid[12][8].click(); // w
-board.renderer.grid[13][9].click(); // b
-board.renderer.grid[13][8].click(); // w
-board.renderer.grid[14][9].click(); // b
-board.renderer.grid[14][8].click(); // w
-board.renderer.grid[15][9].click(); // b
-board.renderer.grid[15][8].click(); // w
-board.renderer.grid[16][9].click(); // b
-board.renderer.grid[16][8].click(); // w
-board.renderer.grid[17][9].click(); // b
-board.renderer.grid[17][8].click(); // w
-board.renderer.grid[18][9].click(); // b
-board.renderer.grid[18][8].click(); // w
-board.pass(); // b
-board.pass(); // w
+game.renderer.grid[0][9].click(); // b
+game.renderer.grid[0][8].click(); // w
+game.renderer.grid[1][9].click(); // b
+game.renderer.grid[1][8].click(); // w
+game.renderer.grid[2][9].click(); // b
+game.renderer.grid[2][8].click(); // w
+game.renderer.grid[3][9].click(); // b
+game.renderer.grid[3][8].click(); // w
+game.renderer.grid[4][9].click(); // b
+game.renderer.grid[4][8].click(); // w
+game.renderer.grid[5][9].click(); // b
+game.renderer.grid[5][8].click(); // w
+game.renderer.grid[6][9].click(); // b
+game.renderer.grid[6][8].click(); // w
+game.renderer.grid[7][9].click(); // b
+game.renderer.grid[7][8].click(); // w
+game.renderer.grid[8][9].click(); // b
+game.renderer.grid[8][8].click(); // w
+game.renderer.grid[9][9].click(); // b
+game.renderer.grid[9][8].click(); // w
+game.renderer.grid[10][9].click(); // b
+game.renderer.grid[10][8].click(); // w
+game.renderer.grid[11][9].click(); // b
+game.renderer.grid[11][8].click(); // w
+game.renderer.grid[12][9].click(); // b
+game.renderer.grid[12][8].click(); // w
+game.renderer.grid[13][9].click(); // b
+game.renderer.grid[13][8].click(); // w
+game.renderer.grid[14][9].click(); // b
+game.renderer.grid[14][8].click(); // w
+game.renderer.grid[15][9].click(); // b
+game.renderer.grid[15][8].click(); // w
+game.renderer.grid[16][9].click(); // b
+game.renderer.grid[16][8].click(); // w
+game.renderer.grid[17][9].click(); // b
+game.renderer.grid[17][8].click(); // w
+game.renderer.grid[18][9].click(); // b
+game.renderer.grid[18][8].click(); // w
+game.pass(); // b
+game.pass(); // w
 
-if (!board.isGameOver()) {
+if (!game.isOver()) {
   throw "tests failed";
 }
 
 // territory
-if (board.territoryScore().black != 9*19) {
+if (game.territoryScore().black != 9*19) {
   throw "tests failed";
 }
 
-if (board.territoryScore().white != 8*19) {
+if (game.territoryScore().white != 8*19) {
   throw "tests failed";
 }
 
 // area
-if (board.areaScore().black != 10*19) {
+if (game.areaScore().black != 10*19) {
   throw "tests failed";
 }
 
-if (board.areaScore().white != 9*19) {
+if (game.areaScore().white != 9*19) {
   throw "tests failed";
 }
 
-board.undo();
+game.undo();
 
-if (board.isGameOver()) {
+if (game.isOver()) {
   throw "tests failed";
 }
 
-board.undo();
+game.undo();
 
 // play in the corner so white captures a stone and leaves 2 black stones dead
-board.renderer.grid[0][0].click(); // b
-board.renderer.grid[0][1].click(); // w
-board.renderer.grid[1][1].click(); // b
-board.renderer.grid[1][0].click(); // w
-board.renderer.grid[0][2].click(); // b
-board.pass(); // w
-board.pass(); // b
+game.renderer.grid[0][0].click(); // b
+game.renderer.grid[0][1].click(); // w
+game.renderer.grid[1][1].click(); // b
+game.renderer.grid[1][0].click(); // w
+game.renderer.grid[0][2].click(); // b
+game.pass(); // w
+game.pass(); // b
 
 // territory + captured stones, but with ambiguous territory remaining
-if (board.territoryScore().black != 9*19) {
+if (game.territoryScore().black != 9*19) {
   throw "tests failed";
 }
 
 // 1 "unambiguous point of territory", 1 captured stone
-if (board.territoryScore().white != 1 + 1) {
+if (game.territoryScore().white != 1 + 1) {
   throw "tests failed";
 }
 
 // territory + stones on the board
-if (board.areaScore().black != 10*19 + 2) {
+if (game.areaScore().black != 10*19 + 2) {
   throw "tests failed";
 }
 
 // 1 point of territory + 2 stones played inside
-if (board.areaScore().white != 1 + 1*19 + 2) {
+if (game.areaScore().white != 1 + 1*19 + 2) {
   throw "tests failed";
 }
 
 // mark dead stones
-board.renderer.grid[1][1].click();
-board.renderer.grid[0][2].click();
+game.renderer.grid[1][1].click();
+game.renderer.grid[0][2].click();
 
-if (!tenuki.utils.hasClass(board.renderer.grid[1][1], "dead") || !tenuki.utils.hasClass(board.renderer.grid[0][2], "dead")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[1][1], "dead") || !tenuki.utils.hasClass(game.renderer.grid[0][2], "dead")) {
   throw "tests failed";
 }
 
-if (board.territoryScore().black != 9*19) {
+if (game.territoryScore().black != 9*19) {
   throw "tests failed";
 }
 
-if (board.areaScore().black != 10*19 + 2) {
+if (game.areaScore().black != 10*19 + 2) {
   throw "tests failed";
 }
 
@@ -355,7 +355,7 @@ if (board.areaScore().black != 10*19 + 2) {
 // 2 white stones played inside the territory, -2
 // 1 captured black stone, +1,
 // 2 dead stones, +2
-if (board.territoryScore().white != 8*19 - 2 + 1 + 2) {
+if (game.territoryScore().white != 8*19 - 2 + 1 + 2) {
   throw "tests failed";
 }
 
@@ -364,28 +364,28 @@ if (board.territoryScore().white != 8*19 - 2 + 1 + 2) {
 // 2 white stones played inside the territory, IGNORED
 // 1 captured black stone, IGNORED
 // 2 dead stones, IGNORED
-if (board.areaScore().white != 9*19) {
+if (game.areaScore().white != 9*19) {
   throw "tests failed";
 }
 
 // marking multi-stone groups as dead, and then toggling it
 resetTests();
 
-board.renderer.grid[0][9].click(); // b
-board.renderer.grid[0][8].click(); // w
-board.renderer.grid[1][9].click(); // b
-board.pass();
-board.pass();
+game.renderer.grid[0][9].click(); // b
+game.renderer.grid[0][8].click(); // w
+game.renderer.grid[1][9].click(); // b
+game.pass();
+game.pass();
 
-board.renderer.grid[0][9].click(); // mark the 2-stone black group as dead
+game.renderer.grid[0][9].click(); // mark the 2-stone black group as dead
 
-if (!tenuki.utils.hasClass(board.renderer.grid[0][9], "dead") || !tenuki.utils.hasClass(board.renderer.grid[1][9], "dead")) {
+if (!tenuki.utils.hasClass(game.renderer.grid[0][9], "dead") || !tenuki.utils.hasClass(game.renderer.grid[1][9], "dead")) {
   throw "tests failed";
 }
 
-board.renderer.grid[0][9].click(); // unmark it dead
+game.renderer.grid[0][9].click(); // unmark it dead
 
-if (tenuki.utils.hasClass(board.renderer.grid[0][9], "dead") || tenuki.utils.hasClass(board.renderer.grid[1][9], "dead")) {
+if (tenuki.utils.hasClass(game.renderer.grid[0][9], "dead") || tenuki.utils.hasClass(game.renderer.grid[1][9], "dead")) {
   throw "tests failed";
 }
 
@@ -393,10 +393,10 @@ if (tenuki.utils.hasClass(board.renderer.grid[0][9], "dead") || tenuki.utils.has
 // which should lead to no territory marked
 resetTests();
 
-board.renderer.grid[0][9].click(); // b
-board.renderer.grid[0][10].click(); // w
-board.pass();
-board.pass();
+game.renderer.grid[0][9].click(); // b
+game.renderer.grid[0][10].click(); // w
+game.pass();
+game.pass();
 
 if (boardElement.querySelectorAll(".territory-black").length + boardElement.querySelectorAll(".territory-white").length > 0) {
   throw "tests failed";
@@ -404,48 +404,48 @@ if (boardElement.querySelectorAll(".territory-black").length + boardElement.quer
 
 // fancy "pass" print
 resetTests();
-board.renderer.grid[3][2].className += " stone black";
-board.renderer.grid[3][3].className += " stone black";
-board.renderer.grid[3][4].className += " stone black";
-board.renderer.grid[3][6].className += " stone black";
-board.renderer.grid[3][7].className += " stone black";
-board.renderer.grid[3][8].className += " stone black";
-board.renderer.grid[3][10].className += " stone black";
-board.renderer.grid[3][11].className += " stone black";
-board.renderer.grid[3][12].className += " stone black";
-board.renderer.grid[3][14].className += " stone black";
-board.renderer.grid[3][15].className += " stone black";
-board.renderer.grid[3][16].className += " stone black";
-board.renderer.grid[4][2].className += " stone black";
-board.renderer.grid[4][4].className += " stone black";
-board.renderer.grid[4][6].className += " stone black";
-board.renderer.grid[4][8].className += " stone black";
-board.renderer.grid[4][10].className += " stone black";
-board.renderer.grid[4][14].className += " stone black";
-board.renderer.grid[5][2].className += " stone black";
-board.renderer.grid[5][3].className += " stone black";
-board.renderer.grid[5][4].className += " stone black";
-board.renderer.grid[5][6].className += " stone black";
-board.renderer.grid[5][7].className += " stone black";
-board.renderer.grid[5][8].className += " stone black";
-board.renderer.grid[5][10].className += " stone black";
-board.renderer.grid[5][11].className += " stone black";
-board.renderer.grid[5][12].className += " stone black";
-board.renderer.grid[5][14].className += " stone black";
-board.renderer.grid[5][15].className += " stone black";
-board.renderer.grid[5][16].className += " stone black";
-board.renderer.grid[6][2].className += " stone black";
-board.renderer.grid[6][6].className += " stone black";
-board.renderer.grid[6][8].className += " stone black";
-board.renderer.grid[6][12].className += " stone black";
-board.renderer.grid[6][16].className += " stone black";
-board.renderer.grid[7][2].className += " stone black";
-board.renderer.grid[7][6].className += " stone black";
-board.renderer.grid[7][8].className += " stone black";
-board.renderer.grid[7][10].className += " stone black";
-board.renderer.grid[7][11].className += " stone black";
-board.renderer.grid[7][12].className += " stone black";
-board.renderer.grid[7][14].className += " stone black";
-board.renderer.grid[7][15].className += " stone black";
-board.renderer.grid[7][16].className += " stone black";
+game.renderer.grid[3][2].className += " stone black";
+game.renderer.grid[3][3].className += " stone black";
+game.renderer.grid[3][4].className += " stone black";
+game.renderer.grid[3][6].className += " stone black";
+game.renderer.grid[3][7].className += " stone black";
+game.renderer.grid[3][8].className += " stone black";
+game.renderer.grid[3][10].className += " stone black";
+game.renderer.grid[3][11].className += " stone black";
+game.renderer.grid[3][12].className += " stone black";
+game.renderer.grid[3][14].className += " stone black";
+game.renderer.grid[3][15].className += " stone black";
+game.renderer.grid[3][16].className += " stone black";
+game.renderer.grid[4][2].className += " stone black";
+game.renderer.grid[4][4].className += " stone black";
+game.renderer.grid[4][6].className += " stone black";
+game.renderer.grid[4][8].className += " stone black";
+game.renderer.grid[4][10].className += " stone black";
+game.renderer.grid[4][14].className += " stone black";
+game.renderer.grid[5][2].className += " stone black";
+game.renderer.grid[5][3].className += " stone black";
+game.renderer.grid[5][4].className += " stone black";
+game.renderer.grid[5][6].className += " stone black";
+game.renderer.grid[5][7].className += " stone black";
+game.renderer.grid[5][8].className += " stone black";
+game.renderer.grid[5][10].className += " stone black";
+game.renderer.grid[5][11].className += " stone black";
+game.renderer.grid[5][12].className += " stone black";
+game.renderer.grid[5][14].className += " stone black";
+game.renderer.grid[5][15].className += " stone black";
+game.renderer.grid[5][16].className += " stone black";
+game.renderer.grid[6][2].className += " stone black";
+game.renderer.grid[6][6].className += " stone black";
+game.renderer.grid[6][8].className += " stone black";
+game.renderer.grid[6][12].className += " stone black";
+game.renderer.grid[6][16].className += " stone black";
+game.renderer.grid[7][2].className += " stone black";
+game.renderer.grid[7][6].className += " stone black";
+game.renderer.grid[7][8].className += " stone black";
+game.renderer.grid[7][10].className += " stone black";
+game.renderer.grid[7][11].className += " stone black";
+game.renderer.grid[7][12].className += " stone black";
+game.renderer.grid[7][14].className += " stone black";
+game.renderer.grid[7][15].className += " stone black";
+game.renderer.grid[7][16].className += " stone black";
 </script>
