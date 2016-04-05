@@ -1,6 +1,6 @@
 {
   "name": "tenuki",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A JavaScript implementation of the game of go/baduk/weiqi with full support for HTML rendering out of the box.",
   "main": "index.js",
   "scripts": {
