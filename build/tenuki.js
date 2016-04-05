@@ -610,7 +610,9 @@ var Game = function(boardElement, boardSize) {
       game.removeScoringState();
     }
 
-    game.intersections().forEach(function(intersection) {
+    var points = currentMove ? currentMove.points : game.intersections();
+
+    points.forEach(function(intersection) {
       if (!currentMove) {
         intersection.setEmpty();
       }

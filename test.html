@@ -85,6 +85,18 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][0], "empty")) {
   throw "tests failed";
 }
 
+// undo should properly forget the undone move
+resetTests();
+
+gameTest.renderer.grid[0][0].click(); // b
+gameTest.renderer.grid[0][1].click(); // w
+gameTest.undo();
+gameTest.renderer.grid[0][2].click(); // w
+
+if (!tenuki.utils.hasClass(gameTest.renderer.grid[0][1], "empty")) {
+  throw "tests failed";
+}
+
 // simple ko
 resetTests();
 
