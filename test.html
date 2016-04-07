@@ -241,7 +241,7 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][0], "empty")) {
   throw "tests failed";
 }
 
-// Territory scoring, with captures and dead stone marking
+// Scoring, with captures and dead stone marking
 resetTests();
 
 // divide the board down the middle, black on the right
@@ -371,7 +371,8 @@ if (gameTest.territoryScore().black != 9*19) {
   throw "tests failed";
 }
 
-if (gameTest.areaScore().black != 10*19 + 2) {
+// 2 dead stones are now ignored because they're marked dead
+if (gameTest.areaScore().black != 10*19) {
   throw "tests failed";
 }
 

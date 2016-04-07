@@ -1003,23 +1003,23 @@ module.exports = NullRenderer;
 
 },{}],6:[function(require,module,exports){
 var Scorer = {
-  territoryResultFor: function(board) {
-    var blackDeadAsCaptures = board.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
-    var whiteDeadAsCaptures = board.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
+  territoryResultFor: function(game) {
+    var blackDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
+    var whiteDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
 
     return {
-      black: board.territoryPoints.black.length + board.captures.white + whiteDeadAsCaptures.length,
-      white: board.territoryPoints.white.length + board.captures.black + blackDeadAsCaptures.length
+      black: game.territoryPoints.black.length + game.captures.white + whiteDeadAsCaptures.length,
+      white: game.territoryPoints.white.length + game.captures.black + blackDeadAsCaptures.length
     };
   },
 
-  areaResultFor: function(board) {
-    var blackStonesOnTheBoard = board.intersections().filter(function(intersection) { return intersection.isBlack() });
-    var whiteStonesOnTheBoard = board.intersections().filter(function(intersection) { return intersection.isWhite() });
+  areaResultFor: function(game) {
+    var blackStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isBlack() && !game.isDeadAt(intersection.y, intersection.x); });
+    var whiteStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isWhite() && !game.isDeadAt(intersection.y, intersection.x); });
 
     return {
-      black: board.territoryPoints.black.length + blackStonesOnTheBoard.length,
-      white: board.territoryPoints.white.length + whiteStonesOnTheBoard.length
+      black: game.territoryPoints.black.length + blackStonesOnTheBoard.length,
+      white: game.territoryPoints.white.length + whiteStonesOnTheBoard.length
     };
   }
 };
