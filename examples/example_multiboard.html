@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+
+<head>
+  <link rel="stylesheet" href="../build/tenuki.css"></link>
+  <script src="../build/tenuki.js"></script>
+
+  <link rel="stylesheet" href="example.css"></link>
+  <script src="example-controls.js"></script>
+
+  <style>
+    #board-2 {
+      margin-top: 1em;
+    }
+  </style>
+</head>
+
+<div id="board-1" class="tenuki-board"></div>
+<div id="board-2" class="tenuki-board"></div>
+
+<script>
+  boardElement_1 = document.querySelector("#board-1");
+  window.board_1 = new tenuki.Game(boardElement_1, 9);
+  window.board_1.setup();
+
+  boardElement_2 = document.querySelector("#board-2");
+  window.board_2 = new tenuki.Game(boardElement_2, 9);
+  window.board_2.setup();
+</script>
