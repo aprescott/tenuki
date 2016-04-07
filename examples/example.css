@@ -1,0 +1,56 @@
+body { margin: 0; }
+
+.tenuki-board {
+  max-width: 100%;
+}
+
+ @media (orientation:landscape) {
+  html, body { height: 100%; }
+
+  .tenuki-board {
+    max-width: none;
+    max-height: 100%;
+  }
+ }
+
+.tenuki-board,
+.controls {
+  float: left;
+}
+
+.controls {
+  margin-left: 10px;
+  overflow: auto;
+  margin-top: 18px;
+}
+
+.controls a + a {
+  margin-left: 1em;
+}
+
+.controls .game-info {
+  padding: 0.3em 0.5em;
+}
+
+.controls .text-info {
+  clear: both;
+  height: 90%;
+  overflow: auto;
+  padding: 0.5em;
+}
+
+.controls a {
+  display: inline-block;
+  height: 100%;
+  font-size: 1em;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.3em 0.5em;
+  border-radius: 7px;
+  background: gray;
+  color: white;
+}
+
+.controls p {
+  margin-top: 1em;
+}

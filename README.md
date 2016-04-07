@@ -7,6 +7,7 @@ Features:
   * Ko rule.
   * Pass.
   * Undo.
+  * Built-in mobile support for touch devices and small screens, even with a 19x19 board.
   * End-game detection: dead stone marking, area/territory scoring.
 
 The go board provides a JavaScript interface to perform various functions, but the UI for individual controls is left to you.
@@ -25,6 +26,8 @@ For live examples, see `examples/`, or view them on GitHub:
 
 * [`example.html`](https://aprescott.github.io/tenuki.js/examples/example.html) — Just the board.
 * [`example_with_simple_controls.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) — Board with an example of simple custom controls and updating game info.
+
+These examples are also set up to work on mobile/touch displays.
 
 # Simple usage
 
