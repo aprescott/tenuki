@@ -17,10 +17,12 @@ Features:
 
 For live examples, see `examples/`, or view them on GitHub:
 
-* [`example.html`](https://aprescott.github.io/tenuki.js/examples/example.html) — Just the board.
 * [`example_with_simple_controls.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) — Board with an example of simple custom controls and updating game info.
+* [`example_with_simple_controls_and_gutter.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls_and_gutter.html) — Same as above, but with the A19 to T1 gutter markers.
+* [`example_multiboard.html`](https://aprescott.github.io/tenuki.js/examples/example_multiboard.html) — Multiple 9x9 boards on a single page.
+* [`example.html`](https://aprescott.github.io/tenuki.js/examples/example.html) — Just the board.
 
-These examples are also set up to work on mobile/touch displays.
+These examples are also set up to **work on mobile/touch displays**.
 
 # Installation
 
