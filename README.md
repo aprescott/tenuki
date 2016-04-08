@@ -10,7 +10,7 @@ Features:
   * Built-in mobile support for touch devices and small screens, even with a 19x19 board.
   * End-game detection: dead stone marking, area/territory scoring.
 
-The go board provides a JavaScript interface to perform various functions, but the UI for individual controls is left to you.
+This library is two main pieces. First, **an interactive HTML go board** with all the basic rules of the game. Second, a **JavaScript interface to control gameplay**. By hooking into the JavaScript API, you can extend the board to, e.g., create your own UI for undo, etc.
 
 # Installation
 
@@ -101,7 +101,7 @@ game.intersectionAt(0, 0).value;
 
 # Game play functions
 
-The following functions are available on a `Game` object, and can be used to control the gameplay.
+There are functions are available on a `Game` object that can be used to control the gameplay.
 
 Note that all functions which take two integer coordinates (`y` and `x`) are measured from the top of the board and left of the board. So `y = 0` is the top-most row, and `x = 0` is the left-most row. On a 19x19 board, the top left star point (4-4) is thus at `y = 3` and `x = 3`.
 
