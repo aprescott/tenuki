@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+
+<head>
+  <link rel="stylesheet" href="../build/tenuki.css"></link>
+  <script src="../build/tenuki.js"></script>
+
+  <link rel="stylesheet" href="example.css"></link>
+  <script src="example-controls.js"></script>
+</head>
+
+<div class="tenuki-board" data-include-gutter=true></div>
+
+<div class="controls">
+  <div class="buttons">
+    <a class="pass" href="#">Pass</a>
+    <a class="undo" href="#">Undo</a>
+    <a class="textured" href="#">Textured</a>
+  </div>
+
+  <div class="game-info"><p>&nbsp;</p></div>
+  <div class="text-info"><p></p></div>
+</div>
+
+<script>
+var boardElement = document.querySelector(".tenuki-board");
+var game = new tenuki.Game(boardElement);
+game.setup();
+
+var controlElement = document.querySelector(".controls");
+var controls = new ExampleGameControls(controlElement, game);
+controls.setup();
+
+game.callbacks.postRender = function(game) {
+  controls.updateStats();
+};
+</script>
