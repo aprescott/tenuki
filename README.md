@@ -1,5 +1,7 @@
 Tenuki is a JavaScript implementation of the game of go/baduk/weiqi with full support for HTML rendering out of the box.
 
+There are two main pieces. First, **an interactive HTML go board** with all the basic rules of the game. Second, a **JavaScript interface to control gameplay**. By hooking into the JavaScript API, you can extend the board to, e.g., create your own UI for undo, etc.
+
 <img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board.png" width="151" height="150">
 
 Features:
@@ -7,18 +9,9 @@ Features:
   * Ko rule.
   * Pass.
   * Undo.
+  * Optional gutter markers for points A19 through T1.
   * Built-in mobile support for touch devices and small screens, even with a 19x19 board.
   * End-game detection: dead stone marking, area/territory scoring.
-
-This library is two main pieces. First, **an interactive HTML go board** with all the basic rules of the game. Second, a **JavaScript interface to control gameplay**. By hooking into the JavaScript API, you can extend the board to, e.g., create your own UI for undo, etc.
-
-# Installation
-
-* With bower: `bower install tenuki`
-* With npm: `npm install tenuki`
-* Download the `zip` or `tar.gz` file for a specific version from [the releases page](https://github.com/aprescott/tenuki.js/releases), then use `build/` however you want.
-
-You can also clone this repo and get the `build/` files that way.
 
 # Examples
 
@@ -28,6 +21,14 @@ For live examples, see `examples/`, or view them on GitHub:
 * [`example_with_simple_controls.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) — Board with an example of simple custom controls and updating game info.
 
 These examples are also set up to work on mobile/touch displays.
+
+# Installation
+
+* With bower: `bower install tenuki`
+* With npm: `npm install tenuki`
+* Download the `zip` or `tar.gz` file for a specific version from [the releases page](https://github.com/aprescott/tenuki.js/releases), then use `build/` however you want.
+
+You can also clone this repo and get the `build/` files that way.
 
 # Simple usage
 
