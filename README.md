@@ -1,5 +1,7 @@
 Tenuki is a JavaScript implementation of the game of go/baduk/weiqi with full support for HTML rendering out of the box.
 
+_The API is still subject to change at any point. Treat it as beta software!_
+
 There are two main pieces. First, **an interactive HTML go board** with all the basic rules of the game. Second, a **JavaScript interface to control gameplay**. By hooking into the JavaScript API, you can extend the board to, e.g., create your own UI for undo, etc.
 
 <img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board.png" width="151" height="150">
