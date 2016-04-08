@@ -76,7 +76,7 @@ I've tested this on Chrome, Firefox, Safari and Opera.
 
 # Known problems
 
-Because the browser is rendered with pure CSS and no images, there are some pixel rounding issues when the browser's zoom level is not 100%. This can create positioning/alignment problems, for instance, at 110%, because widths and lines on the board are not consistent with each other.
+On a desktop, because the browser is rendered with pure CSS and no images, there are some pixel rounding issues when the browser's zoom level is not 100% after zooming with `Ctrl-+` (or `Cmd-+`). This can create positioning/alignment problems, for instance, at 110%, because widths and lines on the board are not consistent with each other.
 
 # Usage outside of a browser
 
