@@ -1,5 +1,5 @@
 /*!
- * tenuki v0.0.8 (https://github.com/aprescott/tenuki.js)
+ * tenuki v0.0.9 (https://github.com/aprescott/tenuki.js)
  * Copyright © 2016 Adam Prescott.
  * Licensed under the MIT license.
  */
@@ -10,7 +10,7 @@ exports.utils = require("./lib/utils");
 },{"./lib/game":3,"./lib/utils":7}],2:[function(require,module,exports){
 var utils = require("./utils");
 
-var DomRenderer = function(game, boardElement) {
+var DOMRenderer = function(game, boardElement) {
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
   this.BASE_MARGIN = this.INTERSECTION_GAP_SIZE - 10;
@@ -18,15 +18,36 @@ var DomRenderer = function(game, boardElement) {
   this.game = game;
   this.boardElement = boardElement;
   this.grid = [];
+  this.touchEventFired = false;
 
   this.setup = function() {
     var renderer = this;
     var game = renderer.game;
+    var boardElement = this.boardElement;
 
-    utils.appendElement(boardElement, utils.createElement("div", { class: "lines horizontal" }));
-    utils.appendElement(boardElement, utils.createElement("div", { class: "lines vertical" }));
-    utils.appendElement(boardElement, utils.createElement("div", { class: "hoshi-points" }));
-    utils.appendElement(boardElement, utils.createElement("div", { class: "intersections" }));
+    var innerContainer = utils.createElement("div", { class: "tenuki-inner-container" });
+    renderer.innerContainer = innerContainer;
+    utils.appendElement(boardElement, innerContainer);
+
+    var zoomContainer = utils.createElement("div", { class: "tenuki-zoom-container" });
+    renderer.zoomContainer = zoomContainer;
+    utils.appendElement(innerContainer, zoomContainer);
+
+    utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines horizontal" }));
+    utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines vertical" }));
+    utils.appendElement(zoomContainer, utils.createElement("div", { class: "hoshi-points" }));
+    utils.appendElement(zoomContainer, utils.createElement("div", { class: "intersections" }));
+
+    renderer.cancelZoomElement = utils.createElement("div", { class: "cancel-zoom" });
+    cancelZoomBackdrop = utils.createElement("div", { class: "cancel-zoom-backdrop" });
+    utils.addEventListener(renderer.cancelZoomElement, "click", function(e) {
+      renderer.zoomOut();
+    });
+    utils.addEventListener(cancelZoomBackdrop, "click", function(e) {
+      renderer.zoomOut();
+    });
+    utils.appendElement(innerContainer, renderer.cancelZoomElement);
+    utils.appendElement(innerContainer, cancelZoomBackdrop);
 
     if (game.boardSize < 7) {
       if (game.boardSize > 1 && game.boardSize % 2 == 1) {
@@ -122,25 +143,211 @@ var DomRenderer = function(game, boardElement) {
     var boardWidth = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + (game.boardSize)*1 + (renderer.MARGIN)*2);
     var boardHeight = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + (game.boardSize)*1 + (renderer.MARGIN)*2);
 
-    boardElement.style.width = boardWidth + "px";
-    boardElement.style.height = boardHeight + "px";
+    innerContainer.style.width = boardWidth + "px";
+    innerContainer.style.height = boardHeight + "px";
+
+    zoomContainer.style.width = boardWidth + "px";
+    zoomContainer.style.height = boardHeight + "px";
 
     utils.flatten(renderer.grid).forEach(function(intersectionEl) {
+      utils.addEventListener(intersectionEl, "touchstart", function() {
+        renderer.touchEventFired = true;
+      });
+
+      utils.addEventListener(intersectionEl, "mouseenter", function() {
+        var intersectionElement = this;
+
+        utils.addClass(intersectionElement, "hovered");
+      });
+
+      utils.addEventListener(intersectionEl, "mouseleave", function() {
+        var intersectionElement = this;
+
+        utils.removeClass(intersectionElement, "hovered");
+        game.renderer.resetTouchedPoint();
+      });
+
       utils.addEventListener(intersectionEl, "click", function() {
         var intersectionElement = this;
         var playedYPosition = Number(intersectionElement.getAttribute("data-position-y"));
         var playedXPosition = Number(intersectionElement.getAttribute("data-position-x"));
 
-        if (game.isOver()) {
-          game.toggleDeadAt(playedYPosition, playedXPosition);
+        var playOrToggleDead = function() {
+          if (game.isOver()) {
+            game.toggleDeadAt(playedYPosition, playedXPosition);
+          } else {
+            game.playAt(playedYPosition, playedXPosition);
+          }
+        };
+
+        // if this isn't part of a touch,
+        // or it is and the user is zoomed in,
+        // or it's game over and we're marking stones dead,
+        // then don't use the zoom/double-select system.
+        if (!renderer.touchEventFired || (document.body.clientWidth / window.innerWidth > 1) || game.isOver()) {
+          playOrToggleDead();
+          return;
+        }
+
+        if (renderer.touchedPoint) {
+          if (intersectionElement == renderer.touchedPoint) {
+            playOrToggleDead();
+          } else {
+            renderer.showPossibleMoveAt(intersectionElement);
+          }
         } else {
-          game.playAt(playedYPosition, playedXPosition);
+          renderer.showPossibleMoveAt(intersectionElement);
         }
       });
     });
+
+    var scaleX = innerContainer.parentNode.clientWidth / innerContainer.clientWidth;
+    var scaleY = innerContainer.parentNode.clientHeight / innerContainer.clientHeight;
+    var scale = Math.min(scaleX, scaleY);
+
+    if (scale > 0 && scale < 1) {
+      utils.addClass(boardElement, "tenuki-scaled");
+      innerContainer.style["transform-origin"] = "top left";
+      innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
+
+      // reset the outer element's height to match, ensuring that we free up any lingering whitespace
+      boardElement.style.width = innerContainer.getBoundingClientRect().width + "px";
+      boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
+    }
+
+    utils.addEventListener(boardElement, "touchstart", function(event) {
+      if (event.touches.length > 1) {
+        return;
+      }
+
+      if (!utils.hasClass(boardElement, "tenuki-zoomed")) {
+        return;
+      }
+
+      var xCursor = event.changedTouches[0].clientX;
+      var yCursor = event.changedTouches[0].clientY;
+
+      renderer.dragStartX = xCursor - this.offsetLeft;
+      renderer.dragStartY = yCursor - this.offsetTop;
+      zoomContainer.style.transition = "none";
+    });
+
+    utils.addEventListener(innerContainer, "touchend", function(event) {
+      if (event.touches.length > 1) {
+        return;
+      }
+
+      if (!utils.hasClass(boardElement, "tenuki-zoomed")) {
+        return;
+      }
+
+      zoomContainer.style.transition = "";
+
+      if (!renderer.moveInProgress) {
+        return;
+      }
+      renderer.translateY = renderer.lastTranslateY;
+      renderer.translateX = renderer.lastTranslateX;
+      renderer.moveInProgress = false;
+    });
+
+    utils.addEventListener(innerContainer, "touchmove", function(event) {
+      if (event.touches.length > 1) {
+        return;
+      }
+
+      if (!utils.hasClass(boardElement, "tenuki-zoomed")) {
+        return true;
+      }
+
+      // prevent pull-to-refresh
+      event.preventDefault();
+
+      renderer.moveInProgress = true;
+
+      var xCursor = event.changedTouches[0].clientX;
+      var yCursor = event.changedTouches[0].clientY;
+
+      var deltaX = xCursor - renderer.dragStartX;
+      var deltaY = yCursor - renderer.dragStartY;
+
+      var translateY = renderer.translateY + deltaY/2.5;
+      var translateX = renderer.translateX + deltaX/2.5;
+
+      if (translateY > 0.5*innerContainer.clientHeight - renderer.MARGIN) {
+        translateY = 0.5*innerContainer.clientHeight - renderer.MARGIN;
+      }
+
+      if (translateX > 0.5*innerContainer.clientWidth - renderer.MARGIN) {
+        translateX = 0.5*innerContainer.clientWidth - renderer.MARGIN;
+      }
+
+      if (translateY < -0.5*innerContainer.clientHeight + renderer.MARGIN) {
+        translateY = -0.5*innerContainer.clientHeight + renderer.MARGIN;
+      }
+
+      if (translateX < -0.5*innerContainer.clientWidth + renderer.MARGIN) {
+        translateX = -0.5*innerContainer.clientWidth + renderer.MARGIN;
+      }
+
+      zoomContainer.style.transform = "translate3d(" + 2.5*translateX + "px, " + 2.5*translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+
+      renderer.lastTranslateX = translateX;
+      renderer.lastTranslateY = translateY;
+    });
   }
 
+  this.showPossibleMoveAt = function(intersectionElement) {
+    var renderer = this;
+    var boardElement = this.boardElement;
+    var innerContainer = this.innerContainer;
+    var zoomContainer = this.zoomContainer;
+
+    renderer.touchedPoint = intersectionElement;
+
+    if (utils.hasClass(boardElement, "tenuki-scaled")) {
+      var top = intersectionElement.offsetTop;
+      var left = intersectionElement.offsetLeft;
+
+      var translateY = 0.5 * zoomContainer.clientHeight - top - renderer.MARGIN;
+      var translateX = 0.5 * zoomContainer.clientWidth - left - renderer.MARGIN;
+
+      zoomContainer.style.transform = "translate3d(" + 2.5*translateX + "px, " + 2.5*translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+      renderer.translateY = translateY;
+      renderer.translateX = translateX;
+
+      utils.addClass(renderer.cancelZoomElement, "visible");
+      utils.addClass(renderer.boardElement, "tenuki-zoomed");
+    }
+  };
+
+  this.resetTouchedPoint = function() {
+    var renderer = this;
+
+    renderer.touchedPoint = null;
+  }
+
+  this.zoomOut = function() {
+    var renderer = this;
+    var zoomContainer = renderer.zoomContainer;
+
+    this.resetTouchedPoint();
+    zoomContainer.style.transform = "";
+    zoomContainer.style.transition = "";
+    renderer.dragStartX = null;
+    renderer.dragStartY = null;
+    renderer.translateY = null;
+    renderer.translateX = null;
+    renderer.lastTranslateX = null;
+    renderer.lastTranslateY = null;
+
+    utils.removeClass(renderer.cancelZoomElement, "visible");
+    utils.removeClass(renderer.boardElement, "tenuki-zoomed");
+  };
+
   this.render = function() {
+    this.resetTouchedPoint();
+
     this.renderStonesPlayed();
     this.updateMarkerPoints();
     this.updateCurrentPlayer();
@@ -243,7 +450,7 @@ var DomRenderer = function(game, boardElement) {
   };
 };
 
-module.exports = DomRenderer;
+module.exports = DOMRenderer;
 
 },{"./utils":7}],3:[function(require,module,exports){
 var utils = require("./utils");
@@ -343,6 +550,8 @@ var Game = function(boardElement, boardSize) {
   };
 
   this.stateForPass = function() {
+    var game = this;
+
     return {
       y: null,
       x: null,
@@ -607,7 +816,9 @@ var Game = function(boardElement, boardSize) {
       game.removeScoringState();
     }
 
-    game.intersections().forEach(function(intersection) {
+    var points = currentMove ? currentMove.points : game.intersections();
+
+    points.forEach(function(intersection) {
       if (!currentMove) {
         intersection.setEmpty();
       }
@@ -792,23 +1003,23 @@ module.exports = NullRenderer;
 
 },{}],6:[function(require,module,exports){
 var Scorer = {
-  territoryResultFor: function(board) {
-    var blackDeadAsCaptures = board.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
-    var whiteDeadAsCaptures = board.deadPoints.filter(function(deadPoint) { return board.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
+  territoryResultFor: function(game) {
+    var blackDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
+    var whiteDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
 
     return {
-      black: board.territoryPoints.black.length + board.captures.white + whiteDeadAsCaptures.length,
-      white: board.territoryPoints.white.length + board.captures.black + blackDeadAsCaptures.length
+      black: game.territoryPoints.black.length + game.captures.white + whiteDeadAsCaptures.length,
+      white: game.territoryPoints.white.length + game.captures.black + blackDeadAsCaptures.length
     };
   },
 
-  areaResultFor: function(board) {
-    var blackStonesOnTheBoard = board.intersections().filter(function(intersection) { return intersection.isBlack() });
-    var whiteStonesOnTheBoard = board.intersections().filter(function(intersection) { return intersection.isWhite() });
+  areaResultFor: function(game) {
+    var blackStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isBlack() && !game.isDeadAt(intersection.y, intersection.x); });
+    var whiteStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isWhite() && !game.isDeadAt(intersection.y, intersection.x); });
 
     return {
-      black: board.territoryPoints.black.length + blackStonesOnTheBoard.length,
-      white: board.territoryPoints.white.length + whiteStonesOnTheBoard.length
+      black: game.territoryPoints.black.length + blackStonesOnTheBoard.length,
+      white: game.territoryPoints.white.length + whiteStonesOnTheBoard.length
     };
   }
 };

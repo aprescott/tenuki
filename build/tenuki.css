@@ -1,6 +1,60 @@
 .tenuki-board {
   position: relative;
+  -webkit-user-select: none;
+}
+
+.tenuki-board .tenuki-inner-container {
   background: rgb(226, 188, 106);
+  overflow: hidden;
+}
+
+.tenuki-board .tenuki-zoom-container {
+  transition: transform 0.2s ease-in-out;
+  /*
+   * address an issue somewhat related to the shrink-to-fit problem on iOS 9: https://forums.developer.apple.com/thread/13510
+   * by setting this initial scale, any subsequent shrinking will not leave whitespace on the right of the board, which leads
+   * to a horizontal scrollbar
+   */
+  transform: scale(1);
+}
+
+.tenuki-board.tenuki-scaled .cancel-zoom.visible {
+  background: #B95858;
+  height: 70px;
+  width: 20px;
+  position: absolute;
+  transform: rotateZ(45deg);
+  bottom: 62px;
+  left: 89px;
+  z-index: 2;
+}
+
+.tenuki-board.tenuki-scaled .cancel-zoom.visible:after {
+  background: #B95858;
+  content: "";
+  height: 20px;
+  left: -25px;
+  position: absolute;
+  top: 25px;
+  width: 70px;
+}
+
+.tenuki-board.tenuki-scaled .cancel-zoom.visible + .cancel-zoom-backdrop {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  z-index: 1;
+  bottom: 48px;
+  left: 49px;
+  background: rgba(226, 188, 106, 0.81);
+  border-radius: 50%;
+}
+
+.tenuki-board[data-include-gutter=true] .cancel-zoom.visible,
+.tenuki-board[data-include-gutter=true] .cancel-zoom.visible + .cancel-zoom-backdrop {
+  /* additional gutter margin offset */
+  margin-left: calc(28px - 3px);
+  margin-bottom: calc(28px - 3px);
 }
 
 .tenuki-board .lines {
@@ -187,7 +241,7 @@
   height: 100%;
 }
 
-.tenuki-board .intersection.empty:hover .highlight {
+.tenuki-board .intersection.empty.hovered .highlight {
   display: block;
   /* stone width without border */
   width: calc(28px - 1px);
@@ -197,13 +251,13 @@
   opacity: 0.5;
 }
 
-.tenuki-board.white-to-play .intersection.empty:hover .highlight,
-.tenuki-board.black-to-play .intersection.empty:hover .highlight {
+.tenuki-board.white-to-play .intersection.empty.hovered .highlight,
+.tenuki-board.black-to-play .intersection.empty.hovered .highlight {
   background: black;
   border: 1px solid black;
 }
 
-.tenuki-board.white-to-play .intersection.empty:hover .highlight {
+.tenuki-board.white-to-play .intersection.empty.hovered .highlight {
   background: white;
 }
 
@@ -268,13 +322,13 @@
 }
 
 .tenuki-board-textured .stone.black,
-.tenuki-board-textured.black-to-play .intersection.empty:hover .highlight {
+.tenuki-board-textured.black-to-play .intersection.empty.hovered .highlight {
   border-color: #565656;
   background: radial-gradient(circle at 50% 120%, #000000, #484848 10%, #101010 80%, #FFFFFF 100%);
 }
 
 .tenuki-board-textured .stone.white,
-.tenuki-board-textured.white-to-play .intersection.empty:hover .highlight {
+.tenuki-board-textured.white-to-play .intersection.empty.hovered .highlight {
   border-color: #DEDEDE;
   background: radial-gradient(circle at 50% 120%, #ECEAEA, #D6D6D6 10%, #EAEAEA 80%, #FFFFFF 100%);
 }
