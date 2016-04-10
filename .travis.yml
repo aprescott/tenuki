@@ -8,3 +8,6 @@ node_js:
   - "4.2"
   - "4.1"
   - "4.0"
+script:
+  - npm test
+  - ./build.sh && git diff --exit-code # require build/ to be up-to-date
