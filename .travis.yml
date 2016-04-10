@@ -1,2 +1,13 @@
 sudo: false
 language: node_js
+node_js:
+  - "node"
+  - "5"
+  - "5.1"
+  - "4"
+  - "4.2"
+  - "4.1"
+  - "4.0"
+matrix:
+  allowed_failures:
+    - node_js: "node"
