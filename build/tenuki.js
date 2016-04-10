@@ -874,30 +874,58 @@ var Game = function Game(boardElement, boardSize) {
       return intersection.isEmpty() || _this9.isDeadAt(intersection.y, intersection.x);
     });
 
-    var checkedPoints = [];
+    if (!this.isOver() || emptyOrDeadPoints.length == 0) {
+      return;
+    }
 
-    emptyOrDeadPoints.forEach(function (emptyPoint) {
-      if (checkedPoints.indexOf(emptyPoint) > -1) {
-        // skip it, we already checked
-      } else {
-          checkedPoints = checkedPoints.concat(_this9.checkTerritoryStartingAt(emptyPoint.y, emptyPoint.x));
-        }
+    var checkedPoints = [];
+    var pointsToCheck = emptyOrDeadPoints.map(function (i) {
+      return i.duplicate();
     });
+
+    while (pointsToCheck.length > 0) {
+      var nextPoint = pointsToCheck.pop();
+      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(nextPoint.y, nextPoint.x));
+      pointsToCheck = emptyOrDeadPoints.filter(function (i) {
+        return checkedPoints.indexOf(i) < 0;
+      });
+    }
   };
 
   this.checkTerritoryStartingAt = function (y, x) {
     var _this10 = this;
 
-    var pointsWithBoundary = this.surroundedPointsWithBoundaryAt(y, x);
+    var checkedPoints = [];
+    var boundaryPoints = [];
+    var pointsToCheck = [];
 
-    var occupiedPoints = pointsWithBoundary.filter(function (checkedPoint) {
-      return !_this10.isDeadAt(checkedPoint.y, checkedPoint.x) && !checkedPoint.isEmpty();
-    });
+    var startingPoint = this.intersectionAt(y, x);
+    pointsToCheck.push(startingPoint);
 
-    var nonOccupiedPoints = pointsWithBoundary.filter(function (checkedPoint) {
-      return _this10.isDeadAt(checkedPoint.y, checkedPoint.x) || checkedPoint.isEmpty();
-    });
+    while (pointsToCheck.length > 0) {
+      var nextPoint = pointsToCheck.pop();
 
+      if (checkedPoints.indexOf(nextPoint) > -1) {
+        // skip it, we already checked
+      } else {
+          checkedPoints.push(nextPoint);
+
+          this.neighborsFor(nextPoint.y, nextPoint.x).forEach(function (neighbor) {
+            if (checkedPoints.indexOf(neighbor) > -1) {
+              // skip this neighbor, we already checked it
+            } else {
+                if (neighbor.isEmpty() || _this10.isDeadAt(neighbor.y, neighbor.x)) {
+                  pointsToCheck.push(neighbor);
+                } else {
+                  boundaryPoints.push(neighbor);
+                }
+              }
+          });
+        }
+    }
+
+    var occupiedPoints = boundaryPoints;
+    var nonOccupiedPoints = checkedPoints;
     var surroundingColors = utils.unique(occupiedPoints.map(function (occupiedPoint) {
       return occupiedPoint.value;
     }));
@@ -913,30 +941,6 @@ var Game = function Game(boardElement, boardSize) {
     }
 
     return nonOccupiedPoints;
-  };
-
-  this.surroundedPointsWithBoundaryAt = function (y, x, accumulated) {
-    var _this11 = this;
-
-    accumulated || (accumulated = []);
-
-    var point = this.intersectionAt(y, x);
-
-    if (accumulated.indexOf(point) > -1) {
-      return accumulated;
-    }
-
-    accumulated.push(point);
-
-    this.neighborsFor(point.y, point.x).forEach(function (neighbor) {
-      if (neighbor.isEmpty() || _this11.isDeadAt(neighbor.y, neighbor.x)) {
-        _this11.surroundedPointsWithBoundaryAt(neighbor.y, neighbor.x, accumulated);
-      } else {
-        accumulated.push(neighbor);
-      }
-    });
-
-    return accumulated;
   };
 
   this.markTerritory = function (y, x, color) {
