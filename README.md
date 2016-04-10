@@ -11,7 +11,7 @@ Features:
   * Ko rule.
   * Pass.
   * Undo.
-  * Optional gutter markers for points A19 through T1.
+  * Optional coordinate markers for points A19 through T1.
   * Built-in mobile support for touch devices and small screens, even with a 19x19 board.
   * End-game detection: dead stone marking, area/territory scoring.
 
@@ -20,7 +20,7 @@ Features:
 For live examples, see `examples/`, or view them on GitHub:
 
 * [`example_with_simple_controls.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) — Board with an example of simple custom controls and updating game info.
-* [`example_with_simple_controls_and_gutter.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls_and_gutter.html) — Same as above, but with the A19 to T1 gutter markers.
+* [`example_with_simple_controls_and_gutter.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls_and_gutter.html) — Same as above, but with the A19 to T1 coordinate markers.
 * [`example_multiboard.html`](https://aprescott.github.io/tenuki.js/examples/example_multiboard.html) — Multiple 9x9 boards on a single page.
 * [`example.html`](https://aprescott.github.io/tenuki.js/examples/example.html) — Just the board.
 
@@ -63,6 +63,8 @@ Create a new `tenuki.Game` instance with a DOM element, then call `setup()`, whi
 
 There are no other dependencies.
 
+# Textured styling
+
 For a textured board, add the class `tenuki-board-textured`:
 
 ```html
@@ -70,6 +72,14 @@ For a textured board, add the class `tenuki-board-textured`:
 ```
 
 <img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board-textured.png" width="151" height="150">
+
+# Coordinate markers
+
+For coordinate markers, indicating positions A19 through T1, add `data-include-coordinates=true` to the HTML element for the board:
+
+```html
+<div class="tenuki-board" data-include-coordinates="true"></div>
+```
 
 # Other board sizes
 
