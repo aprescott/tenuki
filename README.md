@@ -162,8 +162,12 @@ Open [`test.html`](https://aprescott.github.io/tenuki.js/test.html) in your brow
 
 # Developing
 
-You'll need [`browserify`](http://browserify.org/). You can install it with [`npm`](https://www.npmjs.com/) by running `npm install -g browserify`.
+First, make sure [`npm`](https://www.npmjs.com/) is installed, then run:
 
-To make changes, update individual files in `lib/` and `css/`. Then, run `./build.sh` to generate `build/js/tenuki.js` and `build/css/tenuki.css`, suitable for use in a browser.
+```shell
+npm install
+```
+
+To make changes, update individual files in `lib/` and `css/`. Then, run `./build.sh` to generate files in `build/`.
 
 To test changes, use `test.html` and the files in `examples/` to check that things still work.

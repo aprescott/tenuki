@@ -24,5 +24,11 @@
   "bugs": {
     "url": "https://github.com/aprescott/tenuki.js/issues"
   },
-  "homepage": "https://github.com/aprescott/tenuki.js#readme"
+  "homepage": "https://github.com/aprescott/tenuki.js#readme",
+  "devDependencies": {
+    "browserify": "*",
+    "babel-preset-es2015": "*",
+    "babelify": "*",
+    "uglify-js": "*"
+  }
 }

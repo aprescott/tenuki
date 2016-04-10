@@ -4,13 +4,17 @@
  * Licensed under the MIT license.
  */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.tenuki = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+"use strict";
+
 exports.Game = require("./lib/game");
 exports.utils = require("./lib/utils");
 
 },{"./lib/game":3,"./lib/utils":7}],2:[function(require,module,exports){
+"use strict";
+
 var utils = require("./utils");
 
-var DOMRenderer = function(game, boardElement) {
+var DOMRenderer = function DOMRenderer(game, boardElement) {
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
   this.BASE_MARGIN = this.INTERSECTION_GAP_SIZE - 10;
@@ -20,7 +24,7 @@ var DOMRenderer = function(game, boardElement) {
   this.grid = [];
   this.touchEventFired = false;
 
-  this.setup = function() {
+  this.setup = function () {
     var renderer = this;
     var game = renderer.game;
     var boardElement = this.boardElement;
@@ -39,11 +43,11 @@ var DOMRenderer = function(game, boardElement) {
     utils.appendElement(zoomContainer, utils.createElement("div", { class: "intersections" }));
 
     renderer.cancelZoomElement = utils.createElement("div", { class: "cancel-zoom" });
-    cancelZoomBackdrop = utils.createElement("div", { class: "cancel-zoom-backdrop" });
-    utils.addEventListener(renderer.cancelZoomElement, "click", function(e) {
+    var cancelZoomBackdrop = utils.createElement("div", { class: "cancel-zoom-backdrop" });
+    utils.addEventListener(renderer.cancelZoomElement, "click", function (e) {
       renderer.zoomOut();
     });
-    utils.addEventListener(cancelZoomBackdrop, "click", function(e) {
+    utils.addEventListener(cancelZoomBackdrop, "click", function (e) {
       renderer.zoomOut();
     });
     utils.appendElement(innerContainer, renderer.cancelZoomElement);
@@ -52,7 +56,7 @@ var DOMRenderer = function(game, boardElement) {
     if (game.boardSize < 7) {
       if (game.boardSize > 1 && game.boardSize % 2 == 1) {
         var hoshi = utils.createElement("div", { class: "hoshi" });
-        hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (game.boardSize - 1)/2 + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+        hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - 1) / 2 + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
         hoshi.style.left = hoshi.style.top;
 
         utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
@@ -60,44 +64,44 @@ var DOMRenderer = function(game, boardElement) {
         // no hoshi
       }
     } else {
-      var hoshiOffset = game.boardSize > 11 ? 3 : 2;
+        var hoshiOffset = game.boardSize > 11 ? 3 : 2;
 
-      for (var hoshiY = 0; hoshiY < 3; hoshiY++) {
-        for (var hoshiX = 0; hoshiX < 3; hoshiX++) {
-          if ((game.boardSize == 7 || game.boardSize % 2 == 0) && (hoshiY == 1 || hoshiX == 1)) {
-            continue;
+        for (var hoshiY = 0; hoshiY < 3; hoshiY++) {
+          for (var hoshiX = 0; hoshiX < 3; hoshiX++) {
+            if ((game.boardSize == 7 || game.boardSize % 2 == 0) && (hoshiY == 1 || hoshiX == 1)) {
+              continue;
+            }
+
+            var hoshi = utils.createElement("div", { class: "hoshi" });
+
+            if (hoshiY == 0) {
+              hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            }
+
+            if (hoshiY == 1) {
+              hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + ((game.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            }
+
+            if (hoshiY == 2) {
+              hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            }
+
+            if (hoshiX == 0) {
+              hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            }
+
+            if (hoshiX == 1) {
+              hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + ((game.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            }
+
+            if (hoshiX == 2) {
+              hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            }
+
+            utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
           }
-
-          var hoshi = utils.createElement("div", { class: "hoshi" });
-
-          if (hoshiY == 0) {
-            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
-          }
-
-          if (hoshiY == 1) {
-            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + ((game.boardSize + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
-          }
-
-          if (hoshiY == 2) {
-            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
-          }
-
-          if (hoshiX == 0) {
-            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
-          }
-
-          if (hoshiX == 1) {
-            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + ((game.boardSize + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
-          }
-
-          if (hoshiX == 2) {
-            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
-          }
-
-          utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
         }
       }
-    }
 
     for (var y = 0; y < game.boardSize; y++) {
       var horizontalLine = utils.createElement("div", { class: "line horizontal" });
@@ -105,7 +109,7 @@ var DOMRenderer = function(game, boardElement) {
       utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
 
       var verticalLine = utils.createElement("div", { class: "line vertical" });
-      verticalLine.setAttribute("data-top-gutter", game.xCoordinateFor(y))
+      verticalLine.setAttribute("data-top-gutter", game.xCoordinateFor(y));
       utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
 
       for (var x = 0; x < game.boardSize; x++) {
@@ -117,8 +121,8 @@ var DOMRenderer = function(game, boardElement) {
         intersectionElement.setAttribute("data-position-y", y);
         intersectionElement.game = game;
 
-        intersectionElement.style.left = (x * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
-        intersectionElement.style.top = (y * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
+        intersectionElement.style.left = x * (renderer.INTERSECTION_GAP_SIZE + 1) + "px";
+        intersectionElement.style.top = y * (renderer.INTERSECTION_GAP_SIZE + 1) + "px";
 
         utils.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
 
@@ -128,20 +132,20 @@ var DOMRenderer = function(game, boardElement) {
     }
 
     // prevent the text-selection cursor
-    utils.addEventListener(boardElement.querySelector(".lines.horizontal"), "mousedown", function(e) {
+    utils.addEventListener(boardElement.querySelector(".lines.horizontal"), "mousedown", function (e) {
       e.preventDefault();
     });
-    utils.addEventListener(boardElement.querySelector(".lines.vertical"), "mousedown", function(e) {
+    utils.addEventListener(boardElement.querySelector(".lines.vertical"), "mousedown", function (e) {
       e.preventDefault();
     });
 
-    boardElement.querySelector(".lines.horizontal").style.width = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + (game.boardSize)*1) + "px";
-    boardElement.querySelector(".lines.horizontal").style.height = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + (game.boardSize)*1) + "px";
-    boardElement.querySelector(".lines.vertical").style.width = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + (game.boardSize)*1) + "px";
-    boardElement.querySelector(".lines.vertical").style.height = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + (game.boardSize)*1) + "px";
+    boardElement.querySelector(".lines.horizontal").style.width = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + "px";
+    boardElement.querySelector(".lines.horizontal").style.height = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + "px";
+    boardElement.querySelector(".lines.vertical").style.width = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + "px";
+    boardElement.querySelector(".lines.vertical").style.height = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + "px";
 
-    var boardWidth = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + (game.boardSize)*1 + (renderer.MARGIN)*2);
-    var boardHeight = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + (game.boardSize)*1 + (renderer.MARGIN)*2);
+    var boardWidth = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + renderer.MARGIN * 2;
+    var boardHeight = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + renderer.MARGIN * 2;
 
     innerContainer.style.width = boardWidth + "px";
     innerContainer.style.height = boardHeight + "px";
@@ -149,30 +153,30 @@ var DOMRenderer = function(game, boardElement) {
     zoomContainer.style.width = boardWidth + "px";
     zoomContainer.style.height = boardHeight + "px";
 
-    utils.flatten(renderer.grid).forEach(function(intersectionEl) {
-      utils.addEventListener(intersectionEl, "touchstart", function() {
+    utils.flatten(renderer.grid).forEach(function (intersectionEl) {
+      utils.addEventListener(intersectionEl, "touchstart", function () {
         renderer.touchEventFired = true;
       });
 
-      utils.addEventListener(intersectionEl, "mouseenter", function() {
+      utils.addEventListener(intersectionEl, "mouseenter", function () {
         var intersectionElement = this;
 
         utils.addClass(intersectionElement, "hovered");
       });
 
-      utils.addEventListener(intersectionEl, "mouseleave", function() {
+      utils.addEventListener(intersectionEl, "mouseleave", function () {
         var intersectionElement = this;
 
         utils.removeClass(intersectionElement, "hovered");
         game.renderer.resetTouchedPoint();
       });
 
-      utils.addEventListener(intersectionEl, "click", function() {
+      utils.addEventListener(intersectionEl, "click", function () {
         var intersectionElement = this;
         var playedYPosition = Number(intersectionElement.getAttribute("data-position-y"));
         var playedXPosition = Number(intersectionElement.getAttribute("data-position-x"));
 
-        var playOrToggleDead = function() {
+        var playOrToggleDead = function playOrToggleDead() {
           if (game.isOver()) {
             game.toggleDeadAt(playedYPosition, playedXPosition);
           } else {
@@ -184,7 +188,7 @@ var DOMRenderer = function(game, boardElement) {
         // or it is and the user is zoomed in,
         // or it's game over and we're marking stones dead,
         // then don't use the zoom/double-select system.
-        if (!renderer.touchEventFired || (document.body.clientWidth / window.innerWidth > 1) || game.isOver()) {
+        if (!renderer.touchEventFired || document.body.clientWidth / window.innerWidth > 1 || game.isOver()) {
           playOrToggleDead();
           return;
         }
@@ -215,7 +219,7 @@ var DOMRenderer = function(game, boardElement) {
       boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
     }
 
-    utils.addEventListener(boardElement, "touchstart", function(event) {
+    utils.addEventListener(boardElement, "touchstart", function (event) {
       if (event.touches.length > 1) {
         return;
       }
@@ -232,7 +236,7 @@ var DOMRenderer = function(game, boardElement) {
       zoomContainer.style.transition = "none";
     });
 
-    utils.addEventListener(innerContainer, "touchend", function(event) {
+    utils.addEventListener(innerContainer, "touchend", function (event) {
       if (event.touches.length > 1) {
         return;
       }
@@ -251,7 +255,7 @@ var DOMRenderer = function(game, boardElement) {
       renderer.moveInProgress = false;
     });
 
-    utils.addEventListener(innerContainer, "touchmove", function(event) {
+    utils.addEventListener(innerContainer, "touchmove", function (event) {
       if (event.touches.length > 1) {
         return;
       }
@@ -271,33 +275,33 @@ var DOMRenderer = function(game, boardElement) {
       var deltaX = xCursor - renderer.dragStartX;
       var deltaY = yCursor - renderer.dragStartY;
 
-      var translateY = renderer.translateY + deltaY/2.5;
-      var translateX = renderer.translateX + deltaX/2.5;
+      var translateY = renderer.translateY + deltaY / 2.5;
+      var translateX = renderer.translateX + deltaX / 2.5;
 
-      if (translateY > 0.5*innerContainer.clientHeight - renderer.MARGIN) {
-        translateY = 0.5*innerContainer.clientHeight - renderer.MARGIN;
+      if (translateY > 0.5 * innerContainer.clientHeight - renderer.MARGIN) {
+        translateY = 0.5 * innerContainer.clientHeight - renderer.MARGIN;
       }
 
-      if (translateX > 0.5*innerContainer.clientWidth - renderer.MARGIN) {
-        translateX = 0.5*innerContainer.clientWidth - renderer.MARGIN;
+      if (translateX > 0.5 * innerContainer.clientWidth - renderer.MARGIN) {
+        translateX = 0.5 * innerContainer.clientWidth - renderer.MARGIN;
       }
 
-      if (translateY < -0.5*innerContainer.clientHeight + renderer.MARGIN) {
-        translateY = -0.5*innerContainer.clientHeight + renderer.MARGIN;
+      if (translateY < -0.5 * innerContainer.clientHeight + renderer.MARGIN) {
+        translateY = -0.5 * innerContainer.clientHeight + renderer.MARGIN;
       }
 
-      if (translateX < -0.5*innerContainer.clientWidth + renderer.MARGIN) {
-        translateX = -0.5*innerContainer.clientWidth + renderer.MARGIN;
+      if (translateX < -0.5 * innerContainer.clientWidth + renderer.MARGIN) {
+        translateX = -0.5 * innerContainer.clientWidth + renderer.MARGIN;
       }
 
-      zoomContainer.style.transform = "translate3d(" + 2.5*translateX + "px, " + 2.5*translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+      zoomContainer.style.transform = "translate3d(" + 2.5 * translateX + "px, " + 2.5 * translateY + "px, 0) scale3d(2.5, 2.5, 1)";
 
       renderer.lastTranslateX = translateX;
       renderer.lastTranslateY = translateY;
     });
-  }
+  };
 
-  this.showPossibleMoveAt = function(intersectionElement) {
+  this.showPossibleMoveAt = function (intersectionElement) {
     var renderer = this;
     var boardElement = this.boardElement;
     var innerContainer = this.innerContainer;
@@ -312,7 +316,7 @@ var DOMRenderer = function(game, boardElement) {
       var translateY = 0.5 * zoomContainer.clientHeight - top - renderer.MARGIN;
       var translateX = 0.5 * zoomContainer.clientWidth - left - renderer.MARGIN;
 
-      zoomContainer.style.transform = "translate3d(" + 2.5*translateX + "px, " + 2.5*translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+      zoomContainer.style.transform = "translate3d(" + 2.5 * translateX + "px, " + 2.5 * translateY + "px, 0) scale3d(2.5, 2.5, 1)";
       renderer.translateY = translateY;
       renderer.translateX = translateX;
 
@@ -321,13 +325,13 @@ var DOMRenderer = function(game, boardElement) {
     }
   };
 
-  this.resetTouchedPoint = function() {
+  this.resetTouchedPoint = function () {
     var renderer = this;
 
     renderer.touchedPoint = null;
-  }
+  };
 
-  this.zoomOut = function() {
+  this.zoomOut = function () {
     var renderer = this;
     var zoomContainer = renderer.zoomContainer;
 
@@ -345,7 +349,7 @@ var DOMRenderer = function(game, boardElement) {
     utils.removeClass(renderer.boardElement, "tenuki-zoomed");
   };
 
-  this.render = function() {
+  this.render = function () {
     this.resetTouchedPoint();
 
     this.renderStonesPlayed();
@@ -355,20 +359,20 @@ var DOMRenderer = function(game, boardElement) {
     if (this.game.isOver()) {
       this.renderTerritory();
     }
-  }
+  };
 
-  this.renderStonesPlayed = function() {
+  this.renderStonesPlayed = function () {
     var renderer = this;
     var game = renderer.game;
     var currentMove = game.currentMove();
     var points = currentMove ? currentMove.points : game.intersections();
 
-    points.forEach(function(intersection) {
+    points.forEach(function (intersection) {
       renderer.renderIntersection(intersection);
     });
   };
 
-  this.updateMarkerPoints = function() {
+  this.updateMarkerPoints = function () {
     var renderer = this;
     var game = this.game;
     var currentMove = game.currentMove();
@@ -377,7 +381,7 @@ var DOMRenderer = function(game, boardElement) {
       return;
     }
 
-    game.intersections().forEach(function(intersection) {
+    game.intersections().forEach(function (intersection) {
       if (game.wouldBeSuicide(intersection.y, intersection.x)) {
         utils.addClass(renderer.grid[intersection.y][intersection.x], "suicide");
       }
@@ -392,9 +396,9 @@ var DOMRenderer = function(game, boardElement) {
     }
   };
 
-  this.updateCurrentPlayer = function() {
+  this.updateCurrentPlayer = function () {
     var game = this.game;
-    var previousPlayer = (game.currentPlayer == "black" ? "white" : "black");
+    var previousPlayer = game.currentPlayer == "black" ? "white" : "black";
     utils.removeClass(boardElement, previousPlayer + "-to-play");
     utils.addClass(boardElement, game.currentPlayer + "-to-play");
 
@@ -404,7 +408,7 @@ var DOMRenderer = function(game, boardElement) {
     }
   };
 
-  this.renderIntersection = function(intersection) {
+  this.renderIntersection = function (intersection) {
     var renderer = this;
     var game = this.game;
 
@@ -425,11 +429,11 @@ var DOMRenderer = function(game, boardElement) {
     }
   };
 
-  this.renderTerritory = function() {
+  this.renderTerritory = function () {
     var renderer = this;
     var game = this.game;
 
-    game.intersections().forEach(function(intersection) {
+    game.intersections().forEach(function (intersection) {
       utils.removeClass(renderer.grid[intersection.y][intersection.x], "territory-black");
       utils.removeClass(renderer.grid[intersection.y][intersection.x], "territory-white");
 
@@ -440,11 +444,11 @@ var DOMRenderer = function(game, boardElement) {
       }
     });
 
-    game.territoryPoints.black.forEach(function(territoryPoint) {
+    game.territoryPoints.black.forEach(function (territoryPoint) {
       utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-black");
     });
 
-    game.territoryPoints.white.forEach(function(territoryPoint) {
+    game.territoryPoints.white.forEach(function (territoryPoint) {
       utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
   };
@@ -453,13 +457,15 @@ var DOMRenderer = function(game, boardElement) {
 module.exports = DOMRenderer;
 
 },{"./utils":7}],3:[function(require,module,exports){
+"use strict";
+
 var utils = require("./utils");
 var DOMRenderer = require("./dom-renderer");
 var NullRenderer = require("./null-renderer");
 var Intersection = require("./intersection");
 var Scorer = require("./scorer");
 
-var Game = function(boardElement, boardSize) {
+var Game = function Game(boardElement, boardSize) {
   this.boardSize = boardSize || 19;
   this.intersectionGrid = [];
   this.currentPlayer = "black";
@@ -468,14 +474,14 @@ var Game = function(boardElement, boardSize) {
     black: 0,
     white: 0
   };
-  this.renderer = (boardElement ? new DOMRenderer(this, boardElement) : new NullRenderer());
+  this.renderer = boardElement ? new DOMRenderer(this, boardElement) : new NullRenderer();
   this.callbacks = {
-    postRender: function() {}
+    postRender: function postRender() {}
   };
   this.deadPoints = [];
   this.territoryPoints = { black: [], white: [] };
 
-  this.setup = function() {
+  this.setup = function () {
     var game = this;
 
     if (game.boardSize > 19) {
@@ -495,25 +501,25 @@ var Game = function(boardElement, boardSize) {
     game.render();
   };
 
-  this.intersectionAt = function(y, x) {
+  this.intersectionAt = function (y, x) {
     return this.intersectionGrid[y][x];
   };
 
-  this.intersections = function() {
+  this.intersections = function () {
     return utils.flatten(this.intersectionGrid);
   };
 
-  this.yCoordinateFor = function(y) {
+  this.yCoordinateFor = function (y) {
     return this.boardSize - y;
   };
 
-  this.xCoordinateFor = function(x) {
-    letters = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"];
+  this.xCoordinateFor = function (x) {
+    var letters = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"];
 
     return letters[x];
   };
 
-  this.stateFor = function(y, x, captures) {
+  this.stateFor = function (y, x, captures) {
     var game = this;
 
     var moveInfo = {
@@ -522,11 +528,13 @@ var Game = function(boardElement, boardSize) {
       coordinates: this.xCoordinateFor(x) + this.yCoordinateFor(y),
       color: game.currentPlayer,
       pass: false,
-      points: game.intersections().map(function(i) { return i.duplicate(); }),
+      points: game.intersections().map(function (i) {
+        return i.duplicate();
+      }),
       blackStonesCaptured: game.captures.black,
       whiteStonesCaptured: game.captures.white,
-      capturedPositions: captures.map(function(capturedStone) {
-        return { y: capturedStone.y, x: capturedStone.x, color: (game.isBlackPlaying() ? "white" : "black") }
+      capturedPositions: captures.map(function (capturedStone) {
+        return { y: capturedStone.y, x: capturedStone.x, color: game.isBlackPlaying() ? "white" : "black" };
       })
     };
 
@@ -539,17 +547,17 @@ var Game = function(boardElement, boardSize) {
     return moveInfo;
   };
 
-  this.whiteAt = function(y, x) {
+  this.whiteAt = function (y, x) {
     this.intersectionAt(y, x).setWhite();
   };
-  this.blackAt = function(y, x) {
+  this.blackAt = function (y, x) {
     this.intersectionAt(y, x).setBlack();
   };
-  this.removeAt = function(y, x) {
+  this.removeAt = function (y, x) {
     this.intersectionAt(y, x).setEmpty();
   };
 
-  this.stateForPass = function() {
+  this.stateForPass = function () {
     var game = this;
 
     return {
@@ -558,14 +566,16 @@ var Game = function(boardElement, boardSize) {
       coordinates: null,
       color: game.currentPlayer,
       pass: true,
-      points: game.intersections().map(function(i) { return i.duplicate(); }),
+      points: game.intersections().map(function (i) {
+        return i.duplicate();
+      }),
       blackStonesCaptured: game.captures.black,
       whiteStonesCaptured: game.captures.white,
       capturedPositions: []
     };
   };
 
-  this.playAt = function(y, x) {
+  this.playAt = function (y, x) {
     var game = this;
 
     if (game.isIllegalAt(y, x)) {
@@ -582,38 +592,40 @@ var Game = function(boardElement, boardSize) {
     return true;
   };
 
-  this.currentMove = function() {
+  this.currentMove = function () {
     return this.moves[this.moves.length - 1];
   };
 
-  this.isWhitePlaying = function() {
+  this.isWhitePlaying = function () {
     return this.currentPlayer == "white";
   };
 
-  this.isBlackPlaying = function() {
+  this.isBlackPlaying = function () {
     return this.currentPlayer == "black";
   };
 
-  this.inAtari = function(y, x) {
+  this.inAtari = function (y, x) {
     return this.libertiesAt(y, x) == 1;
-  }
+  };
 
-  this.wouldBeSuicide = function(y, x) {
+  this.wouldBeSuicide = function (y, x) {
     var game = this;
     var intersection = game.intersectionAt(y, x);
-    var surroundedEmptyPoint = intersection.isEmpty() && game.neighborsFor(intersection.y, intersection.x).filter(function(neighbor) { return neighbor.isEmpty() }).length == 0;
+    var surroundedEmptyPoint = intersection.isEmpty() && game.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
+      return neighbor.isEmpty();
+    }).length == 0;
 
     if (!surroundedEmptyPoint) {
       return false;
     }
 
-    suicide = true;
+    var suicide = true;
 
-    var friendlyNeighbors = game.neighborsFor(intersection.y, intersection.x).filter(function(neighbor) {
+    var friendlyNeighbors = game.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
       return neighbor.isOccupiedWith(game.currentPlayer);
     });
 
-    var someFriendlyNotInAtari = game.neighborsFor(intersection.y, intersection.x).some(function(neighbor) {
+    var someFriendlyNotInAtari = game.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
       var inAtari = game.inAtari(neighbor.y, neighbor.x);
       var friendly = neighbor.isOccupiedWith(game.currentPlayer);
 
@@ -624,7 +636,7 @@ var Game = function(boardElement, boardSize) {
       suicide = false;
     }
 
-    var someEnemyInAtari = game.neighborsFor(intersection.y, intersection.x).some(function(neighbor) {
+    var someEnemyInAtari = game.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
       var inAtari = game.inAtari(neighbor.y, neighbor.x);
       var enemy = !neighbor.isOccupiedWith(game.currentPlayer);
 
@@ -638,14 +650,14 @@ var Game = function(boardElement, boardSize) {
     return suicide;
   };
 
-  this.pass = function() {
+  this.pass = function () {
     if (!this.isOver()) {
-      this.moves.push(this.stateForPass())
+      this.moves.push(this.stateForPass());
       this.render();
     }
   };
 
-  this.isOver = function() {
+  this.isOver = function () {
     if (this.moves.length < 2) {
       return false;
     }
@@ -656,75 +668,79 @@ var Game = function(boardElement, boardSize) {
     return currentMove.pass && previousMove.pass;
   };
 
-  this.toggleDeadAt = function(y, x) {
+  this.toggleDeadAt = function (y, x) {
     var game = this;
 
     var alreadyDead = game.isDeadAt(y, x);
 
-    game.groupAt(y, x).forEach(function(intersection) {
+    game.groupAt(y, x).forEach(function (intersection) {
       if (alreadyDead) {
-        game.deadPoints = game.deadPoints.filter(function(dead) { return !(dead.y == intersection.y && dead.x == intersection.x) });
+        game.deadPoints = game.deadPoints.filter(function (dead) {
+          return !(dead.y == intersection.y && dead.x == intersection.x);
+        });
       } else {
         game.deadPoints.push({ y: intersection.y, x: intersection.x });
       }
     });
 
     game.render();
-  }
+  };
 
-  this.isDeadAt = function(y, x) {
+  this.isDeadAt = function (y, x) {
     var game = this;
 
-    return game.deadPoints.some(function(dead) {
+    return game.deadPoints.some(function (dead) {
       return dead.y == y && dead.x == x;
     });
   };
 
-  this.territoryScore = function() {
+  this.territoryScore = function () {
     return Scorer.territoryResultFor(this);
   };
 
-  this.areaScore = function() {
+  this.areaScore = function () {
     return Scorer.areaResultFor(this);
   };
 
-  this.isKoFrom = function(y, x, captures) {
+  this.isKoFrom = function (y, x, captures) {
     var game = this;
     var point = game.intersectionAt(y, x);
 
     return captures.length == 1 && this.groupAt(point.y, point.x).length == 1 && game.inAtari(point.y, point.x);
   };
 
-  this.libertiesAt = function(y, x) {
+  this.libertiesAt = function (y, x) {
     var game = this;
     var point = game.intersectionAt(y, x);
 
-    var emptyPoints = utils.flatMap(this.groupAt(point.y, point.x), function(groupPoint) {
-      return game.neighborsFor(groupPoint.y, groupPoint.x).filter(function(intersection) {
+    var emptyPoints = utils.flatMap(this.groupAt(point.y, point.x), function (groupPoint) {
+      return game.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
         return intersection.isEmpty();
-      })
+      });
     });
 
     // this is not great, but we need a representation that will be unique-able,
     // and Y-X does the job.
-    return utils.unique(emptyPoints.map(function(emptyPoint) { return emptyPoint.y + "-" + emptyPoint.x; })).length;
+    return utils.unique(emptyPoints.map(function (emptyPoint) {
+      return emptyPoint.y + "-" + emptyPoint.x;
+    })).length;
   };
 
-  this.groupAt = function(y, x, accumulated) {
+  this.groupAt = function (y, x, accumulated) {
     accumulated || (accumulated = []);
 
     var game = this;
     var point = game.intersectionAt(y, x);
 
     if (accumulated.indexOf(point) > -1) {
-      return accumulated
+      return accumulated;
     }
 
     accumulated.push(point);
 
-    game.neighborsFor(point.y, point.x).filter(function(neighbor) {
+    game.neighborsFor(point.y, point.x).filter(function (neighbor) {
       return !neighbor.isEmpty();
-    }).forEach(function(neighbor) {
+    }).forEach(function (neighbor) {
       if (neighbor.sameColorAs(point)) {
         game.groupAt(neighbor.y, neighbor.x, accumulated);
       }
@@ -733,14 +749,14 @@ var Game = function(boardElement, boardSize) {
     return accumulated;
   };
 
-  this.neighborsFor = function(y, x) {
+  this.neighborsFor = function (y, x) {
     var neighbors = [];
 
     if (x > 0) {
       neighbors.push(this.intersectionAt(y, x - 1));
     }
 
-    if (x < (this.boardSize - 1)) {
+    if (x < this.boardSize - 1) {
       neighbors.push(this.intersectionAt(y, x + 1));
     }
 
@@ -748,37 +764,37 @@ var Game = function(boardElement, boardSize) {
       neighbors.push(this.intersectionAt(y - 1, x));
     }
 
-    if (y < (this.boardSize - 1)) {
+    if (y < this.boardSize - 1) {
       neighbors.push(this.intersectionAt(y + 1, x));
     }
 
     return neighbors;
   };
 
-  this.hasCapturesFor = function(y, x) {
+  this.hasCapturesFor = function (y, x) {
     var game = this;
     var point = game.intersectionAt(y, x);
 
-    var capturedNeighbors = game.neighborsFor(point.y, point.x).filter(function(neighbor) {
+    var capturedNeighbors = game.neighborsFor(point.y, point.x).filter(function (neighbor) {
       return !neighbor.isEmpty && !neighbor.sameColorAs(point) && game.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
-    return capturedNeighbors.length > 0
+    return capturedNeighbors.length > 0;
   };
 
-  this.clearCapturesFor = function(y, x) {
+  this.clearCapturesFor = function (y, x) {
     var game = this;
     var point = game.intersectionAt(y, x);
 
-    var capturedNeighbors = game.neighborsFor(point.y, point.x).filter(function(neighbor) {
+    var capturedNeighbors = game.neighborsFor(point.y, point.x).filter(function (neighbor) {
       return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && game.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
-    var capturedStones = utils.flatMap(capturedNeighbors, function(neighbor) {
+    var capturedStones = utils.flatMap(capturedNeighbors, function (neighbor) {
       return game.groupAt(neighbor.y, neighbor.x);
     });
 
-    capturedStones.forEach(function(capturedStone) {
+    capturedStones.forEach(function (capturedStone) {
       if (capturedStone.isBlack()) {
         game.captures["black"] += 1;
       } else {
@@ -791,7 +807,7 @@ var Game = function(boardElement, boardSize) {
     return capturedStones;
   };
 
-  this.isIllegalAt = function(y, x) {
+  this.isIllegalAt = function (y, x) {
     if (this.moves.length == 0) {
       return false;
     }
@@ -805,10 +821,10 @@ var Game = function(boardElement, boardSize) {
     var koPoint = this.currentMove().koPoint;
     var isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
 
-    return !isEmpty || isKoViolation || (isSuicide && !isCapturing);
+    return !isEmpty || isKoViolation || isSuicide && !isCapturing;
   };
 
-  this.render = function() {
+  this.render = function () {
     var game = this;
     var currentMove = game.currentMove();
 
@@ -818,7 +834,7 @@ var Game = function(boardElement, boardSize) {
 
     var points = currentMove ? currentMove.points : game.intersections();
 
-    points.forEach(function(intersection) {
+    points.forEach(function (intersection) {
       if (!currentMove) {
         intersection.setEmpty();
       }
@@ -839,7 +855,7 @@ var Game = function(boardElement, boardSize) {
       game.captures = {
         black: currentMove.blackStonesCaptured,
         white: currentMove.whiteStonesCaptured
-      }
+      };
     }
 
     game.checkTerritory();
@@ -847,50 +863,52 @@ var Game = function(boardElement, boardSize) {
     game.callbacks.postRender(game);
   };
 
-  this.removeScoringState = function() {
+  this.removeScoringState = function () {
     this.deadPoints = [];
     this.territoryPoints = { black: [], white: [] };
   };
 
-  this.checkTerritory = function() {
+  this.checkTerritory = function () {
     var game = this;
 
     game.territoryPoints = { black: [], white: [] };
 
-    var emptyOrDeadPoints = game.intersections().filter(function(intersection) {
+    var emptyOrDeadPoints = game.intersections().filter(function (intersection) {
       return intersection.isEmpty() || game.isDeadAt(intersection.y, intersection.x);
     });
 
     var checkedPoints = [];
 
-    emptyOrDeadPoints.forEach(function(emptyPoint) {
+    emptyOrDeadPoints.forEach(function (emptyPoint) {
       if (checkedPoints.indexOf(emptyPoint) > -1) {
         // skip it, we already checked
       } else {
-        checkedPoints = checkedPoints.concat(game.checkTerritoryStartingAt(emptyPoint.y, emptyPoint.x));
-      }
+          checkedPoints = checkedPoints.concat(game.checkTerritoryStartingAt(emptyPoint.y, emptyPoint.x));
+        }
     });
   };
 
-  this.checkTerritoryStartingAt = function(y, x) {
+  this.checkTerritoryStartingAt = function (y, x) {
     var game = this;
 
     var pointsWithBoundary = game.surroundedPointsWithBoundaryAt(y, x);
 
-    var occupiedPoints = pointsWithBoundary.filter(function(checkedPoint) {
+    var occupiedPoints = pointsWithBoundary.filter(function (checkedPoint) {
       return !game.isDeadAt(checkedPoint.y, checkedPoint.x) && !checkedPoint.isEmpty();
     });
 
-    var nonOccupiedPoints = pointsWithBoundary.filter(function(checkedPoint) {
+    var nonOccupiedPoints = pointsWithBoundary.filter(function (checkedPoint) {
       return game.isDeadAt(checkedPoint.y, checkedPoint.x) || checkedPoint.isEmpty();
     });
 
-    var surroundingColors = utils.unique(occupiedPoints.map(function(occupiedPoint) { return occupiedPoint.value }));
+    var surroundingColors = utils.unique(occupiedPoints.map(function (occupiedPoint) {
+      return occupiedPoint.value;
+    }));
 
     if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
       var territoryColor = surroundingColors[0];
 
-      nonOccupiedPoints.forEach(function(nonOccupiedPoint) {
+      nonOccupiedPoints.forEach(function (nonOccupiedPoint) {
         game.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor);
       });
     }
@@ -898,7 +916,7 @@ var Game = function(boardElement, boardSize) {
     return nonOccupiedPoints;
   };
 
-  this.surroundedPointsWithBoundaryAt = function(y, x, accumulated) {
+  this.surroundedPointsWithBoundaryAt = function (y, x, accumulated) {
     accumulated || (accumulated = []);
 
     var game = this;
@@ -910,7 +928,7 @@ var Game = function(boardElement, boardSize) {
 
     accumulated.push(point);
 
-    game.neighborsFor(point.y, point.x).forEach(function(neighbor) {
+    game.neighborsFor(point.y, point.x).forEach(function (neighbor) {
       if (neighbor.isEmpty() || game.isDeadAt(neighbor.y, neighbor.x)) {
         game.surroundedPointsWithBoundaryAt(neighbor.y, neighbor.x, accumulated);
       } else {
@@ -921,16 +939,18 @@ var Game = function(boardElement, boardSize) {
     return accumulated;
   };
 
-  this.markTerritory = function(y, x, color) {
+  this.markTerritory = function (y, x, color) {
     var game = this;
-    var pointIsMarkedTerritory = game.territoryPoints[color].some(function(point) { return point.y == y && point.x == x; });
+    var pointIsMarkedTerritory = game.territoryPoints[color].some(function (point) {
+      return point.y == y && point.x == x;
+    });
 
     if (!pointIsMarkedTerritory) {
       game.territoryPoints[color].push({ y: y, x: x });
     }
   };
 
-  this.undo = function() {
+  this.undo = function () {
     var game = this;
 
     game.moves.pop();
@@ -941,23 +961,25 @@ var Game = function(boardElement, boardSize) {
 module.exports = Game;
 
 },{"./dom-renderer":2,"./intersection":4,"./null-renderer":5,"./scorer":6,"./utils":7}],4:[function(require,module,exports){
-var Intersection = function(y, x) {
+"use strict";
+
+var Intersection = function Intersection(y, x) {
   this.y = y;
   this.x = x;
   this.value = "empty";
 
-  this.duplicate = function() {
+  this.duplicate = function () {
     var duplicateIntersection = new Intersection(this.y, this.x);
     duplicateIntersection.value = this.value;
 
     return duplicateIntersection;
-  }
+  };
 
-  this.setWhite = function() {
+  this.setWhite = function () {
     this.value = "white";
   };
 
-  this.isOccupiedWith = function(color) {
+  this.isOccupiedWith = function (color) {
     if (this.isEmpty()) {
       return false;
     }
@@ -965,27 +987,27 @@ var Intersection = function(y, x) {
     return this.value === color;
   };
 
-  this.setBlack = function() {
+  this.setBlack = function () {
     this.value = "black";
   };
 
-  this.isBlack = function() {
+  this.isBlack = function () {
     return this.value === "black";
   };
 
-  this.isWhite = function() {
+  this.isWhite = function () {
     return this.value === "white";
-  }
+  };
 
-  this.setEmpty = function() {
+  this.setEmpty = function () {
     this.value = "empty";
   };
 
-  this.isEmpty = function() {
+  this.isEmpty = function () {
     return this.value === "empty";
   };
 
-  this.sameColorAs = function(otherIntersection) {
+  this.sameColorAs = function (otherIntersection) {
     return this.value === otherIntersection.value;
   };
 };
@@ -993,18 +1015,26 @@ var Intersection = function(y, x) {
 module.exports = Intersection;
 
 },{}],5:[function(require,module,exports){
-var NullRenderer = function() {
-  this.setup = function() {};
-  this.render = function() {};
-}
+"use strict";
+
+var NullRenderer = function NullRenderer() {
+  this.setup = function () {};
+  this.render = function () {};
+};
 
 module.exports = NullRenderer;
 
 },{}],6:[function(require,module,exports){
+"use strict";
+
 var Scorer = {
-  territoryResultFor: function(game) {
-    var blackDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
-    var whiteDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
+  territoryResultFor: function territoryResultFor(game) {
+    var blackDeadAsCaptures = game.deadPoints.filter(function (deadPoint) {
+      return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack();
+    });
+    var whiteDeadAsCaptures = game.deadPoints.filter(function (deadPoint) {
+      return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite();
+    });
 
     return {
       black: game.territoryPoints.black.length + game.captures.white + whiteDeadAsCaptures.length,
@@ -1012,9 +1042,13 @@ var Scorer = {
     };
   },
 
-  areaResultFor: function(game) {
-    var blackStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isBlack() && !game.isDeadAt(intersection.y, intersection.x); });
-    var whiteStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isWhite() && !game.isDeadAt(intersection.y, intersection.x); });
+  areaResultFor: function areaResultFor(game) {
+    var blackStonesOnTheBoard = game.intersections().filter(function (intersection) {
+      return intersection.isBlack() && !game.isDeadAt(intersection.y, intersection.x);
+    });
+    var whiteStonesOnTheBoard = game.intersections().filter(function (intersection) {
+      return intersection.isWhite() && !game.isDeadAt(intersection.y, intersection.x);
+    });
 
     return {
       black: game.territoryPoints.black.length + blackStonesOnTheBoard.length,
@@ -1026,17 +1060,21 @@ var Scorer = {
 module.exports = Scorer;
 
 },{}],7:[function(require,module,exports){
+"use strict";
+
 var utils = {
-  flatten: function(ary) {
-    return ary.reduce(function(a, b) { return a.concat(b); })
+  flatten: function flatten(ary) {
+    return ary.reduce(function (a, b) {
+      return a.concat(b);
+    });
   },
 
-  flatMap: function(ary, lambda) {
+  flatMap: function flatMap(ary, lambda) {
     return Array.prototype.concat.apply([], ary.map(lambda));
   },
 
-  createElement: function(elementName, options) {
-    element = document.createElement(elementName);
+  createElement: function createElement(elementName, options) {
+    var element = document.createElement(elementName);
 
     if (typeof options != "undefined") {
       if (options.class) {
@@ -1047,27 +1085,27 @@ var utils = {
     return element;
   },
 
-  appendElement: function(parent, el) {
+  appendElement: function appendElement(parent, el) {
     parent.insertBefore(el, null);
   },
 
-  addEventListener: function(el, eventName, fn) {
+  addEventListener: function addEventListener(el, eventName, fn) {
     el.addEventListener(eventName, fn, false);
   },
 
-  removeClass: function(el, className) {
+  removeClass: function removeClass(el, className) {
     el.classList.remove(className);
   },
 
-  addClass: function(el, className) {
+  addClass: function addClass(el, className) {
     el.classList.add(className);
   },
 
-  hasClass: function(el, className) {
+  hasClass: function hasClass(el, className) {
     return el.classList.contains(className);
   },
 
-  toggleClass: function(el, className) {
+  toggleClass: function toggleClass(el, className) {
     if (this.hasClass(el, className)) {
       this.removeClass(el, className);
     } else {
@@ -1075,7 +1113,7 @@ var utils = {
     }
   },
 
-  unique: function(ary) {
+  unique: function unique(ary) {
     return Array.from(new Set(ary));
   }
 };
