@@ -33,5 +33,8 @@
     "clean-css": "*",
     "mocha": "^2.4.5",
     "uglify-js": "*"
+  },
+  "engines": {
+    "node": ">=4.0.0"
   }
 }
