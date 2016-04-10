@@ -719,30 +719,40 @@ var Game = function Game(boardElement, boardSize) {
     })).length;
   };
 
-  this.groupAt = function (y, x, accumulated) {
+  this.groupAt = function (y, x) {
     var _this5 = this;
 
-    accumulated || (accumulated = []);
+    var checkedPoints = [];
+    var pointsToCheck = [];
 
-    var point = this.intersectionAt(y, x);
+    var startingPoint = this.intersectionAt(y, x);
+    pointsToCheck.push(startingPoint);
 
-    if (accumulated.indexOf(point) > -1) {
-      return accumulated;
+    var _loop = function _loop() {
+      var point = pointsToCheck.pop();
+
+      if (checkedPoints.indexOf(point) > -1) {
+        // skip it, we already checked
+      } else {
+          checkedPoints.push(point);
+
+          _this5.neighborsFor(point.y, point.x).forEach(function (neighbor) {
+            if (checkedPoints.indexOf(neighbor) > -1) {
+              // skip this neighbor, we already checked it
+            } else {
+                if (neighbor.sameColorAs(point)) {
+                  pointsToCheck.push(neighbor);
+                }
+              }
+          });
+        }
+    };
+
+    while (pointsToCheck.length > 0) {
+      _loop();
     }
 
-    accumulated.push(point);
-
-    var nonEmptyNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty();
-    });
-
-    nonEmptyNeighbors.forEach(function (neighbor) {
-      if (neighbor.sameColorAs(point)) {
-        _this5.groupAt(neighbor.y, neighbor.x, accumulated);
-      }
-    });
-
-    return accumulated;
+    return checkedPoints;
   };
 
   this.neighborsFor = function (y, x) {
