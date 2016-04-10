@@ -486,7 +486,7 @@ var Game = function(boardElement, boardSize) {
 
     for (var y = 0; y < game.boardSize; y++) {
       for (var x = 0; x < game.boardSize; x++) {
-        var intersection = new Intersection(y, x, game);
+        var intersection = new Intersection(y, x);
         game.intersectionGrid[y] || (game.intersectionGrid[y] = []);
         game.intersectionGrid[y][x] = intersection;
       }
@@ -941,14 +941,13 @@ var Game = function(boardElement, boardSize) {
 module.exports = Game;
 
 },{"./dom-renderer":2,"./intersection":4,"./null-renderer":5,"./scorer":6,"./utils":7}],4:[function(require,module,exports){
-var Intersection = function(y, x, game) {
+var Intersection = function(y, x) {
   this.y = y;
   this.x = x;
   this.value = "empty";
-  this.game = game;
 
   this.duplicate = function() {
-    var duplicateIntersection = new Intersection(this.y, this.x, this.game);
+    var duplicateIntersection = new Intersection(this.y, this.x);
     duplicateIntersection.value = this.value;
 
     return duplicateIntersection;
