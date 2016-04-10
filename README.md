@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/aprescott/tenuki.js.svg?branch=master)](https://travis-ci.org/aprescott/tenuki.js)
+
 Tenuki is a JavaScript implementation of the game of go/baduk/weiqi with full support for HTML rendering out of the box.
 
 _The API is still subject to change at any point. Treat it as beta software!_
