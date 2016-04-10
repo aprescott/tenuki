@@ -72,33 +72,33 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
               continue;
             }
 
-            var hoshi = utils.createElement("div", { class: "hoshi" });
+            var _hoshi = utils.createElement("div", { class: "hoshi" });
 
             if (hoshiY == 0) {
-              hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
             if (hoshiY == 1) {
-              hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + ((game.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + ((game.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
             if (hoshiY == 2) {
-              hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
             if (hoshiX == 0) {
-              hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
             if (hoshiX == 1) {
-              hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + ((game.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + ((game.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
             if (hoshiX == 2) {
-              hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
-            utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
+            utils.appendElement(boardElement.querySelector(".hoshi-points"), _hoshi);
           }
         }
       }
@@ -903,11 +903,13 @@ var Game = function Game(boardElement, boardSize) {
     }));
 
     if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
-      var territoryColor = surroundingColors[0];
+      (function () {
+        var territoryColor = surroundingColors[0];
 
-      nonOccupiedPoints.forEach(function (nonOccupiedPoint) {
-        return _this10.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor);
-      });
+        nonOccupiedPoints.forEach(function (nonOccupiedPoint) {
+          return _this10.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor);
+        });
+      })();
     }
 
     return nonOccupiedPoints;
