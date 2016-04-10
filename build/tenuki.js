@@ -482,23 +482,21 @@ var Game = function Game(boardElement, boardSize) {
   this.territoryPoints = { black: [], white: [] };
 
   this.setup = function () {
-    var game = this;
-
-    if (game.boardSize > 19) {
+    if (this.boardSize > 19) {
       throw "cannot generate a board size greater than 19";
     }
 
-    game.renderer.setup();
+    this.renderer.setup();
 
-    for (var y = 0; y < game.boardSize; y++) {
-      for (var x = 0; x < game.boardSize; x++) {
+    for (var y = 0; y < this.boardSize; y++) {
+      for (var x = 0; x < this.boardSize; x++) {
         var intersection = new Intersection(y, x);
-        game.intersectionGrid[y] || (game.intersectionGrid[y] = []);
-        game.intersectionGrid[y][x] = intersection;
+        this.intersectionGrid[y] || (this.intersectionGrid[y] = []);
+        this.intersectionGrid[y][x] = intersection;
       }
     }
 
-    game.render();
+    this.render();
   };
 
   this.intersectionAt = function (y, x) {
@@ -520,25 +518,25 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.stateFor = function (y, x, captures) {
-    var game = this;
+    var _this = this;
 
     var moveInfo = {
       y: y,
       x: x,
       coordinates: this.xCoordinateFor(x) + this.yCoordinateFor(y),
-      color: game.currentPlayer,
+      color: this.currentPlayer,
       pass: false,
-      points: game.intersections().map(function (i) {
+      points: this.intersections().map(function (i) {
         return i.duplicate();
       }),
-      blackStonesCaptured: game.captures.black,
-      whiteStonesCaptured: game.captures.white,
+      blackStonesCaptured: this.captures.black,
+      whiteStonesCaptured: this.captures.white,
       capturedPositions: captures.map(function (capturedStone) {
-        return { y: capturedStone.y, x: capturedStone.x, color: game.isBlackPlaying() ? "white" : "black" };
+        return { y: capturedStone.y, x: capturedStone.x, color: _this.isBlackPlaying() ? "white" : "black" };
       })
     };
 
-    if (game.isKoFrom(y, x, captures)) {
+    if (this.isKoFrom(y, x, captures)) {
       moveInfo["koPoint"] = { y: captures[0].y, x: captures[0].x };
     } else {
       moveInfo["koPoint"] = null;
@@ -558,36 +556,32 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.stateForPass = function () {
-    var game = this;
-
     return {
       y: null,
       x: null,
       coordinates: null,
-      color: game.currentPlayer,
+      color: this.currentPlayer,
       pass: true,
-      points: game.intersections().map(function (i) {
+      points: this.intersections().map(function (i) {
         return i.duplicate();
       }),
-      blackStonesCaptured: game.captures.black,
-      whiteStonesCaptured: game.captures.white,
+      blackStonesCaptured: this.captures.black,
+      whiteStonesCaptured: this.captures.white,
       capturedPositions: []
     };
   };
 
   this.playAt = function (y, x) {
-    var game = this;
-
-    if (game.isIllegalAt(y, x)) {
+    if (this.isIllegalAt(y, x)) {
       return false;
     }
 
-    game[game.currentPlayer + "At"](y, x);
+    this[this.currentPlayer + "At"](y, x);
 
-    var captures = game.clearCapturesFor(y, x);
+    var captures = this.clearCapturesFor(y, x);
 
-    game.moves.push(game.stateFor(y, x, captures));
-    game.render();
+    this.moves.push(this.stateFor(y, x, captures));
+    this.render();
 
     return true;
   };
@@ -609,9 +603,10 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.wouldBeSuicide = function (y, x) {
-    var game = this;
-    var intersection = game.intersectionAt(y, x);
-    var surroundedEmptyPoint = intersection.isEmpty() && game.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
+    var _this2 = this;
+
+    var intersection = this.intersectionAt(y, x);
+    var surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
       return neighbor.isEmpty();
     }).length == 0;
 
@@ -621,13 +616,13 @@ var Game = function Game(boardElement, boardSize) {
 
     var suicide = true;
 
-    var friendlyNeighbors = game.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
-      return neighbor.isOccupiedWith(game.currentPlayer);
+    var friendlyNeighbors = this.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
+      return neighbor.isOccupiedWith(_this2.currentPlayer);
     });
 
-    var someFriendlyNotInAtari = game.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
-      var inAtari = game.inAtari(neighbor.y, neighbor.x);
-      var friendly = neighbor.isOccupiedWith(game.currentPlayer);
+    var someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
+      var inAtari = _this2.inAtari(neighbor.y, neighbor.x);
+      var friendly = neighbor.isOccupiedWith(_this2.currentPlayer);
 
       return friendly && !inAtari;
     });
@@ -636,9 +631,9 @@ var Game = function Game(boardElement, boardSize) {
       suicide = false;
     }
 
-    var someEnemyInAtari = game.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
-      var inAtari = game.inAtari(neighbor.y, neighbor.x);
-      var enemy = !neighbor.isOccupiedWith(game.currentPlayer);
+    var someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
+      var inAtari = _this2.inAtari(neighbor.y, neighbor.x);
+      var enemy = !neighbor.isOccupiedWith(_this2.currentPlayer);
 
       return enemy && inAtari;
     });
@@ -669,27 +664,25 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.toggleDeadAt = function (y, x) {
-    var game = this;
+    var _this3 = this;
 
-    var alreadyDead = game.isDeadAt(y, x);
+    var alreadyDead = this.isDeadAt(y, x);
 
-    game.groupAt(y, x).forEach(function (intersection) {
+    this.groupAt(y, x).forEach(function (intersection) {
       if (alreadyDead) {
-        game.deadPoints = game.deadPoints.filter(function (dead) {
+        _this3.deadPoints = _this3.deadPoints.filter(function (dead) {
           return !(dead.y == intersection.y && dead.x == intersection.x);
         });
       } else {
-        game.deadPoints.push({ y: intersection.y, x: intersection.x });
+        _this3.deadPoints.push({ y: intersection.y, x: intersection.x });
       }
     });
 
-    game.render();
+    this.render();
   };
 
   this.isDeadAt = function (y, x) {
-    var game = this;
-
-    return game.deadPoints.some(function (dead) {
+    return this.deadPoints.some(function (dead) {
       return dead.y == y && dead.x == x;
     });
   };
@@ -703,18 +696,18 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.isKoFrom = function (y, x, captures) {
-    var game = this;
-    var point = game.intersectionAt(y, x);
+    var point = this.intersectionAt(y, x);
 
-    return captures.length == 1 && this.groupAt(point.y, point.x).length == 1 && game.inAtari(point.y, point.x);
+    return captures.length == 1 && this.groupAt(point.y, point.x).length == 1 && this.inAtari(point.y, point.x);
   };
 
   this.libertiesAt = function (y, x) {
-    var game = this;
-    var point = game.intersectionAt(y, x);
+    var _this4 = this;
+
+    var point = this.intersectionAt(y, x);
 
     var emptyPoints = utils.flatMap(this.groupAt(point.y, point.x), function (groupPoint) {
-      return game.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
+      return _this4.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
         return intersection.isEmpty();
       });
     });
@@ -727,10 +720,11 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.groupAt = function (y, x, accumulated) {
+    var _this5 = this;
+
     accumulated || (accumulated = []);
 
-    var game = this;
-    var point = game.intersectionAt(y, x);
+    var point = this.intersectionAt(y, x);
 
     if (accumulated.indexOf(point) > -1) {
       return accumulated;
@@ -738,11 +732,13 @@ var Game = function Game(boardElement, boardSize) {
 
     accumulated.push(point);
 
-    game.neighborsFor(point.y, point.x).filter(function (neighbor) {
+    var nonEmptyNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
       return !neighbor.isEmpty();
-    }).forEach(function (neighbor) {
+    });
+
+    nonEmptyNeighbors.forEach(function (neighbor) {
       if (neighbor.sameColorAs(point)) {
-        game.groupAt(neighbor.y, neighbor.x, accumulated);
+        _this5.groupAt(neighbor.y, neighbor.x, accumulated);
       }
     });
 
@@ -772,36 +768,38 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.hasCapturesFor = function (y, x) {
-    var game = this;
-    var point = game.intersectionAt(y, x);
+    var _this6 = this;
 
-    var capturedNeighbors = game.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && game.libertiesAt(neighbor.y, neighbor.x) == 0;
+    var point = this.intersectionAt(y, x);
+
+    var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
+      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && _this6.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
     return capturedNeighbors.length > 0;
   };
 
   this.clearCapturesFor = function (y, x) {
-    var game = this;
-    var point = game.intersectionAt(y, x);
+    var _this7 = this;
 
-    var capturedNeighbors = game.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && game.libertiesAt(neighbor.y, neighbor.x) == 0;
+    var point = this.intersectionAt(y, x);
+
+    var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
+      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && _this7.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
     var capturedStones = utils.flatMap(capturedNeighbors, function (neighbor) {
-      return game.groupAt(neighbor.y, neighbor.x);
+      return _this7.groupAt(neighbor.y, neighbor.x);
     });
 
     capturedStones.forEach(function (capturedStone) {
       if (capturedStone.isBlack()) {
-        game.captures["black"] += 1;
+        _this7.captures["black"] += 1;
       } else {
-        game.captures["white"] += 1;
+        _this7.captures["white"] += 1;
       }
 
-      game.removeAt(capturedStone.y, capturedStone.x);
+      _this7.removeAt(capturedStone.y, capturedStone.x);
     });
 
     return capturedStones;
@@ -812,9 +810,7 @@ var Game = function Game(boardElement, boardSize) {
       return false;
     }
 
-    var game = this;
-    var intersection = game.intersectionAt(y, x);
-
+    var intersection = this.intersectionAt(y, x);
     var isEmpty = intersection.isEmpty();
     var isCapturing = this.hasCapturesFor(y, x);
     var isSuicide = this.wouldBeSuicide(y, x);
@@ -825,42 +821,43 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.render = function () {
-    var game = this;
-    var currentMove = game.currentMove();
+    var _this8 = this;
 
-    if (!game.isOver()) {
-      game.removeScoringState();
+    var currentMove = this.currentMove();
+
+    if (!this.isOver()) {
+      this.removeScoringState();
     }
 
-    var points = currentMove ? currentMove.points : game.intersections();
+    var points = currentMove ? currentMove.points : this.intersections();
 
     points.forEach(function (intersection) {
       if (!currentMove) {
         intersection.setEmpty();
       }
 
-      game.intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
+      _this8.intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
     });
 
     if (!currentMove) {
-      game.currentPlayer = "black";
-      game.captures = { black: 0, white: 0 };
+      this.currentPlayer = "black";
+      this.captures = { black: 0, white: 0 };
     } else {
       if (currentMove.color == "black") {
-        game.currentPlayer = "white";
+        this.currentPlayer = "white";
       } else {
-        game.currentPlayer = "black";
+        this.currentPlayer = "black";
       }
 
-      game.captures = {
+      this.captures = {
         black: currentMove.blackStonesCaptured,
         white: currentMove.whiteStonesCaptured
       };
     }
 
-    game.checkTerritory();
-    game.renderer.render();
-    game.callbacks.postRender(game);
+    this.checkTerritory();
+    this.renderer.render();
+    this.callbacks.postRender(this);
   };
 
   this.removeScoringState = function () {
@@ -869,12 +866,12 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.checkTerritory = function () {
-    var game = this;
+    var _this9 = this;
 
-    game.territoryPoints = { black: [], white: [] };
+    this.territoryPoints = { black: [], white: [] };
 
-    var emptyOrDeadPoints = game.intersections().filter(function (intersection) {
-      return intersection.isEmpty() || game.isDeadAt(intersection.y, intersection.x);
+    var emptyOrDeadPoints = this.intersections().filter(function (intersection) {
+      return intersection.isEmpty() || _this9.isDeadAt(intersection.y, intersection.x);
     });
 
     var checkedPoints = [];
@@ -883,22 +880,22 @@ var Game = function Game(boardElement, boardSize) {
       if (checkedPoints.indexOf(emptyPoint) > -1) {
         // skip it, we already checked
       } else {
-          checkedPoints = checkedPoints.concat(game.checkTerritoryStartingAt(emptyPoint.y, emptyPoint.x));
+          checkedPoints = checkedPoints.concat(_this9.checkTerritoryStartingAt(emptyPoint.y, emptyPoint.x));
         }
     });
   };
 
   this.checkTerritoryStartingAt = function (y, x) {
-    var game = this;
+    var _this10 = this;
 
-    var pointsWithBoundary = game.surroundedPointsWithBoundaryAt(y, x);
+    var pointsWithBoundary = this.surroundedPointsWithBoundaryAt(y, x);
 
     var occupiedPoints = pointsWithBoundary.filter(function (checkedPoint) {
-      return !game.isDeadAt(checkedPoint.y, checkedPoint.x) && !checkedPoint.isEmpty();
+      return !_this10.isDeadAt(checkedPoint.y, checkedPoint.x) && !checkedPoint.isEmpty();
     });
 
     var nonOccupiedPoints = pointsWithBoundary.filter(function (checkedPoint) {
-      return game.isDeadAt(checkedPoint.y, checkedPoint.x) || checkedPoint.isEmpty();
+      return _this10.isDeadAt(checkedPoint.y, checkedPoint.x) || checkedPoint.isEmpty();
     });
 
     var surroundingColors = utils.unique(occupiedPoints.map(function (occupiedPoint) {
@@ -909,7 +906,7 @@ var Game = function Game(boardElement, boardSize) {
       var territoryColor = surroundingColors[0];
 
       nonOccupiedPoints.forEach(function (nonOccupiedPoint) {
-        game.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor);
+        return _this10.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor);
       });
     }
 
@@ -917,10 +914,11 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.surroundedPointsWithBoundaryAt = function (y, x, accumulated) {
+    var _this11 = this;
+
     accumulated || (accumulated = []);
 
-    var game = this;
-    var point = game.intersectionAt(y, x);
+    var point = this.intersectionAt(y, x);
 
     if (accumulated.indexOf(point) > -1) {
       return accumulated;
@@ -928,9 +926,9 @@ var Game = function Game(boardElement, boardSize) {
 
     accumulated.push(point);
 
-    game.neighborsFor(point.y, point.x).forEach(function (neighbor) {
-      if (neighbor.isEmpty() || game.isDeadAt(neighbor.y, neighbor.x)) {
-        game.surroundedPointsWithBoundaryAt(neighbor.y, neighbor.x, accumulated);
+    this.neighborsFor(point.y, point.x).forEach(function (neighbor) {
+      if (neighbor.isEmpty() || _this11.isDeadAt(neighbor.y, neighbor.x)) {
+        _this11.surroundedPointsWithBoundaryAt(neighbor.y, neighbor.x, accumulated);
       } else {
         accumulated.push(neighbor);
       }
@@ -940,21 +938,18 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.markTerritory = function (y, x, color) {
-    var game = this;
-    var pointIsMarkedTerritory = game.territoryPoints[color].some(function (point) {
+    var pointIsMarkedTerritory = this.territoryPoints[color].some(function (point) {
       return point.y == y && point.x == x;
     });
 
     if (!pointIsMarkedTerritory) {
-      game.territoryPoints[color].push({ y: y, x: x });
+      this.territoryPoints[color].push({ y: y, x: x });
     }
   };
 
   this.undo = function () {
-    var game = this;
-
-    game.moves.pop();
-    game.render();
+    this.moves.pop();
+    this.render();
   };
 };
 
