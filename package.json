@@ -4,7 +4,7 @@
   "description": "A JavaScript implementation of the game of go/baduk/weiqi with full support for HTML rendering out of the box.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -26,10 +26,12 @@
   },
   "homepage": "https://github.com/aprescott/tenuki.js#readme",
   "devDependencies": {
-    "browserify": "*",
     "babel-preset-es2015": "*",
     "babelify": "*",
+    "browserify": "*",
+    "chai": "^3.5.0",
     "clean-css": "*",
+    "mocha": "^2.4.5",
     "uglify-js": "*"
   }
 }

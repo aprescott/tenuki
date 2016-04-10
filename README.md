@@ -158,7 +158,9 @@ game.callbacks.postRender = function(game) {
 
 # Running tests
 
-Open [`test.html`](https://aprescott.github.io/tenuki.js/test.html) in your browser. If the tests all pass, you'll see "PASS" shown with black stones.
+For end-to-end tests on a real board, open [`test.html`](https://aprescott.github.io/tenuki.js/test.html) in your browser. If the tests all pass, you'll see "PASS" shown with black stones.
+
+For other tests, use `npm test`.
 
 # Developing
 
