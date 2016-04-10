@@ -7,6 +7,24 @@
 <div id="test-board" class="tenuki-board"></div>
 
 <script>
+// phantomjs has no click(). patch courtesy of http://stackoverflow.com/a/17789929/528044
+if (!HTMLElement.prototype.click) {
+  HTMLElement.prototype.click = function() {
+    var ev = document.createEvent('MouseEvent');
+    ev.initMouseEvent(
+        'click',
+        /*bubble*/true, /*cancelable*/true,
+        window, null,
+        0, 0, 0, 0, /*coordinates*/
+        false, false, false, false, /*modifier keys*/
+        0/*button=left*/, null
+    );
+    this.dispatchEvent(ev);
+  };
+}
+</script>
+
+<script>
 var boardElementTest = document.querySelector(".tenuki-board");
 var gameTest = window.gameTest = new tenuki.Game(boardElementTest);
 gameTest.setup();

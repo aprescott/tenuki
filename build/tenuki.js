@@ -1115,7 +1115,13 @@ var utils = {
   },
 
   unique: function unique(ary) {
-    return Array.from(new Set(ary));
+    var unique = [];
+    ary.forEach(function (el) {
+      if (unique.indexOf(el) < 0) {
+        unique.push(el);
+      }
+    });
+    return unique;
   }
 };
 

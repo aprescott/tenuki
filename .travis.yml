@@ -11,3 +11,4 @@ node_js:
 script:
   - npm test
   - ./build.sh && git diff --exit-code # require build/ to be up-to-date
+  - phantomjs phantomjs-test.js
