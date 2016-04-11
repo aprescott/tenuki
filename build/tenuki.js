@@ -459,8 +459,6 @@ module.exports = DOMRenderer;
 },{"./utils":7}],3:[function(require,module,exports){
 "use strict";
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 var utils = require("./utils");
 var DOMRenderer = require("./dom-renderer");
 var NullRenderer = require("./null-renderer");
@@ -724,17 +722,11 @@ var Game = function Game(boardElement, boardSize) {
   this.groupAt = function (y, x) {
     var startingPoint = this.intersectionAt(y, x);
 
-    var _partitionTraverse = this.partitionTraverse(startingPoint, function (neighbor) {
+    var partition = this.partitionTraverse(startingPoint, function (neighbor) {
       return neighbor.sameColorAs(startingPoint);
     });
 
-    var _partitionTraverse2 = _slicedToArray(_partitionTraverse, 2);
-
-    var groupPoints = _partitionTraverse2[0];
-    var _ = _partitionTraverse2[1];
-
-
-    return groupPoints;
+    return partition[0];
   };
 
   this.neighborsFor = function (y, x) {
@@ -926,15 +918,12 @@ var Game = function Game(boardElement, boardSize) {
 
     var startingPoint = this.intersectionAt(y, x);
 
-    var _partitionTraverse3 = this.partitionTraverse(startingPoint, function (neighbor) {
+    var partition = this.partitionTraverse(startingPoint, function (neighbor) {
       return neighbor.isEmpty() || _this9.isDeadAt(neighbor.y, neighbor.x);
     });
 
-    var _partitionTraverse4 = _slicedToArray(_partitionTraverse3, 2);
-
-    var nonOccupiedPoints = _partitionTraverse4[0];
-    var occupiedPoints = _partitionTraverse4[1];
-
+    var nonOccupiedPoints = partition[0];
+    var occupiedPoints = partition[1];
 
     var surroundingColors = utils.unique(occupiedPoints.map(function (occupiedPoint) {
       return occupiedPoint.value;
