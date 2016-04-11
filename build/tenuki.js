@@ -517,13 +517,17 @@ var Game = function Game(boardElement, boardSize) {
     return letters[x];
   };
 
+  this.coordinatesFor = function (y, x) {
+    return this.xCoordinateFor(x) + this.yCoordinateFor(y);
+  };
+
   this.stateFor = function (y, x, captures) {
     var _this = this;
 
     var moveInfo = {
       y: y,
       x: x,
-      coordinates: this.xCoordinateFor(x) + this.yCoordinateFor(y),
+      coordinates: this.coordinatesFor(y, x),
       color: this.currentPlayer,
       pass: false,
       points: this.intersections().map(function (i) {
