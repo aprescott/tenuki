@@ -459,6 +459,8 @@ module.exports = DOMRenderer;
 },{"./utils":7}],3:[function(require,module,exports){
 "use strict";
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var utils = require("./utils");
 var DOMRenderer = require("./dom-renderer");
 var NullRenderer = require("./null-renderer");
@@ -720,39 +722,19 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.groupAt = function (y, x) {
-    var _this5 = this;
-
-    var checkedPoints = [];
-    var pointsToCheck = [];
-
     var startingPoint = this.intersectionAt(y, x);
-    pointsToCheck.push(startingPoint);
 
-    var _loop = function _loop() {
-      var point = pointsToCheck.pop();
+    var _partitionTraverse = this.partitionTraverse(startingPoint, function (neighbor) {
+      return neighbor.sameColorAs(startingPoint);
+    });
 
-      if (checkedPoints.indexOf(point) > -1) {
-        // skip it, we already checked
-      } else {
-          checkedPoints.push(point);
+    var _partitionTraverse2 = _slicedToArray(_partitionTraverse, 2);
 
-          _this5.neighborsFor(point.y, point.x).forEach(function (neighbor) {
-            if (checkedPoints.indexOf(neighbor) > -1) {
-              // skip this neighbor, we already checked it
-            } else {
-                if (neighbor.sameColorAs(point)) {
-                  pointsToCheck.push(neighbor);
-                }
-              }
-          });
-        }
-    };
+    var groupPoints = _partitionTraverse2[0];
+    var _ = _partitionTraverse2[1];
 
-    while (pointsToCheck.length > 0) {
-      _loop();
-    }
 
-    return checkedPoints;
+    return groupPoints;
   };
 
   this.neighborsFor = function (y, x) {
@@ -778,38 +760,38 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.hasCapturesFor = function (y, x) {
-    var _this6 = this;
+    var _this5 = this;
 
     var point = this.intersectionAt(y, x);
 
     var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && _this6.libertiesAt(neighbor.y, neighbor.x) == 0;
+      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && _this5.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
     return capturedNeighbors.length > 0;
   };
 
   this.clearCapturesFor = function (y, x) {
-    var _this7 = this;
+    var _this6 = this;
 
     var point = this.intersectionAt(y, x);
 
     var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && _this7.libertiesAt(neighbor.y, neighbor.x) == 0;
+      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && _this6.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
     var capturedStones = utils.flatMap(capturedNeighbors, function (neighbor) {
-      return _this7.groupAt(neighbor.y, neighbor.x);
+      return _this6.groupAt(neighbor.y, neighbor.x);
     });
 
     capturedStones.forEach(function (capturedStone) {
       if (capturedStone.isBlack()) {
-        _this7.captures["black"] += 1;
+        _this6.captures["black"] += 1;
       } else {
-        _this7.captures["white"] += 1;
+        _this6.captures["white"] += 1;
       }
 
-      _this7.removeAt(capturedStone.y, capturedStone.x);
+      _this6.removeAt(capturedStone.y, capturedStone.x);
     });
 
     return capturedStones;
@@ -831,7 +813,7 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.render = function () {
-    var _this8 = this;
+    var _this7 = this;
 
     var currentMove = this.currentMove();
 
@@ -846,7 +828,7 @@ var Game = function Game(boardElement, boardSize) {
         intersection.setEmpty();
       }
 
-      _this8.intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
+      _this7.intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
     });
 
     if (!currentMove) {
@@ -875,13 +857,50 @@ var Game = function Game(boardElement, boardSize) {
     this.territoryPoints = { black: [], white: [] };
   };
 
+  // Iterative depth-first search traversal. Start from
+  // startingPoint, iteratively follow all neighbors.
+  // If inclusionConditionis met for a neighbor, include it
+  // otherwise, exclude it. At the end, return two arrays:
+  // One for the included neighbors, another for the remaining neighbors.
+  this.partitionTraverse = function (startingPoint, inclusionCondition) {
+    var checkedPoints = [];
+    var boundaryPoints = [];
+    var pointsToCheck = [];
+
+    pointsToCheck.push(startingPoint);
+
+    while (pointsToCheck.length > 0) {
+      var point = pointsToCheck.pop();
+
+      if (checkedPoints.indexOf(point) > -1) {
+        // skip it, we already checked
+      } else {
+          checkedPoints.push(point);
+
+          this.neighborsFor(point.y, point.x).forEach(function (neighbor) {
+            if (checkedPoints.indexOf(neighbor) > -1) {
+              // skip this neighbor, we already checked it
+            } else {
+                if (inclusionCondition(neighbor)) {
+                  pointsToCheck.push(neighbor);
+                } else {
+                  boundaryPoints.push(neighbor);
+                }
+              }
+          });
+        }
+    }
+
+    return [checkedPoints, boundaryPoints];
+  };
+
   this.checkTerritory = function () {
-    var _this9 = this;
+    var _this8 = this;
 
     this.territoryPoints = { black: [], white: [] };
 
     var emptyOrDeadPoints = this.intersections().filter(function (intersection) {
-      return intersection.isEmpty() || _this9.isDeadAt(intersection.y, intersection.x);
+      return intersection.isEmpty() || _this8.isDeadAt(intersection.y, intersection.x);
     });
 
     if (!this.isOver() || emptyOrDeadPoints.length == 0) {
@@ -903,39 +922,20 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.checkTerritoryStartingAt = function (y, x) {
-    var _this10 = this;
-
-    var checkedPoints = [];
-    var boundaryPoints = [];
-    var pointsToCheck = [];
+    var _this9 = this;
 
     var startingPoint = this.intersectionAt(y, x);
-    pointsToCheck.push(startingPoint);
 
-    while (pointsToCheck.length > 0) {
-      var nextPoint = pointsToCheck.pop();
+    var _partitionTraverse3 = this.partitionTraverse(startingPoint, function (neighbor) {
+      return neighbor.isEmpty() || _this9.isDeadAt(neighbor.y, neighbor.x);
+    });
 
-      if (checkedPoints.indexOf(nextPoint) > -1) {
-        // skip it, we already checked
-      } else {
-          checkedPoints.push(nextPoint);
+    var _partitionTraverse4 = _slicedToArray(_partitionTraverse3, 2);
 
-          this.neighborsFor(nextPoint.y, nextPoint.x).forEach(function (neighbor) {
-            if (checkedPoints.indexOf(neighbor) > -1) {
-              // skip this neighbor, we already checked it
-            } else {
-                if (neighbor.isEmpty() || _this10.isDeadAt(neighbor.y, neighbor.x)) {
-                  pointsToCheck.push(neighbor);
-                } else {
-                  boundaryPoints.push(neighbor);
-                }
-              }
-          });
-        }
-    }
+    var nonOccupiedPoints = _partitionTraverse4[0];
+    var occupiedPoints = _partitionTraverse4[1];
 
-    var occupiedPoints = boundaryPoints;
-    var nonOccupiedPoints = checkedPoints;
+
     var surroundingColors = utils.unique(occupiedPoints.map(function (occupiedPoint) {
       return occupiedPoint.value;
     }));
@@ -945,7 +945,7 @@ var Game = function Game(boardElement, boardSize) {
         var territoryColor = surroundingColors[0];
 
         nonOccupiedPoints.forEach(function (nonOccupiedPoint) {
-          return _this10.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor);
+          return _this9.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor);
         });
       })();
     }
