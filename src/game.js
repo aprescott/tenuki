@@ -7,7 +7,7 @@ import Scorer from "./scorer";
 export default function Game(boardElement) {
   this._defaultBoardSize = 19;
   this.boardSize = null;
-  this.intersectionGrid = [];
+  this._intersectionGrid = [];
   this.currentPlayer = "black";
   this.moves = [];
   this.captures = {
@@ -37,8 +37,8 @@ export default function Game(boardElement) {
     for (let y = 0; y < this.boardSize; y++) {
       for (let x = 0; x < this.boardSize; x++) {
         const intersection = new Intersection(y, x);
-        this.intersectionGrid[y] || (this.intersectionGrid[y] = []);
-        this.intersectionGrid[y][x] = intersection;
+        this._intersectionGrid[y] || (this._intersectionGrid[y] = []);
+        this._intersectionGrid[y][x] = intersection;
       }
     }
 
@@ -46,11 +46,11 @@ export default function Game(boardElement) {
   };
 
   this.intersectionAt = function(y, x) {
-    return this.intersectionGrid[y][x];
+    return this._intersectionGrid[y][x];
   };
 
   this.intersections = function() {
-    return utils.flatten(this.intersectionGrid);
+    return utils.flatten(this._intersectionGrid);
   };
 
   this.yCoordinateFor = function(y) {
@@ -336,7 +336,7 @@ export default function Game(boardElement) {
         intersection.setEmpty();
       }
 
-      this.intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
+      this._intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
     });
 
     if (!currentMove) {

@@ -501,7 +501,7 @@ function _interopRequireDefault(obj) {
 function Game(boardElement) {
   this._defaultBoardSize = 19;
   this.boardSize = null;
-  this.intersectionGrid = [];
+  this._intersectionGrid = [];
   this.currentPlayer = "black";
   this.moves = [];
   this.captures = {
@@ -536,8 +536,8 @@ function Game(boardElement) {
     for (var y = 0; y < this.boardSize; y++) {
       for (var x = 0; x < this.boardSize; x++) {
         var intersection = new _intersection2.default(y, x);
-        this.intersectionGrid[y] || (this.intersectionGrid[y] = []);
-        this.intersectionGrid[y][x] = intersection;
+        this._intersectionGrid[y] || (this._intersectionGrid[y] = []);
+        this._intersectionGrid[y][x] = intersection;
       }
     }
 
@@ -545,11 +545,11 @@ function Game(boardElement) {
   };
 
   this.intersectionAt = function (y, x) {
-    return this.intersectionGrid[y][x];
+    return this._intersectionGrid[y][x];
   };
 
   this.intersections = function () {
-    return _utils2.default.flatten(this.intersectionGrid);
+    return _utils2.default.flatten(this._intersectionGrid);
   };
 
   this.yCoordinateFor = function (y) {
@@ -869,7 +869,7 @@ function Game(boardElement) {
         intersection.setEmpty();
       }
 
-      _this7.intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
+      _this7._intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
     });
 
     if (!currentMove) {
