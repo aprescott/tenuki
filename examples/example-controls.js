@@ -11,9 +11,9 @@ ExampleGameControls = function(element, game) {
 
   this.updateStats = function() {
     var newGameInfo = "";
-    newGameInfo += "Black stones captured: " + this.game.captures["black"];
+    newGameInfo += "Black stones captured: " + this.game.currentMove().blackStonesCaptured;
     newGameInfo += "\n\n";
-    newGameInfo +=  "White stones captured: " + this.game.captures["white"];
+    newGameInfo +=  "White stones captured: " + this.game.currentMove().whiteStonesCaptured;
     newGameInfo += "\n\n";
 
     newGameInfo += "Move " + this.game.moves.length;

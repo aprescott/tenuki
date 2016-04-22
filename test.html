@@ -337,7 +337,7 @@ if (gameTest.isOver()) {
 
 gameTest.undo();
 
-if (gameTest.captures.black != 0 || gameTest.captures.white != 0) {
+if (gameTest.currentMove().blackStonesCaptured != 0 || gameTest.currentMove().whiteStonesCaptured != 0) {
   throw "tests failed";
 }
 
@@ -346,13 +346,13 @@ gameTest.renderer.grid[0][0].click(); // b
 gameTest.renderer.grid[0][1].click(); // w
 gameTest.renderer.grid[1][1].click(); // b
 
-if (gameTest.captures.black != 0 || gameTest.captures.white != 0) {
+if (gameTest.currentMove().blackStonesCaptured != 0 || gameTest.currentMove().whiteStonesCaptured != 0) {
   throw "tests failed";
 }
 
 gameTest.renderer.grid[1][0].click(); // w
 
-if (gameTest.captures.black != 1 || gameTest.captures.white != 0) {
+if (gameTest.currentMove().blackStonesCaptured != 1 || gameTest.currentMove().whiteStonesCaptured != 0) {
   throw "tests failed";
 }
 
@@ -419,7 +419,7 @@ gameTest.undo();
 gameTest.undo();
 gameTest.undo();
 
-if (gameTest.captures.black != 0 || gameTest.captures.white != 0) {
+if (gameTest.currentMove().blackStonesCaptured != 0 || gameTest.currentMove().whiteStonesCaptured != 0) {
   throw "tests failed";
 }
 

@@ -504,10 +504,6 @@ function Game(boardElement) {
   this._intersectionGrid = [];
   this.currentPlayer = "black";
   this.moves = [];
-  this.captures = {
-    black: 0,
-    white: 0
-  };
   this.renderer = boardElement ? new _domRenderer2.default(this, boardElement) : new _nullRenderer2.default();
   this.callbacks = {
     postRender: function postRender() {}
@@ -578,8 +574,8 @@ function Game(boardElement) {
       points: this.intersections().map(function (i) {
         return i.duplicate();
       }),
-      blackStonesCaptured: this.captures.black,
-      whiteStonesCaptured: this.captures.white,
+      blackStonesCaptured: (this.currentMove() && this.currentMove().blackStonesCaptured || 0) + (this.isBlackPlaying() ? 0 : captures.length),
+      whiteStonesCaptured: (this.currentMove() && this.currentMove().whiteStonesCaptured || 0) + (this.isWhitePlaying() ? 0 : captures.length),
       capturedPositions: captures.map(function (capturedStone) {
         return { y: capturedStone.y, x: capturedStone.x, color: _this.isBlackPlaying() ? "white" : "black" };
       })
@@ -614,8 +610,8 @@ function Game(boardElement) {
       points: this.intersections().map(function (i) {
         return i.duplicate();
       }),
-      blackStonesCaptured: this.captures.black,
-      whiteStonesCaptured: this.captures.white,
+      blackStonesCaptured: this.currentMove() && this.currentMove().blackStonesCaptured || 0,
+      whiteStonesCaptured: this.currentMove() && this.currentMove().whiteStonesCaptured || 0,
       capturedPositions: []
     };
   };
@@ -826,12 +822,6 @@ function Game(boardElement) {
     });
 
     capturedStones.forEach(function (capturedStone) {
-      if (capturedStone.isBlack()) {
-        _this6.captures["black"] += 1;
-      } else {
-        _this6.captures["white"] += 1;
-      }
-
       _this6.removeAt(capturedStone.y, capturedStone.x);
     });
 
@@ -874,18 +864,12 @@ function Game(boardElement) {
 
     if (!currentMove) {
       this.currentPlayer = "black";
-      this.captures = { black: 0, white: 0 };
     } else {
       if (currentMove.color == "black") {
         this.currentPlayer = "white";
       } else {
         this.currentPlayer = "black";
       }
-
-      this.captures = {
-        black: currentMove.blackStonesCaptured,
-        white: currentMove.whiteStonesCaptured
-      };
     }
 
     this.checkTerritory();
@@ -1094,8 +1078,8 @@ exports.default = {
     });
 
     return {
-      black: game.territoryPoints.black.length + game.captures.white + whiteDeadAsCaptures.length,
-      white: game.territoryPoints.white.length + game.captures.black + blackDeadAsCaptures.length
+      black: game.territoryPoints.black.length + game.currentMove().whiteStonesCaptured + whiteDeadAsCaptures.length,
+      white: game.territoryPoints.white.length + game.currentMove().blackStonesCaptured + blackDeadAsCaptures.length
     };
   },
 

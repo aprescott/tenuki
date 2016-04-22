@@ -10,10 +10,6 @@ export default function Game(boardElement) {
   this._intersectionGrid = [];
   this.currentPlayer = "black";
   this.moves = [];
-  this.captures = {
-    black: 0,
-    white: 0
-  };
   this.renderer = (boardElement ? new DOMRenderer(this, boardElement) : new NullRenderer());
   this.callbacks = {
     postRender: function() {}
@@ -75,8 +71,8 @@ export default function Game(boardElement) {
       color: this.currentPlayer,
       pass: false,
       points: this.intersections().map(i => i.duplicate()),
-      blackStonesCaptured: this.captures.black,
-      whiteStonesCaptured: this.captures.white,
+      blackStonesCaptured: ((this.currentMove() && this.currentMove().blackStonesCaptured) || 0) + (this.isBlackPlaying() ? 0 : captures.length),
+      whiteStonesCaptured: ((this.currentMove() && this.currentMove().whiteStonesCaptured) || 0) + (this.isWhitePlaying() ? 0 : captures.length),
       capturedPositions: captures.map(capturedStone => ({ y: capturedStone.y, x: capturedStone.x, color: (this.isBlackPlaying() ? "white" : "black") }))
     };
 
@@ -107,8 +103,8 @@ export default function Game(boardElement) {
       color: this.currentPlayer,
       pass: true,
       points: this.intersections().map(i => i.duplicate()),
-      blackStonesCaptured: this.captures.black,
-      whiteStonesCaptured: this.captures.white,
+      blackStonesCaptured: ((this.currentMove() && this.currentMove().blackStonesCaptured) || 0),
+      whiteStonesCaptured: ((this.currentMove() && this.currentMove().whiteStonesCaptured) || 0),
       capturedPositions: []
     };
   };
@@ -295,12 +291,6 @@ export default function Game(boardElement) {
     const capturedStones = utils.flatMap(capturedNeighbors, neighbor => this.groupAt(neighbor.y, neighbor.x));
 
     capturedStones.forEach(capturedStone => {
-      if (capturedStone.isBlack()) {
-        this.captures["black"] += 1;
-      } else {
-        this.captures["white"] += 1;
-      }
-
       this.removeAt(capturedStone.y, capturedStone.x);
     });
 
@@ -341,17 +331,11 @@ export default function Game(boardElement) {
 
     if (!currentMove) {
       this.currentPlayer = "black";
-      this.captures = { black: 0, white: 0 };
     } else {
       if (currentMove.color == "black") {
         this.currentPlayer = "white";
       } else {
         this.currentPlayer = "black";
-      }
-
-      this.captures = {
-        black: currentMove.blackStonesCaptured,
-        white: currentMove.whiteStonesCaptured
       }
     }
 
