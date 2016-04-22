@@ -15,7 +15,6 @@ export default function Game(boardElement) {
     postRender: function() {}
   };
   this.deadPoints = [];
-  this.territoryPoints = { black: [], white: [] };
 
   this._configureOptions = function({ boardSize = this._defaultBoardSize } = {}) {
     this.boardSize = boardSize;
@@ -339,14 +338,12 @@ export default function Game(boardElement) {
       }
     }
 
-    this.checkTerritory();
     this.renderer.render();
     this.callbacks.postRender(this);
   };
 
   this.removeScoringState = function() {
     this.deadPoints = [];
-    this.territoryPoints = { black: [], white: [] };
   };
 
   // Iterative depth-first search traversal. Start from
@@ -386,9 +383,7 @@ export default function Game(boardElement) {
     return [checkedPoints, boundaryPoints];
   };
 
-  this.checkTerritory = function() {
-    this.territoryPoints = { black: [], white: [] };
-
+  this.territory = function() {
     const emptyOrDeadPoints = this.intersections().filter(intersection => {
       return intersection.isEmpty() || this.isDeadAt(intersection.y, intersection.x);
     });
@@ -398,16 +393,22 @@ export default function Game(boardElement) {
     }
 
     var checkedPoints = [];
+    var territoryPoints = { black: [], white: [] };
     var pointsToCheck = emptyOrDeadPoints.map(i => i.duplicate());
 
     while (pointsToCheck.length > 0) {
       const nextPoint = pointsToCheck.pop();
-      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(nextPoint.y, nextPoint.x));
+      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(nextPoint.y, nextPoint.x, territoryPoints));
       pointsToCheck = emptyOrDeadPoints.filter(i => checkedPoints.indexOf(i) < 0);
     }
+
+    return({
+      black: territoryPoints.black.map(i => ({ y: i.y, x: i.x })),
+      white: territoryPoints.white.map(i => ({ y: i.y, x: i.x }))
+    });
   };
 
-  this.checkTerritoryStartingAt = function(y, x) {
+  this.checkTerritoryStartingAt = function(y, x, territoryPoints) {
     const startingPoint = this.intersectionAt(y, x);
 
     const [nonOccupiedPoints, occupiedPoints] = this.partitionTraverse(startingPoint, neighbor => {
@@ -419,18 +420,10 @@ export default function Game(boardElement) {
     if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
       const territoryColor = surroundingColors[0];
 
-      nonOccupiedPoints.forEach(nonOccupiedPoint => this.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor));
+      territoryPoints[territoryColor] = territoryPoints[territoryColor].concat(nonOccupiedPoints);
     }
 
     return nonOccupiedPoints;
-  };
-
-  this.markTerritory = function(y, x, color) {
-    const pointIsMarkedTerritory = this.territoryPoints[color].some(point => point.y == y && point.x == x);
-
-    if (!pointIsMarkedTerritory) {
-      this.territoryPoints[color].push({ y: y, x: x });
-    }
   };
 
   this.undo = function() {

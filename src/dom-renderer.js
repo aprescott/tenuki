@@ -430,11 +430,11 @@ export default function DOMRenderer(game, boardElement) {
       }
     });
 
-    game.territoryPoints.black.forEach(function(territoryPoint) {
+    game.territory().black.forEach(function(territoryPoint) {
       utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-black");
     });
 
-    game.territoryPoints.white.forEach(function(territoryPoint) {
+    game.territory().white.forEach(function(territoryPoint) {
       utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
   };

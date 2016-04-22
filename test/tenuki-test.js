@@ -8,9 +8,7 @@ describe("basic gameplay functionality", function() {
     game.setup();
     expect(game.playAt(5, 10)).to.be.true;
     expect(game.playAt(5, 10)).to.be.false;
-    expect(game.areaScore()).to.deep.equal({ black: 1, white: 0 });
     game.pass();
-    expect(game.areaScore()).to.deep.equal({ black: 1, white: 0 });
     game.pass();
     expect(game.areaScore()).to.deep.equal({ black: 361, white: 0 });
   });

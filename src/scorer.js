@@ -4,8 +4,8 @@ export default {
     const whiteDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
 
     return {
-      black: game.territoryPoints.black.length + game.currentMove().whiteStonesCaptured + whiteDeadAsCaptures.length,
-      white: game.territoryPoints.white.length + game.currentMove().blackStonesCaptured + blackDeadAsCaptures.length
+      black: game.territory().black.length + game.currentMove().whiteStonesCaptured + whiteDeadAsCaptures.length,
+      white: game.territory().white.length + game.currentMove().blackStonesCaptured + blackDeadAsCaptures.length
     };
   },
 
@@ -14,8 +14,8 @@ export default {
     const whiteStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isWhite() && !game.isDeadAt(intersection.y, intersection.x); });
 
     return {
-      black: game.territoryPoints.black.length + blackStonesOnTheBoard.length,
-      white: game.territoryPoints.white.length + whiteStonesOnTheBoard.length
+      black: game.territory().black.length + blackStonesOnTheBoard.length,
+      white: game.territory().white.length + whiteStonesOnTheBoard.length
     };
   }
 };

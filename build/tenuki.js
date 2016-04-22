@@ -455,11 +455,11 @@ function DOMRenderer(game, boardElement) {
       }
     });
 
-    game.territoryPoints.black.forEach(function (territoryPoint) {
+    game.territory().black.forEach(function (territoryPoint) {
       _utils2.default.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-black");
     });
 
-    game.territoryPoints.white.forEach(function (territoryPoint) {
+    game.territory().white.forEach(function (territoryPoint) {
       _utils2.default.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
   };
@@ -536,7 +536,6 @@ function Game(boardElement) {
     postRender: function postRender() {}
   };
   this.deadPoints = [];
-  this.territoryPoints = { black: [], white: [] };
 
   this._configureOptions = function () {
     var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -904,14 +903,12 @@ function Game(boardElement) {
       }
     }
 
-    this.checkTerritory();
     this.renderer.render();
     this.callbacks.postRender(this);
   };
 
   this.removeScoringState = function () {
     this.deadPoints = [];
-    this.territoryPoints = { black: [], white: [] };
   };
 
   // Iterative depth-first search traversal. Start from
@@ -951,10 +948,8 @@ function Game(boardElement) {
     return [checkedPoints, boundaryPoints];
   };
 
-  this.checkTerritory = function () {
+  this.territory = function () {
     var _this8 = this;
-
-    this.territoryPoints = { black: [], white: [] };
 
     var emptyOrDeadPoints = this.intersections().filter(function (intersection) {
       return intersection.isEmpty() || _this8.isDeadAt(intersection.y, intersection.x);
@@ -965,20 +960,30 @@ function Game(boardElement) {
     }
 
     var checkedPoints = [];
+    var territoryPoints = { black: [], white: [] };
     var pointsToCheck = emptyOrDeadPoints.map(function (i) {
       return i.duplicate();
     });
 
     while (pointsToCheck.length > 0) {
       var nextPoint = pointsToCheck.pop();
-      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(nextPoint.y, nextPoint.x));
+      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(nextPoint.y, nextPoint.x, territoryPoints));
       pointsToCheck = emptyOrDeadPoints.filter(function (i) {
         return checkedPoints.indexOf(i) < 0;
       });
     }
+
+    return {
+      black: territoryPoints.black.map(function (i) {
+        return { y: i.y, x: i.x };
+      }),
+      white: territoryPoints.white.map(function (i) {
+        return { y: i.y, x: i.x };
+      })
+    };
   };
 
-  this.checkTerritoryStartingAt = function (y, x) {
+  this.checkTerritoryStartingAt = function (y, x, territoryPoints) {
     var _this9 = this;
 
     var startingPoint = this.intersectionAt(y, x);
@@ -997,26 +1002,12 @@ function Game(boardElement) {
     }));
 
     if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
-      (function () {
-        var territoryColor = surroundingColors[0];
+      var territoryColor = surroundingColors[0];
 
-        nonOccupiedPoints.forEach(function (nonOccupiedPoint) {
-          return _this9.markTerritory(nonOccupiedPoint.y, nonOccupiedPoint.x, territoryColor);
-        });
-      })();
+      territoryPoints[territoryColor] = territoryPoints[territoryColor].concat(nonOccupiedPoints);
     }
 
     return nonOccupiedPoints;
-  };
-
-  this.markTerritory = function (y, x, color) {
-    var pointIsMarkedTerritory = this.territoryPoints[color].some(function (point) {
-      return point.y == y && point.x == x;
-    });
-
-    if (!pointIsMarkedTerritory) {
-      this.territoryPoints[color].push({ y: y, x: x });
-    }
   };
 
   this.undo = function () {
@@ -1112,8 +1103,8 @@ exports.default = {
     });
 
     return {
-      black: game.territoryPoints.black.length + game.currentMove().whiteStonesCaptured + whiteDeadAsCaptures.length,
-      white: game.territoryPoints.white.length + game.currentMove().blackStonesCaptured + blackDeadAsCaptures.length
+      black: game.territory().black.length + game.currentMove().whiteStonesCaptured + whiteDeadAsCaptures.length,
+      white: game.territory().white.length + game.currentMove().blackStonesCaptured + blackDeadAsCaptures.length
     };
   },
 
@@ -1126,8 +1117,8 @@ exports.default = {
     });
 
     return {
-      black: game.territoryPoints.black.length + blackStonesOnTheBoard.length,
-      white: game.territoryPoints.white.length + whiteStonesOnTheBoard.length
+      black: game.territory().black.length + blackStonesOnTheBoard.length,
+      white: game.territory().white.length + whiteStonesOnTheBoard.length
     };
   }
 };
