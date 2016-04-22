@@ -242,11 +242,11 @@ export default function Game(boardElement) {
   this.groupAt = function(y, x) {
     const startingPoint = this.intersectionAt(y, x);
 
-    const partition = this.partitionTraverse(startingPoint, neighbor => {
+    const [group, _] = this.partitionTraverse(startingPoint, neighbor => {
       return neighbor.sameColorAs(startingPoint)
     });
 
-    return partition[0];
+    return group;
   };
 
   this.neighborsFor = function(y, x) {
@@ -410,12 +410,9 @@ export default function Game(boardElement) {
   this.checkTerritoryStartingAt = function(y, x) {
     const startingPoint = this.intersectionAt(y, x);
 
-    const partition = this.partitionTraverse(startingPoint, neighbor => {
+    const [nonOccupiedPoints, occupiedPoints] = this.partitionTraverse(startingPoint, neighbor => {
       return neighbor.isEmpty() || this.isDeadAt(neighbor.y, neighbor.x);
     });
-
-    const nonOccupiedPoints = partition[0];
-    const occupiedPoints = partition[1];
 
     const surroundingColors = utils.unique(occupiedPoints.map(occupiedPoint => occupiedPoint.value));
 
