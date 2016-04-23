@@ -457,6 +457,23 @@ if (boardElementTest.querySelectorAll(".territory-black").length + boardElementT
   throw "tests failed";
 }
 
+// capturing a group with a stone that is a shared liberty
+resetTests();
+gameTest.renderer.grid[0][1].click(); // b
+gameTest.renderer.grid[0][2].click(); // w
+gameTest.renderer.grid[1][1].click(); // b
+gameTest.renderer.grid[1][2].click(); // w
+gameTest.renderer.grid[1][0].click(); // b
+gameTest.renderer.grid[2][1].click(); // w
+gameTest.renderer.grid[2][2].click(); // b
+gameTest.renderer.grid[2][0].click(); // w
+gameTest.renderer.grid[3][3].click(); // b
+gameTest.renderer.grid[0][0].click(); // w
+
+if (gameTest.currentMove().blackStonesCaptured != 3 || gameTest.currentMove().whiteStonesCaptured != 0) {
+  throw "tests failed";
+}
+
 // fancy "pass" print
 resetTests();
 gameTest.renderer.grid[3][2].className += " stone black";
