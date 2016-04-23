@@ -42,11 +42,22 @@ export default function Game(boardElement) {
   };
 
   this.intersectionAt = function(y, x) {
-    return this._intersectionGrid[y][x];
+    // TODO: should there be a specific state (through currentState()?)
+    // that describes the empty board so that this sort of check isn't
+    // necessary and that way we don't need to rely on _intersectionGrid ?
+    if (this.currentMove()) {
+      return this.currentMove().intersectionAt(y, x);
+    } else {
+      return this._intersectionGrid[y][x];
+    }
   };
 
   this.intersections = function() {
-    return utils.flatten(this._intersectionGrid);
+    if (this.currentMove()) {
+      return this.currentMove().points;
+    } else {
+      return utils.flatten(this._intersectionGrid);
+    }
   };
 
   this.yCoordinateFor = function(y) {
@@ -68,13 +79,13 @@ export default function Game(boardElement) {
   };
 
   this.whiteAt = function(y, x) {
-    this.intersectionAt(y, x).setWhite();
+    this._intersectionGrid[y][x].setWhite();
   };
   this.blackAt = function(y, x) {
-    this.intersectionAt(y, x).setBlack();
+    this._intersectionGrid[y][x].setBlack();
   };
   this.removeAt = function(y, x) {
-    this.intersectionAt(y, x).setEmpty();
+    this._intersectionGrid[y][x].setEmpty();
   };
 
   this.stateForPass = function() {
@@ -206,38 +217,19 @@ export default function Game(boardElement) {
   };
 
   this.groupAt = function(y, x) {
-    const startingPoint = this.intersectionAt(y, x);
-
-    const [group, _] = this.partitionTraverse(startingPoint, neighbor => {
-      return neighbor.sameColorAs(startingPoint)
-    });
-
-    return group;
+    return this.currentMove().groupAt(y, x);
   };
 
   this.neighborsFor = function(y, x) {
-    const neighbors = [];
-
-    if (x > 0) {
-      neighbors.push(this.intersectionAt(y, x - 1));
-    }
-
-    if (x < (this.boardSize - 1)) {
-      neighbors.push(this.intersectionAt(y, x + 1));
-    }
-
-    if (y > 0) {
-      neighbors.push(this.intersectionAt(y - 1, x));
-    }
-
-    if (y < (this.boardSize - 1)) {
-      neighbors.push(this.intersectionAt(y + 1, x));
-    }
-
-    return neighbors;
+    return this.currentMove().neighborsFor(y, x);
   };
 
   this.hasCapturesFor = function(y, x) {
+    // TODO:
+    if (!this.currentMove()) {
+      return false;
+    }
+
     const point = this.intersectionAt(y, x);
 
     const capturedNeighbors = this.neighborsFor(point.y, point.x).filter(neighbor => {
@@ -248,10 +240,19 @@ export default function Game(boardElement) {
   };
 
   this.clearCapturesFor = function(y, x) {
-    const point = this.intersectionAt(y, x);
+    // TODO:
+    if (!this.currentMove()) {
+      return [];
+    }
+
+    const point = this._intersectionGrid[y][x];
 
     const capturedNeighbors = this.neighborsFor(point.y, point.x).filter(neighbor => {
-      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && this.libertiesAt(neighbor.y, neighbor.x) == 0;
+      // TODO: this value of 1 is potentially weird.
+      // we're checking against the move before the stone we just played
+      // where this space is not occupied yet. things should possibly be
+      // reworked.
+      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && this.libertiesAt(neighbor.y, neighbor.x) == 1;
     });
 
     const capturedStones = utils.flatMap(capturedNeighbors, neighbor => this.groupAt(neighbor.y, neighbor.x));
@@ -313,84 +314,12 @@ export default function Game(boardElement) {
     this.deadPoints = [];
   };
 
-  // Iterative depth-first search traversal. Start from
-  // startingPoint, iteratively follow all neighbors.
-  // If inclusionConditionis met for a neighbor, include it
-  // otherwise, exclude it. At the end, return two arrays:
-  // One for the included neighbors, another for the remaining neighbors.
-  this.partitionTraverse = function(startingPoint, inclusionCondition) {
-    let checkedPoints = [];
-    let boundaryPoints = [];
-    let pointsToCheck = [];
-
-    pointsToCheck.push(startingPoint);
-
-    while (pointsToCheck.length > 0) {
-      const point = pointsToCheck.pop();
-
-      if (checkedPoints.indexOf(point) > -1) {
-        // skip it, we already checked
-      } else {
-        checkedPoints.push(point);
-
-        this.neighborsFor(point.y, point.x).forEach(neighbor => {
-          if (checkedPoints.indexOf(neighbor) > -1) {
-            // skip this neighbor, we already checked it
-          } else {
-            if (inclusionCondition(neighbor)) {
-              pointsToCheck.push(neighbor);
-            } else {
-              boundaryPoints.push(neighbor);
-            }
-          }
-        });
-      }
-    }
-
-    return [checkedPoints, boundaryPoints];
-  };
-
   this.territory = function() {
-    const emptyOrDeadPoints = this.intersections().filter(intersection => {
-      return intersection.isEmpty() || this.isDeadAt(intersection.y, intersection.x);
-    });
-
-    if (!this.isOver() || emptyOrDeadPoints.length == 0) {
+    if (!this.isOver()) {
       return;
     }
 
-    var checkedPoints = [];
-    var territoryPoints = { black: [], white: [] };
-    var pointsToCheck = emptyOrDeadPoints.map(i => i.duplicate());
-
-    while (pointsToCheck.length > 0) {
-      const nextPoint = pointsToCheck.pop();
-      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(nextPoint.y, nextPoint.x, territoryPoints));
-      pointsToCheck = emptyOrDeadPoints.filter(i => checkedPoints.indexOf(i) < 0);
-    }
-
-    return({
-      black: territoryPoints.black.map(i => ({ y: i.y, x: i.x })),
-      white: territoryPoints.white.map(i => ({ y: i.y, x: i.x }))
-    });
-  };
-
-  this.checkTerritoryStartingAt = function(y, x, territoryPoints) {
-    const startingPoint = this.intersectionAt(y, x);
-
-    const [nonOccupiedPoints, occupiedPoints] = this.partitionTraverse(startingPoint, neighbor => {
-      return neighbor.isEmpty() || this.isDeadAt(neighbor.y, neighbor.x);
-    });
-
-    const surroundingColors = utils.unique(occupiedPoints.map(occupiedPoint => occupiedPoint.value));
-
-    if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
-      const territoryColor = surroundingColors[0];
-
-      territoryPoints[territoryColor] = territoryPoints[territoryColor].concat(nonOccupiedPoints);
-    }
-
-    return nonOccupiedPoints;
+    return this.currentMove().territory(this);
   };
 
   this.undo = function() {

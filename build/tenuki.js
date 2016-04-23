@@ -472,83 +472,6 @@ function DOMRenderer(game, boardElement) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var GameState = function GameState(_ref) {
-  var y = _ref.y;
-  var x = _ref.x;
-  var color = _ref.color;
-  var pass = _ref.pass;
-  var points = _ref.points;
-  var blackStonesCaptured = _ref.blackStonesCaptured;
-  var whiteStonesCaptured = _ref.whiteStonesCaptured;
-  var capturedPositions = _ref.capturedPositions;
-  var koPoint = _ref.koPoint;
-
-  this.y = y;
-  this.x = x;
-  this.color = color;
-  this.pass = pass;
-  this.points = points;
-  this.blackStonesCaptured = blackStonesCaptured;
-  this.whiteStonesCaptured = whiteStonesCaptured;
-  this.capturedPositions = capturedPositions;
-  this.koPoint = koPoint;
-
-  Object.freeze(this);
-};
-
-GameState.forPlay = function (game, y, x, captures) {
-  var moveInfo = {
-    y: y,
-    x: x,
-    color: game.currentPlayer,
-    pass: false,
-    points: game.intersections().map(function (i) {
-      return i.duplicate();
-    }),
-    blackStonesCaptured: (game.currentMove() && game.currentMove().blackStonesCaptured || 0) + (game.isBlackPlaying() ? 0 : captures.length),
-    whiteStonesCaptured: (game.currentMove() && game.currentMove().whiteStonesCaptured || 0) + (game.isWhitePlaying() ? 0 : captures.length),
-    capturedPositions: captures.map(function (capturedStone) {
-      return { y: capturedStone.y, x: capturedStone.x, color: game.isBlackPlaying() ? "white" : "black" };
-    })
-  };
-
-  var hasKoPoint = captures.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
-
-  if (hasKoPoint) {
-    var koPoint = captures[0];
-    moveInfo["koPoint"] = { y: koPoint.y, x: koPoint.x };
-  } else {
-    moveInfo["koPoint"] = null;
-  }
-
-  return new GameState(moveInfo);
-};
-
-GameState.forPass = function (game) {
-  return new GameState({
-    y: null,
-    x: null,
-    color: game.currentPlayer,
-    pass: true,
-    points: game.intersections().map(function (i) {
-      return i.duplicate();
-    }),
-    blackStonesCaptured: game.currentMove() && game.currentMove().blackStonesCaptured || 0,
-    whiteStonesCaptured: game.currentMove() && game.currentMove().whiteStonesCaptured || 0,
-    capturedPositions: [],
-    koPoint: null
-  });
-};
-
-exports.default = GameState;
-
-
-},{}],4:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 
 var _slicedToArray = function () {
   function sliceIterator(arr, i) {
@@ -576,6 +499,245 @@ var _slicedToArray = function () {
   };
 }();
 
+var _utils = require("./utils");
+
+var _utils2 = _interopRequireDefault(_utils);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+var GameState = function GameState(_ref) {
+  var y = _ref.y;
+  var x = _ref.x;
+  var color = _ref.color;
+  var pass = _ref.pass;
+  var points = _ref.points;
+  var blackStonesCaptured = _ref.blackStonesCaptured;
+  var whiteStonesCaptured = _ref.whiteStonesCaptured;
+  var capturedPositions = _ref.capturedPositions;
+  var koPoint = _ref.koPoint;
+  var boardSize = _ref.boardSize;
+
+  this.y = y;
+  this.x = x;
+  this.color = color;
+  this.pass = pass;
+  // "points" -- we can do better
+  this.points = points;
+  // we can probably do better here, too
+  this.blackStonesCaptured = blackStonesCaptured;
+  this.whiteStonesCaptured = whiteStonesCaptured;
+  this.capturedPositions = capturedPositions;
+  this.koPoint = koPoint;
+  this.boardSize = boardSize;
+
+  Object.freeze(this);
+};
+
+GameState.prototype = {
+  intersectionAt: function intersectionAt(y, x) {
+    // TODO: this is going to lead to mn-ish performance. not good.
+    return this.points.filter(function (i) {
+      return i.y == y && i.x == x;
+    })[0];
+  },
+
+  groupAt: function groupAt(y, x) {
+    var startingPoint = this.intersectionAt(y, x);
+
+    var _partitionTraverse = this.partitionTraverse(startingPoint, function (neighbor) {
+      return neighbor.sameColorAs(startingPoint);
+    });
+
+    var _partitionTraverse2 = _slicedToArray(_partitionTraverse, 2);
+
+    var group = _partitionTraverse2[0];
+    var _ = _partitionTraverse2[1];
+
+    return group;
+  },
+
+  neighborsFor: function neighborsFor(y, x) {
+    var neighbors = [];
+
+    if (x > 0) {
+      neighbors.push(this.intersectionAt(y, x - 1));
+    }
+
+    if (x < this.boardSize - 1) {
+      neighbors.push(this.intersectionAt(y, x + 1));
+    }
+
+    if (y > 0) {
+      neighbors.push(this.intersectionAt(y - 1, x));
+    }
+
+    if (y < this.boardSize - 1) {
+      neighbors.push(this.intersectionAt(y + 1, x));
+    }
+
+    return neighbors;
+  },
+
+  // Iterative depth-first search traversal. Start from
+  // startingPoint, iteratively follow all neighbors.
+  // If inclusionConditionis met for a neighbor, include it
+  // otherwise, exclude it. At the end, return two arrays:
+  // One for the included neighbors, another for the remaining neighbors.
+  partitionTraverse: function partitionTraverse(startingPoint, inclusionCondition) {
+    var checkedPoints = [];
+    var boundaryPoints = [];
+    var pointsToCheck = [];
+
+    pointsToCheck.push(startingPoint);
+
+    while (pointsToCheck.length > 0) {
+      var point = pointsToCheck.pop();
+
+      if (checkedPoints.indexOf(point) > -1) {
+        // skip it, we already checked
+      } else {
+          checkedPoints.push(point);
+
+          this.neighborsFor(point.y, point.x).forEach(function (neighbor) {
+            if (checkedPoints.indexOf(neighbor) > -1) {
+              // skip this neighbor, we already checked it
+            } else {
+                if (inclusionCondition(neighbor)) {
+                  pointsToCheck.push(neighbor);
+                } else {
+                  boundaryPoints.push(neighbor);
+                }
+              }
+          });
+        }
+    }
+
+    return [checkedPoints, boundaryPoints];
+  },
+
+  territory: function territory(game) {
+    var emptyOrDeadPoints = this.points.filter(function (intersection) {
+      return intersection.isEmpty() || game.isDeadAt(intersection.y, intersection.x);
+    });
+
+    if (emptyOrDeadPoints.length == 0) {
+      return;
+    }
+
+    var checkedPoints = [];
+    var territoryPoints = { black: [], white: [] };
+    var pointsToCheck = emptyOrDeadPoints.map(function (i) {
+      return i.duplicate();
+    });
+
+    while (pointsToCheck.length > 0) {
+      var nextPoint = pointsToCheck.pop();
+      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(game, nextPoint.y, nextPoint.x, territoryPoints));
+      pointsToCheck = emptyOrDeadPoints.filter(function (i) {
+        return checkedPoints.indexOf(i) < 0;
+      });
+    }
+
+    return {
+      black: territoryPoints.black.map(function (i) {
+        return { y: i.y, x: i.x };
+      }),
+      white: territoryPoints.white.map(function (i) {
+        return { y: i.y, x: i.x };
+      })
+    };
+  },
+
+  checkTerritoryStartingAt: function checkTerritoryStartingAt(game, y, x, territoryPoints) {
+    var startingPoint = this.intersectionAt(y, x);
+
+    var _partitionTraverse3 = this.partitionTraverse(startingPoint, function (neighbor) {
+      return neighbor.isEmpty() || game.isDeadAt(neighbor.y, neighbor.x);
+    });
+
+    var _partitionTraverse4 = _slicedToArray(_partitionTraverse3, 2);
+
+    var nonOccupiedPoints = _partitionTraverse4[0];
+    var occupiedPoints = _partitionTraverse4[1];
+
+    var surroundingColors = _utils2.default.unique(occupiedPoints.map(function (occupiedPoint) {
+      return occupiedPoint.value;
+    }));
+
+    if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
+      var territoryColor = surroundingColors[0];
+
+      territoryPoints[territoryColor] = territoryPoints[territoryColor].concat(nonOccupiedPoints);
+    }
+
+    return nonOccupiedPoints;
+  }
+};
+
+GameState.forPlay = function (game, y, x, captures) {
+  var moveInfo = {
+    y: y,
+    x: x,
+    color: game.currentPlayer,
+    pass: false,
+    points: _utils2.default.flatten(game._intersectionGrid).map(function (i) {
+      return i.duplicate();
+    }),
+    blackStonesCaptured: (game.currentMove() && game.currentMove().blackStonesCaptured || 0) + (game.isBlackPlaying() ? 0 : captures.length),
+    whiteStonesCaptured: (game.currentMove() && game.currentMove().whiteStonesCaptured || 0) + (game.isWhitePlaying() ? 0 : captures.length),
+    capturedPositions: captures.map(function (capturedStone) {
+      return { y: capturedStone.y, x: capturedStone.x, color: game.isBlackPlaying() ? "white" : "black" };
+    }),
+    boardSize: game.boardSize
+  };
+
+  // TODO: haaacks.
+  // this is needed because the game
+  // has to calculate the liberties
+  // of the stone _we're playing right now_,
+  // but "before" it's been played
+  game.moves.push(new GameState(moveInfo));
+  var hasKoPoint = captures.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
+  game.moves.pop();
+
+  if (hasKoPoint) {
+    var koPoint = captures[0];
+    moveInfo["koPoint"] = { y: koPoint.y, x: koPoint.x };
+  } else {
+    moveInfo["koPoint"] = null;
+  }
+
+  return new GameState(moveInfo);
+};
+
+GameState.forPass = function (game) {
+  return new GameState({
+    y: null,
+    x: null,
+    color: game.currentPlayer,
+    pass: true,
+    points: _utils2.default.flatten(game._intersectionGrid).map(function (i) {
+      return i.duplicate();
+    }),
+    blackStonesCaptured: game.currentMove() && game.currentMove().blackStonesCaptured || 0,
+    whiteStonesCaptured: game.currentMove() && game.currentMove().whiteStonesCaptured || 0,
+    capturedPositions: [],
+    koPoint: null,
+    boardSize: game.boardSize
+  });
+};
+
+exports.default = GameState;
+
+
+},{"./utils":8}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.default = Game;
 
 var _utils = require("./utils");
@@ -648,11 +810,22 @@ function Game(boardElement) {
   };
 
   this.intersectionAt = function (y, x) {
-    return this._intersectionGrid[y][x];
+    // TODO: should there be a specific state (through currentState()?)
+    // that describes the empty board so that this sort of check isn't
+    // necessary and that way we don't need to rely on _intersectionGrid ?
+    if (this.currentMove()) {
+      return this.currentMove().intersectionAt(y, x);
+    } else {
+      return this._intersectionGrid[y][x];
+    }
   };
 
   this.intersections = function () {
-    return _utils2.default.flatten(this._intersectionGrid);
+    if (this.currentMove()) {
+      return this.currentMove().points;
+    } else {
+      return _utils2.default.flatten(this._intersectionGrid);
+    }
   };
 
   this.yCoordinateFor = function (y) {
@@ -674,13 +847,13 @@ function Game(boardElement) {
   };
 
   this.whiteAt = function (y, x) {
-    this.intersectionAt(y, x).setWhite();
+    this._intersectionGrid[y][x].setWhite();
   };
   this.blackAt = function (y, x) {
-    this.intersectionAt(y, x).setBlack();
+    this._intersectionGrid[y][x].setBlack();
   };
   this.removeAt = function (y, x) {
-    this.intersectionAt(y, x).setEmpty();
+    this._intersectionGrid[y][x].setEmpty();
   };
 
   this.stateForPass = function () {
@@ -830,44 +1003,20 @@ function Game(boardElement) {
   };
 
   this.groupAt = function (y, x) {
-    var startingPoint = this.intersectionAt(y, x);
-
-    var _partitionTraverse = this.partitionTraverse(startingPoint, function (neighbor) {
-      return neighbor.sameColorAs(startingPoint);
-    });
-
-    var _partitionTraverse2 = _slicedToArray(_partitionTraverse, 2);
-
-    var group = _partitionTraverse2[0];
-    var _ = _partitionTraverse2[1];
-
-    return group;
+    return this.currentMove().groupAt(y, x);
   };
 
   this.neighborsFor = function (y, x) {
-    var neighbors = [];
-
-    if (x > 0) {
-      neighbors.push(this.intersectionAt(y, x - 1));
-    }
-
-    if (x < this.boardSize - 1) {
-      neighbors.push(this.intersectionAt(y, x + 1));
-    }
-
-    if (y > 0) {
-      neighbors.push(this.intersectionAt(y - 1, x));
-    }
-
-    if (y < this.boardSize - 1) {
-      neighbors.push(this.intersectionAt(y + 1, x));
-    }
-
-    return neighbors;
+    return this.currentMove().neighborsFor(y, x);
   };
 
   this.hasCapturesFor = function (y, x) {
     var _this4 = this;
+
+    // TODO:
+    if (!this.currentMove()) {
+      return false;
+    }
 
     var point = this.intersectionAt(y, x);
 
@@ -881,10 +1030,19 @@ function Game(boardElement) {
   this.clearCapturesFor = function (y, x) {
     var _this5 = this;
 
-    var point = this.intersectionAt(y, x);
+    // TODO:
+    if (!this.currentMove()) {
+      return [];
+    }
+
+    var point = this._intersectionGrid[y][x];
 
     var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && _this5.libertiesAt(neighbor.y, neighbor.x) == 0;
+      // TODO: this value of 1 is potentially weird.
+      // we're checking against the move before the stone we just played
+      // where this space is not occupied yet. things should possibly be
+      // reworked.
+      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && _this5.libertiesAt(neighbor.y, neighbor.x) == 1;
     });
 
     var capturedStones = _utils2.default.flatMap(capturedNeighbors, function (neighbor) {
@@ -950,103 +1108,12 @@ function Game(boardElement) {
     this.deadPoints = [];
   };
 
-  // Iterative depth-first search traversal. Start from
-  // startingPoint, iteratively follow all neighbors.
-  // If inclusionConditionis met for a neighbor, include it
-  // otherwise, exclude it. At the end, return two arrays:
-  // One for the included neighbors, another for the remaining neighbors.
-  this.partitionTraverse = function (startingPoint, inclusionCondition) {
-    var checkedPoints = [];
-    var boundaryPoints = [];
-    var pointsToCheck = [];
-
-    pointsToCheck.push(startingPoint);
-
-    while (pointsToCheck.length > 0) {
-      var point = pointsToCheck.pop();
-
-      if (checkedPoints.indexOf(point) > -1) {
-        // skip it, we already checked
-      } else {
-          checkedPoints.push(point);
-
-          this.neighborsFor(point.y, point.x).forEach(function (neighbor) {
-            if (checkedPoints.indexOf(neighbor) > -1) {
-              // skip this neighbor, we already checked it
-            } else {
-                if (inclusionCondition(neighbor)) {
-                  pointsToCheck.push(neighbor);
-                } else {
-                  boundaryPoints.push(neighbor);
-                }
-              }
-          });
-        }
-    }
-
-    return [checkedPoints, boundaryPoints];
-  };
-
   this.territory = function () {
-    var _this7 = this;
-
-    var emptyOrDeadPoints = this.intersections().filter(function (intersection) {
-      return intersection.isEmpty() || _this7.isDeadAt(intersection.y, intersection.x);
-    });
-
-    if (!this.isOver() || emptyOrDeadPoints.length == 0) {
+    if (!this.isOver()) {
       return;
     }
 
-    var checkedPoints = [];
-    var territoryPoints = { black: [], white: [] };
-    var pointsToCheck = emptyOrDeadPoints.map(function (i) {
-      return i.duplicate();
-    });
-
-    while (pointsToCheck.length > 0) {
-      var nextPoint = pointsToCheck.pop();
-      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(nextPoint.y, nextPoint.x, territoryPoints));
-      pointsToCheck = emptyOrDeadPoints.filter(function (i) {
-        return checkedPoints.indexOf(i) < 0;
-      });
-    }
-
-    return {
-      black: territoryPoints.black.map(function (i) {
-        return { y: i.y, x: i.x };
-      }),
-      white: territoryPoints.white.map(function (i) {
-        return { y: i.y, x: i.x };
-      })
-    };
-  };
-
-  this.checkTerritoryStartingAt = function (y, x, territoryPoints) {
-    var _this8 = this;
-
-    var startingPoint = this.intersectionAt(y, x);
-
-    var _partitionTraverse3 = this.partitionTraverse(startingPoint, function (neighbor) {
-      return neighbor.isEmpty() || _this8.isDeadAt(neighbor.y, neighbor.x);
-    });
-
-    var _partitionTraverse4 = _slicedToArray(_partitionTraverse3, 2);
-
-    var nonOccupiedPoints = _partitionTraverse4[0];
-    var occupiedPoints = _partitionTraverse4[1];
-
-    var surroundingColors = _utils2.default.unique(occupiedPoints.map(function (occupiedPoint) {
-      return occupiedPoint.value;
-    }));
-
-    if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
-      var territoryColor = surroundingColors[0];
-
-      territoryPoints[territoryColor] = territoryPoints[territoryColor].concat(nonOccupiedPoints);
-    }
-
-    return nonOccupiedPoints;
+    return this.currentMove().territory(this);
   };
 
   this.undo = function () {
