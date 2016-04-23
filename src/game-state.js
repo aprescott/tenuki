@@ -250,18 +250,27 @@ GameState.prototype = {
   }
 }
 
-GameState.initialFor = function(game) {
-  let emptyPoints = Array.apply(null, Array(game.boardSize * game.boardSize));
+GameState.initialFor = function(boardSize) {
+  this._cache = this._cache || {};
+
+  if (this._cache[boardSize]) {
+    return this._cache[boardSize];
+  }
+
+  let emptyPoints = Array.apply(null, Array(boardSize * boardSize));
   emptyPoints = emptyPoints.map((x, i) => {
-    return new Intersection(Math.floor(i / game.boardSize), i % game.boardSize);
+    return new Intersection(Math.floor(i / boardSize), i % boardSize);
   });
 
-  return new GameState({
+  const initialState = new GameState({
     points: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
     whiteStonesCaptured: 0,
-    boardSize: game.boardSize
+    boardSize: boardSize
   });
+
+  this._cache[boardSize] = initialState;
+  return initialState;
 }
 
 export default GameState;

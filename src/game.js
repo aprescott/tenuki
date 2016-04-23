@@ -70,7 +70,7 @@ Game.prototype = {
   },
 
   currentMove: function() {
-    return this.moves[this.moves.length - 1] || GameState.initialFor(this);
+    return this.moves[this.moves.length - 1] || GameState.initialFor(this.boardSize);
   },
 
   isWhitePlaying: function() {

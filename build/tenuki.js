@@ -804,18 +804,27 @@ GameState.prototype = {
   }
 };
 
-GameState.initialFor = function (game) {
-  var emptyPoints = Array.apply(null, Array(game.boardSize * game.boardSize));
+GameState.initialFor = function (boardSize) {
+  this._cache = this._cache || {};
+
+  if (this._cache[boardSize]) {
+    return this._cache[boardSize];
+  }
+
+  var emptyPoints = Array.apply(null, Array(boardSize * boardSize));
   emptyPoints = emptyPoints.map(function (x, i) {
-    return new _intersection2.default(Math.floor(i / game.boardSize), i % game.boardSize);
+    return new _intersection2.default(Math.floor(i / boardSize), i % boardSize);
   });
 
-  return new GameState({
+  var initialState = new GameState({
     points: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
     whiteStonesCaptured: 0,
-    boardSize: game.boardSize
+    boardSize: boardSize
   });
+
+  this._cache[boardSize] = initialState;
+  return initialState;
 };
 
 exports.default = GameState;
@@ -926,7 +935,7 @@ Game.prototype = {
   },
 
   currentMove: function currentMove() {
-    return this.moves[this.moves.length - 1] || _gameState2.default.initialFor(this);
+    return this.moves[this.moves.length - 1] || _gameState2.default.initialFor(this.boardSize);
   },
 
   isWhitePlaying: function isWhitePlaying() {
