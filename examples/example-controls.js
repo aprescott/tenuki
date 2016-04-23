@@ -16,7 +16,7 @@ ExampleGameControls = function(element, game) {
     newGameInfo +=  "White stones captured: " + this.game.currentMove().whiteStonesCaptured;
     newGameInfo += "\n\n";
 
-    newGameInfo += "Move " + this.game.moves.length;
+    newGameInfo += "Move " + this.game.currentMove().number;
 
     if (this.game.currentMove().y && this.game.currentMove().x) {
       newGameInfo += " (" + this.game.coordinatesFor(this.game.currentMove().y, this.game.currentMove().x) + ")";

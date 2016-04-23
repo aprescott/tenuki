@@ -519,6 +519,7 @@ function _interopRequireDefault(obj) {
 }
 
 var GameState = function GameState(_ref) {
+  var number = _ref.number;
   var y = _ref.y;
   var x = _ref.x;
   var color = _ref.color;
@@ -530,6 +531,7 @@ var GameState = function GameState(_ref) {
   var koPoint = _ref.koPoint;
   var boardSize = _ref.boardSize;
 
+  this.number = number;
   this.y = y;
   this.x = x;
   this.color = color;
@@ -595,6 +597,7 @@ GameState.prototype = {
 
   playPass: function playPass() {
     var newState = new GameState({
+      number: this.number + 1,
       y: null,
       x: null,
       color: this._nextColor(),
@@ -630,6 +633,7 @@ GameState.prototype = {
     var boardSize = this.boardSize;
 
     var moveInfo = {
+      number: this.number + 1,
       y: y,
       x: x,
       color: playedColor,
@@ -646,9 +650,9 @@ GameState.prototype = {
     // has to calculate the liberties
     // of the stone _we're playing right now_,
     // but "before" it's been played
-    game.moves.push(new GameState(moveInfo));
+    game._moves.push(new GameState(moveInfo));
     var hasKoPoint = capturedPositions.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
-    game.moves.pop();
+    game._moves.pop();
 
     if (hasKoPoint) {
       moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
@@ -821,6 +825,7 @@ GameState.initialFor = function (boardSize) {
   });
 
   var initialState = new GameState({
+    number: 0,
     points: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
     whiteStonesCaptured: 0,
@@ -872,7 +877,7 @@ function _interopRequireDefault(obj) {
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
   this.boardSize = null;
-  this.moves = [];
+  this._moves = [];
   this.renderer = boardElement ? new _domRenderer2.default(this, boardElement) : new _nullRenderer2.default();
   this.callbacks = {
     postRender: function postRender() {}
@@ -932,14 +937,14 @@ Game.prototype = {
       return false;
     }
 
-    this.moves.push(this.currentMove().playAt(y, x, this));
+    this._moves.push(this.currentMove().playAt(y, x, this));
     this.render();
 
     return true;
   },
 
   currentMove: function currentMove() {
-    return this.moves[this.moves.length - 1] || _gameState2.default.initialFor(this.boardSize);
+    return this._moves[this._moves.length - 1] || _gameState2.default.initialFor(this.boardSize);
   },
 
   isWhitePlaying: function isWhitePlaying() {
@@ -993,18 +998,18 @@ Game.prototype = {
 
   pass: function pass() {
     if (!this.isOver()) {
-      this.moves.push(this.currentMove().playPass());
+      this._moves.push(this.currentMove().playPass());
       this.render();
     }
   },
 
   isOver: function isOver() {
-    if (this.moves.length < 2) {
+    if (this._moves.length < 2) {
       return false;
     }
 
     var currentMove = this.currentMove();
-    var previousMove = this.moves[this.moves.length - 2];
+    var previousMove = this._moves[this._moves.length - 2];
 
     return currentMove.pass && previousMove.pass;
   },
@@ -1066,7 +1071,7 @@ Game.prototype = {
   },
 
   isIllegalAt: function isIllegalAt(y, x) {
-    if (this.moves.length == 0) {
+    if (this._moves.length == 0) {
       return false;
     }
 
@@ -1104,7 +1109,7 @@ Game.prototype = {
   },
 
   undo: function undo() {
-    this.moves.pop();
+    this._moves.pop();
     this.render();
   }
 };

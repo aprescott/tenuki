@@ -1,7 +1,8 @@
 import utils from "./utils";
 import Intersection from "./intersection";
 
-const GameState = function({ y, x, color, pass, points, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
+const GameState = function({ number, y, x, color, pass, points, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
+  this.number = number;
   this.y = y;
   this.x = x;
   this.color = color;
@@ -63,6 +64,7 @@ GameState.prototype = {
 
   playPass: function() {
     const newState = new GameState({
+      number: this.number + 1,
       y: null,
       x: null,
       color: this._nextColor(),
@@ -96,6 +98,7 @@ GameState.prototype = {
     const boardSize = this.boardSize;
 
     const moveInfo = {
+      number: this.number + 1,
       y: y,
       x: x,
       color: playedColor,
@@ -112,9 +115,9 @@ GameState.prototype = {
     // has to calculate the liberties
     // of the stone _we're playing right now_,
     // but "before" it's been played
-    game.moves.push(new GameState(moveInfo));
+    game._moves.push(new GameState(moveInfo));
     const hasKoPoint = capturedPositions.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
-    game.moves.pop();
+    game._moves.pop();
 
     if (hasKoPoint) {
       moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
@@ -265,6 +268,7 @@ GameState.initialFor = function(boardSize) {
   });
 
   const initialState = new GameState({
+    number: 0,
     points: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
     whiteStonesCaptured: 0,

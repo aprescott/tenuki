@@ -8,7 +8,7 @@ import GameState from "./game-state";
 const Game = function(boardElement) {
   this._defaultBoardSize = 19;
   this.boardSize = null;
-  this.moves = [];
+  this._moves = [];
   this.renderer = (boardElement ? new DOMRenderer(this, boardElement) : new NullRenderer());
   this.callbacks = {
     postRender: function() {}
@@ -63,14 +63,14 @@ Game.prototype = {
       return false;
     }
 
-    this.moves.push(this.currentMove().playAt(y, x, this));
+    this._moves.push(this.currentMove().playAt(y, x, this));
     this.render();
 
     return true;
   },
 
   currentMove: function() {
-    return this.moves[this.moves.length - 1] || GameState.initialFor(this.boardSize);
+    return this._moves[this._moves.length - 1] || GameState.initialFor(this.boardSize);
   },
 
   isWhitePlaying: function() {
@@ -120,18 +120,18 @@ Game.prototype = {
 
   pass: function() {
     if (!this.isOver()) {
-      this.moves.push(this.currentMove().playPass())
+      this._moves.push(this.currentMove().playPass())
       this.render();
     }
   },
 
   isOver: function() {
-    if (this.moves.length < 2) {
+    if (this._moves.length < 2) {
       return false;
     }
 
     const currentMove = this.currentMove();
-    const previousMove = this.moves[this.moves.length - 2];
+    const previousMove = this._moves[this._moves.length - 2];
 
     return currentMove.pass && previousMove.pass;
   },
@@ -185,7 +185,7 @@ Game.prototype = {
   },
 
   isIllegalAt: function(y, x) {
-    if (this.moves.length == 0) {
+    if (this._moves.length == 0) {
       return false;
     }
 
@@ -223,7 +223,7 @@ Game.prototype = {
   },
 
   undo: function() {
-    this.moves.pop();
+    this._moves.pop();
     this.render();
   }
 };

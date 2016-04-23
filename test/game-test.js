@@ -36,9 +36,9 @@ describe("Game", function() {
       game.setup();
       game.playAt(2, 3);
 
-      expect(game.moves[0].y).to.equal(2);
-      game.moves[0].y = 10;
-      expect(game.moves[0].y).to.equal(2);
+      expect(game.currentMove().y).to.equal(2);
+      game.currentMove().y = 10;
+      expect(game.currentMove().y).to.equal(2);
     });
   });
 });
