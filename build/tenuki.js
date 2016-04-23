@@ -572,11 +572,15 @@ GameState.prototype = {
       return _this.groupAt(neighbor.y, neighbor.x);
     });
 
-    return capturedStones;
+    return _utils2.default.unique(capturedStones);
   },
 
   _updatePoint: function _updatePoint(intersection, points, color) {
     var index = points.indexOf(intersection);
+
+    if (index < 0) {
+      throw "unexpected negative index " + index + " when attempting to update " + intersection.y + "," + intersection.x + " to " + color;
+    }
 
     var prefix = points.slice(0, index);
     var newPoint = new _intersection2.default(intersection.y, intersection.x, color);
@@ -685,11 +689,7 @@ GameState.prototype = {
       });
     });
 
-    // this is not great, but we need a representation that will be unique-able,
-    // and Y-X does the job.
-    return _utils2.default.unique(emptyPoints.map(function (emptyPoint) {
-      return emptyPoint.y + "-" + emptyPoint.x;
-    })).length;
+    return _utils2.default.unique(emptyPoints).length;
   },
 
   neighborsFor: function neighborsFor(y, x) {

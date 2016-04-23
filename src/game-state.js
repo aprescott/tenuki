@@ -40,11 +40,15 @@ GameState.prototype = {
 
     const capturedStones = utils.flatMap(capturedNeighbors, neighbor => this.groupAt(neighbor.y, neighbor.x));
 
-    return capturedStones;
+    return utils.unique(capturedStones);
   },
 
   _updatePoint: function(intersection, points, color) {
     const index = points.indexOf(intersection);
+
+    if (index < 0) {
+      throw "unexpected negative index " + index + " when attempting to update " + intersection.y + "," + intersection.x + " to " + color;
+    }
 
     const prefix = points.slice(0, index);
     const newPoint = new Intersection(intersection.y, intersection.x, color);
@@ -142,9 +146,7 @@ GameState.prototype = {
       return this.neighborsFor(groupPoint.y, groupPoint.x).filter(intersection => intersection.isEmpty());
     });
 
-    // this is not great, but we need a representation that will be unique-able,
-    // and Y-X does the job.
-    return utils.unique(emptyPoints.map(emptyPoint => emptyPoint.y + "-" + emptyPoint.x)).length;
+    return utils.unique(emptyPoints).length;
   },
 
   neighborsFor: function(y, x) {
