@@ -172,6 +172,6 @@ First, make sure [`npm`](https://www.npmjs.com/) is installed, then run:
 npm install
 ```
 
-To make changes, update individual files in `lib/` and `css/`. Then, run `./build.sh` to generate files in `build/`.
+To make changes, update individual files in `src/` and `css/`. Then, run `./build.sh` to generate files in `build/`.
 
 To test changes, use `test.html` and the files in `examples/` to check that things still work.

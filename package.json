@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/aprescott/tenuki.js#readme",
   "devDependencies": {
+    "babel-cli": "^6.7.7",
     "babel-preset-es2015": "*",
     "babelify": "*",
     "browserify": "*",

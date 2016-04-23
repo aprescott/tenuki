@@ -1,5 +1,8 @@
 sudo: false
 language: node_js
+cache:
+  directories:
+    - node_modules
 node_js:
   - "node"
   - "5"
@@ -8,7 +11,9 @@ node_js:
   - "4.2"
   - "4.1"
   - "4.0"
+before_script:
+  - ./build.sh
 script:
   - npm test
-  - ./build.sh && git diff --exit-code # require build/ to be up-to-date
+  - git diff --exit-code # require build/ to be up-to-date
   - phantomjs phantomjs-test.js
