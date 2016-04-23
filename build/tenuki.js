@@ -594,7 +594,6 @@ function Game(boardElement) {
     var moveInfo = {
       y: y,
       x: x,
-      coordinates: this.coordinatesFor(y, x),
       color: this.currentPlayer,
       pass: false,
       points: this.intersections().map(function (i) {
@@ -630,7 +629,6 @@ function Game(boardElement) {
     return {
       y: null,
       x: null,
-      coordinates: null,
       color: this.currentPlayer,
       pass: true,
       points: this.intersections().map(function (i) {

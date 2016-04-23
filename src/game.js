@@ -66,7 +66,6 @@ export default function Game(boardElement) {
     const moveInfo = {
       y: y,
       x: x,
-      coordinates: this.coordinatesFor(y, x),
       color: this.currentPlayer,
       pass: false,
       points: this.intersections().map(i => i.duplicate()),
@@ -98,7 +97,6 @@ export default function Game(boardElement) {
     return {
       y: null,
       x: null,
-      coordinates: null,
       color: this.currentPlayer,
       pass: true,
       points: this.intersections().map(i => i.duplicate()),

@@ -17,6 +17,11 @@ ExampleGameControls = function(element, game) {
     newGameInfo += "\n\n";
 
     newGameInfo += "Move " + this.game.moves.length;
+
+    if (this.game.currentMove() && !this.game.currentMove().pass) {
+      newGameInfo += " (" + this.game.coordinatesFor(this.game.currentMove().y, this.game.currentMove().x) + ")";
+    }
+
     newGameInfo += "\n\n";
 
     var currentMove = this.game.currentMove();
