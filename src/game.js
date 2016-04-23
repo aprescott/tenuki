@@ -5,7 +5,7 @@ import Intersection from "./intersection";
 import Scorer from "./scorer";
 import GameState from "./game-state";
 
-export default function Game(boardElement) {
+const Game = function(boardElement) {
   this._defaultBoardSize = 19;
   this.boardSize = null;
   this.moves = [];
@@ -14,12 +14,14 @@ export default function Game(boardElement) {
     postRender: function() {}
   };
   this.deadPoints = [];
+};
 
-  this._configureOptions = function({ boardSize = this._defaultBoardSize } = {}) {
+Game.prototype = {
+  _configureOptions: function({ boardSize = this._defaultBoardSize } = {}) {
     this.boardSize = boardSize;
-  };
+  },
 
-  this.setup = function(options) {
+  setup: function(options) {
     this._configureOptions(options);
 
     if (this.boardSize > 19) {
@@ -28,35 +30,35 @@ export default function Game(boardElement) {
 
     this.renderer.setup();
     this.render();
-  };
+  },
 
-  this.intersectionAt = function(y, x) {
+  intersectionAt: function(y, x) {
     return this.currentMove().intersectionAt(y, x);
-  };
+  },
 
-  this.intersections = function() {
+  intersections: function() {
     return this.currentMove().points;
-  };
+  },
 
-  this.yCoordinateFor = function(y) {
+  yCoordinateFor: function(y) {
     return this.boardSize - y;
-  };
+  },
 
-  this.xCoordinateFor = function(x) {
+  xCoordinateFor: function(x) {
     const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"];
 
     return letters[x];
-  };
+  },
 
-  this.coordinatesFor = function(y, x) {
+  coordinatesFor: function(y, x) {
     return this.xCoordinateFor(x) + this.yCoordinateFor(y);
-  };
+  },
 
-  this.currentPlayer = function() {
+  currentPlayer: function() {
     return this.currentMove()._nextColor();
-  };
+  },
 
-  this.playAt = function(y, x) {
+  playAt: function(y, x) {
     if (this.isIllegalAt(y, x)) {
       return false;
     }
@@ -65,25 +67,25 @@ export default function Game(boardElement) {
     this.render();
 
     return true;
-  };
+  },
 
-  this.currentMove = function() {
+  currentMove: function() {
     return this.moves[this.moves.length - 1] || GameState.initialFor(this);
-  };
+  },
 
-  this.isWhitePlaying = function() {
+  isWhitePlaying: function() {
     return this.currentPlayer() == "white";
-  };
+  },
 
-  this.isBlackPlaying = function() {
+  isBlackPlaying: function() {
     return this.currentPlayer() == "black";
-  };
+  },
 
-  this.inAtari = function(y, x) {
+  inAtari: function(y, x) {
     return this.libertiesAt(y, x) == 1;
-  }
+  },
 
-  this.wouldBeSuicide = function(y, x) {
+  wouldBeSuicide: function(y, x) {
     const intersection = this.intersectionAt(y, x);
     const surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isEmpty()).length == 0;
 
@@ -118,16 +120,16 @@ export default function Game(boardElement) {
     }
 
     return suicide;
-  };
+  },
 
-  this.pass = function() {
+  pass: function() {
     if (!this.isOver()) {
       this.moves.push(this.currentMove().playPass())
       this.render();
     }
-  };
+  },
 
-  this.isOver = function() {
+  isOver: function() {
     if (this.moves.length < 2) {
       return false;
     }
@@ -136,9 +138,9 @@ export default function Game(boardElement) {
     const previousMove = this.moves[this.moves.length - 2];
 
     return currentMove.pass && previousMove.pass;
-  };
+  },
 
-  this.toggleDeadAt = function(y, x) {
+  toggleDeadAt: function(y, x) {
     const alreadyDead = this.isDeadAt(y, x);
 
     this.groupAt(y, x).forEach(intersection => {
@@ -150,33 +152,33 @@ export default function Game(boardElement) {
     });
 
     this.render();
-  }
+  },
 
-  this.isDeadAt = function(y, x) {
+  isDeadAt: function(y, x) {
     return this.deadPoints.some(dead => dead.y == y && dead.x == x);
-  };
+  },
 
-  this.territoryScore = function() {
+  territoryScore: function() {
     return Scorer.territoryResultFor(this);
-  };
+  },
 
-  this.areaScore = function() {
+  areaScore: function() {
     return Scorer.areaResultFor(this);
-  };
+  },
 
-  this.libertiesAt = function(y, x) {
+  libertiesAt: function(y, x) {
     return this.currentMove().libertiesAt(y, x);
-  };
+  },
 
-  this.groupAt = function(y, x) {
+  groupAt: function(y, x) {
     return this.currentMove().groupAt(y, x);
-  };
+  },
 
-  this.neighborsFor = function(y, x) {
+  neighborsFor: function(y, x) {
     return this.currentMove().neighborsFor(y, x);
-  };
+  },
 
-  this.hasCapturesFor = function(y, x) {
+  hasCapturesFor: function(y, x) {
     const point = this.intersectionAt(y, x);
 
     const capturedNeighbors = this.neighborsFor(point.y, point.x).filter(neighbor => {
@@ -184,9 +186,9 @@ export default function Game(boardElement) {
     });
 
     return capturedNeighbors.length > 0
-  };
+  },
 
-  this.isIllegalAt = function(y, x) {
+  isIllegalAt: function(y, x) {
     if (this.moves.length == 0) {
       return false;
     }
@@ -199,9 +201,9 @@ export default function Game(boardElement) {
     const isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
 
     return !isEmpty || isKoViolation || (isSuicide && !isCapturing);
-  };
+  },
 
-  this.render = function() {
+  render: function() {
     const currentMove = this.currentMove();
 
     if (!this.isOver()) {
@@ -210,22 +212,24 @@ export default function Game(boardElement) {
 
     this.renderer.render();
     this.callbacks.postRender(this);
-  };
+  },
 
-  this.removeScoringState = function() {
+  removeScoringState: function() {
     this.deadPoints = [];
-  };
+  },
 
-  this.territory = function() {
+  territory: function() {
     if (!this.isOver()) {
       return;
     }
 
     return this.currentMove().territory(this);
-  };
+  },
 
-  this.undo = function() {
+  undo: function() {
     this.moves.pop();
     this.render();
-  };
+  }
 };
+
+export default Game;
