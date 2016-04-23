@@ -64,7 +64,7 @@ Game.prototype = {
       return false;
     }
 
-    this._moves.push(this.currentMove().playAt(y, x, this));
+    this._moves.push(this.currentMove().playAt(y, x));
     this.render();
 
     return true;
@@ -83,7 +83,7 @@ Game.prototype = {
   },
 
   inAtari: function(y, x) {
-    return this.libertiesAt(y, x) == 1;
+    return this.currentMove().inAtari(y, x);
   },
 
   wouldBeSuicide: function(y, x) {

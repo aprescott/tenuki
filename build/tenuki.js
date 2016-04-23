@@ -613,7 +613,7 @@ GameState.prototype = {
     return newState;
   },
 
-  playAt: function playAt(y, x, game) {
+  playAt: function playAt(y, x) {
     var _this2 = this;
 
     var playedColor = this._nextColor();
@@ -645,14 +645,8 @@ GameState.prototype = {
       boardSize: boardSize
     };
 
-    // TODO: haaacks.
-    // this is needed because the game
-    // has to calculate the liberties
-    // of the stone _we're playing right now_,
-    // but "before" it's been played
-    game._moves.push(new GameState(moveInfo));
-    var hasKoPoint = capturedPositions.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
-    game._moves.pop();
+    var withPlayedPoint = new GameState(moveInfo);
+    var hasKoPoint = capturedPositions.length == 1 && withPlayedPoint.groupAt(y, x).length == 1 && withPlayedPoint.inAtari(y, x);
 
     if (hasKoPoint) {
       moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
@@ -694,6 +688,10 @@ GameState.prototype = {
     });
 
     return _utils2.default.unique(emptyPoints).length;
+  },
+
+  inAtari: function inAtari(y, x) {
+    return this.libertiesAt(y, x) == 1;
   },
 
   neighborsFor: function neighborsFor(y, x) {
@@ -938,7 +936,7 @@ Game.prototype = {
       return false;
     }
 
-    this._moves.push(this.currentMove().playAt(y, x, this));
+    this._moves.push(this.currentMove().playAt(y, x));
     this.render();
 
     return true;
@@ -957,7 +955,7 @@ Game.prototype = {
   },
 
   inAtari: function inAtari(y, x) {
-    return this.libertiesAt(y, x) == 1;
+    return this.currentMove().inAtari(y, x);
   },
 
   wouldBeSuicide: function wouldBeSuicide(y, x) {

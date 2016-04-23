@@ -80,7 +80,7 @@ GameState.prototype = {
     return newState;
   },
 
-  playAt: function(y, x, game) {
+  playAt: function(y, x) {
     const playedColor = this._nextColor();
     const capturedPositions = this._capturesFrom(y, x, playedColor);
     let playedPoint = this.intersectionAt(y, x);
@@ -110,14 +110,8 @@ GameState.prototype = {
       boardSize: boardSize
     };
 
-    // TODO: haaacks.
-    // this is needed because the game
-    // has to calculate the liberties
-    // of the stone _we're playing right now_,
-    // but "before" it's been played
-    game._moves.push(new GameState(moveInfo));
-    const hasKoPoint = capturedPositions.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
-    game._moves.pop();
+    const withPlayedPoint = new GameState(moveInfo);
+    const hasKoPoint = capturedPositions.length == 1 && withPlayedPoint.groupAt(y, x).length == 1 && withPlayedPoint.inAtari(y, x);
 
     if (hasKoPoint) {
       moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
@@ -150,6 +144,10 @@ GameState.prototype = {
     });
 
     return utils.unique(emptyPoints).length;
+  },
+
+  inAtari: function(y, x) {
+    return this.libertiesAt(y, x) == 1;
   },
 
   neighborsFor: function(y, x) {
