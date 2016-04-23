@@ -33,7 +33,7 @@ function DOMRenderer(game, boardElement) {
   this.game = game;
   this.boardElement = boardElement;
   this.grid = [];
-  this.touchEventFired = false;
+  this._touchEventFired = false;
 
   this.setup = function () {
     var renderer = this;
@@ -166,7 +166,7 @@ function DOMRenderer(game, boardElement) {
 
     _utils2.default.flatten(renderer.grid).forEach(function (intersectionEl) {
       _utils2.default.addEventListener(intersectionEl, "touchstart", function () {
-        renderer.touchEventFired = true;
+        renderer._touchEventFired = true;
       });
 
       _utils2.default.addEventListener(intersectionEl, "mouseenter", function () {
@@ -199,7 +199,7 @@ function DOMRenderer(game, boardElement) {
         // or it is and the user is zoomed in,
         // or it's game over and we're marking stones dead,
         // then don't use the zoom/double-select system.
-        if (!renderer.touchEventFired || document.body.clientWidth / window.innerWidth > 1 || game.isOver()) {
+        if (!renderer._touchEventFired || document.body.clientWidth / window.innerWidth > 1 || game.isOver()) {
           playOrToggleDead();
           return;
         }
