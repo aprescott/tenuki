@@ -402,19 +402,23 @@ export default function DOMRenderer(game, boardElement) {
     const game = this.game;
 
     const intersectionEl = renderer.grid[intersection.y][intersection.x];
-    intersectionEl.className = ""; // be clear that we're removing all classes
-    utils.addClass(intersectionEl, "intersection");
+
+    let classes = ["intersection"];
 
     if (intersection.isEmpty()) {
-      utils.addClass(intersectionEl, "empty");
+      classes.push("empty");
     } else {
-      utils.addClass(intersectionEl, "stone");
+      classes.push("stone");
 
       if (intersection.isBlack()) {
-        utils.addClass(intersectionEl, "black");
+        classes.push("black");
       } else {
-        utils.addClass(intersectionEl, "white");
+        classes.push("white");
       }
+    }
+
+    if (intersectionEl.className != classes.join(" ")) {
+      intersectionEl.className = classes.join(" ");
     }
   };
 

@@ -427,19 +427,23 @@ function DOMRenderer(game, boardElement) {
     var game = this.game;
 
     var intersectionEl = renderer.grid[intersection.y][intersection.x];
-    intersectionEl.className = ""; // be clear that we're removing all classes
-    _utils2.default.addClass(intersectionEl, "intersection");
+
+    var classes = ["intersection"];
 
     if (intersection.isEmpty()) {
-      _utils2.default.addClass(intersectionEl, "empty");
+      classes.push("empty");
     } else {
-      _utils2.default.addClass(intersectionEl, "stone");
+      classes.push("stone");
 
       if (intersection.isBlack()) {
-        _utils2.default.addClass(intersectionEl, "black");
+        classes.push("black");
       } else {
-        _utils2.default.addClass(intersectionEl, "white");
+        classes.push("white");
       }
+    }
+
+    if (intersectionEl.className != classes.join(" ")) {
+      intersectionEl.className = classes.join(" ");
     }
   };
 
