@@ -465,6 +465,7 @@ function DOMRenderer(game, boardElement) {
   };
 };
 
+
 },{"./utils":7}],3:[function(require,module,exports){
 "use strict";
 
@@ -994,6 +995,7 @@ function Game(boardElement, boardSize) {
   };
 };
 
+
 },{"./dom-renderer":2,"./intersection":4,"./null-renderer":5,"./scorer":6,"./utils":7}],4:[function(require,module,exports){
 "use strict";
 
@@ -1050,6 +1052,7 @@ function Intersection(y, x) {
   };
 };
 
+
 },{}],5:[function(require,module,exports){
 "use strict";
 
@@ -1061,6 +1064,7 @@ function NullRenderer() {
   this.setup = function () {};
   this.render = function () {};
 }
+
 
 },{}],6:[function(require,module,exports){
 "use strict";
@@ -1097,6 +1101,7 @@ exports.default = {
     };
   }
 };
+
 
 },{}],7:[function(require,module,exports){
 "use strict";
@@ -1165,6 +1170,7 @@ exports.default = {
     return unique;
   }
 };
+
 
 },{}]},{},[1])(1)
 });

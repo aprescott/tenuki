@@ -4,7 +4,7 @@
   "description": "A JavaScript implementation of the game of go/baduk/weiqi with full support for HTML rendering out of the box.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --require source-map-support/register"
   },
   "repository": {
     "type": "git",
@@ -33,7 +33,8 @@
     "chai": "^3.5.0",
     "clean-css": "*",
     "mocha": "^2.4.5",
-    "uglify-js": "*"
+    "uglify-js": "*",
+    "source-map-support": "^0.4.0"
   },
   "engines": {
     "node": ">=4.0.0"
