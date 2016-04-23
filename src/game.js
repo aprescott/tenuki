@@ -4,8 +4,9 @@ import NullRenderer from "./null-renderer";
 import Intersection from "./intersection";
 import Scorer from "./scorer";
 
-export default function Game(boardElement, boardSize) {
-  this.boardSize = boardSize || 19;
+export default function Game(boardElement) {
+  this._defaultBoardSize = 19;
+  this.boardSize = null;
   this.intersectionGrid = [];
   this.currentPlayer = "black";
   this.moves = [];
@@ -20,7 +21,13 @@ export default function Game(boardElement, boardSize) {
   this.deadPoints = [];
   this.territoryPoints = { black: [], white: [] };
 
-  this.setup = function() {
+  this._configureOptions = function({ boardSize = this._defaultBoardSize } = {}) {
+    this.boardSize = boardSize;
+  };
+
+  this.setup = function(options) {
+    this._configureOptions(options);
+
     if (this.boardSize > 19) {
       throw "cannot generate a board size greater than 19";
     }

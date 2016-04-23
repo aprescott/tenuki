@@ -31,8 +31,11 @@ gameTest.setup();
 
 resetTests = window.resetTests = function () {
   boardElementTest.innerHTML = "";
-  gameTest = new tenuki.Game(boardElementTest, gameTest.boardSize);
-  gameTest.setup();
+  var boardSize = gameTest.boardSize;
+  gameTest = new tenuki.Game(boardElementTest);
+  gameTest.setup({
+    boardSize: boardSize
+  });
 };
 
 // black and white alternate
