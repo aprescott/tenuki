@@ -88,8 +88,11 @@ For coordinate markers, indicating positions A19 through T1, add `data-include-c
 You can pass a second argument to `new tenuki.Game` to specify the board size. If no size is given, the default of 19 is used. All sizes between 1x1 and 19x19 should work. Sizes above 19x19 will error and won't render.
 
 ```js
+var game = new tenuki.Game(boardElement);
 // use a 13x13 board
-new tenuki.Game(boardElement, 13);
+game.setup({
+  boardSize: 13
+});
 ```
 
 # Browser support
@@ -107,7 +110,6 @@ The full browser environment is not required in order to use the representation 
 ```js
 var Game = require("tenuki").Game;
 game = new Game();
-// game.boardSize = 13;
 game.setup();
 ```
 
