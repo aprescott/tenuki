@@ -54,6 +54,7 @@ Game.prototype = {
     return this.xCoordinateFor(x) + this.yCoordinateFor(y);
   },
 
+  // TODO: currentMove().color != currentPlayer() and this is weird.
   currentPlayer: function() {
     return this.currentMove()._nextColor();
   },
