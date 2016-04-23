@@ -376,7 +376,7 @@ function DOMRenderer(game, boardElement) {
     var renderer = this;
     var game = renderer.game;
     var currentMove = game.currentMove();
-    var points = currentMove ? currentMove.points : game.intersections();
+    var points = game.intersections();
 
     points.forEach(function (intersection) {
       renderer.renderIntersection(intersection);
@@ -402,16 +402,19 @@ function DOMRenderer(game, boardElement) {
       _utils2.default.addClass(renderer.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
     }
 
-    if (!currentMove.pass) {
+    // TODO: this is awkward naming. it seems like currentState should be separate from currentMove?
+    // but then you constantly have to check currentMove everywhere?
+    // what if there were a flag that represented the presence of y and x?
+    if (currentMove.y && currentMove.x) {
       _utils2.default.addClass(renderer.grid[currentMove.y][currentMove.x], "marker");
     }
   };
 
   this.updateCurrentPlayer = function () {
     var game = this.game;
-    var previousPlayer = game.currentPlayer == "black" ? "white" : "black";
+    var previousPlayer = game.currentPlayer() == "black" ? "white" : "black";
     _utils2.default.removeClass(boardElement, previousPlayer + "-to-play");
-    _utils2.default.addClass(boardElement, game.currentPlayer + "-to-play");
+    _utils2.default.addClass(boardElement, game.currentPlayer() + "-to-play");
 
     if (game.isOver()) {
       _utils2.default.removeClass(boardElement, "black-to-play");
@@ -503,6 +506,10 @@ var _utils = require("./utils");
 
 var _utils2 = _interopRequireDefault(_utils);
 
+var _intersection = require("./intersection");
+
+var _intersection2 = _interopRequireDefault(_intersection);
+
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
@@ -536,6 +543,114 @@ var GameState = function GameState(_ref) {
 };
 
 GameState.prototype = {
+  _nextColor: function _nextColor() {
+    if (!this.color || this.color == "white") {
+      return "black";
+    } else {
+      return "white";
+    }
+  },
+
+  _capturesFrom: function _capturesFrom(y, x, color) {
+    var _this = this;
+
+    var point = this.intersectionAt(y, x);
+
+    var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
+      // TODO: this value of 1 is potentially weird.
+      // we're checking against the move before the stone we just played
+      // where this space is not occupied yet. things should possibly be
+      // reworked.
+      return !neighbor.isEmpty() && neighbor.value != color && _this.libertiesAt(neighbor.y, neighbor.x) == 1;
+    });
+
+    var capturedStones = _utils2.default.flatMap(capturedNeighbors, function (neighbor) {
+      return _this.groupAt(neighbor.y, neighbor.x);
+    });
+
+    return capturedStones;
+  },
+
+  _updatePoint: function _updatePoint(intersection, points, color) {
+    var index = points.indexOf(intersection);
+
+    var prefix = points.slice(0, index);
+    var newPoint = new _intersection2.default(intersection.y, intersection.x, color);
+    var suffix = points.slice(index + 1);
+
+    return prefix.concat([newPoint], suffix);
+  },
+
+  _removePoint: function _removePoint(intersection, points) {
+    return this._updatePoint(intersection, points, "empty");
+  },
+
+  playPass: function playPass() {
+    var newState = new GameState({
+      y: null,
+      x: null,
+      color: this._nextColor(),
+      pass: true,
+      points: this.points,
+      blackStonesCaptured: this.blackStonesCaptured,
+      whiteStonesCaptured: this.whiteStonesCaptured,
+      capturedPositions: [],
+      koPoint: null,
+      boardSize: this.boardSize
+    });
+
+    return newState;
+  },
+
+  playAt: function playAt(y, x, game) {
+    var _this2 = this;
+
+    var playedColor = this._nextColor();
+    var capturedPositions = this._capturesFrom(y, x, playedColor);
+    var playedPoint = this.intersectionAt(y, x);
+    var newPoints = this.points;
+
+    capturedPositions.forEach(function (i) {
+      newPoints = _this2._removePoint(i, newPoints);
+    });
+
+    newPoints = this._updatePoint(playedPoint, newPoints, playedColor);
+
+    var newTotalBlackCaptured = this.blackStonesCaptured + (playedColor == "black" ? 0 : capturedPositions.length);
+    var newTotalWhiteCaptured = this.whiteStonesCaptured + (playedColor == "white" ? 0 : capturedPositions.length);
+
+    var boardSize = this.boardSize;
+
+    var moveInfo = {
+      y: y,
+      x: x,
+      color: playedColor,
+      pass: false,
+      points: newPoints,
+      blackStonesCaptured: newTotalBlackCaptured,
+      whiteStonesCaptured: newTotalWhiteCaptured,
+      capturedPositions: capturedPositions,
+      boardSize: boardSize
+    };
+
+    // TODO: haaacks.
+    // this is needed because the game
+    // has to calculate the liberties
+    // of the stone _we're playing right now_,
+    // but "before" it's been played
+    game.moves.push(new GameState(moveInfo));
+    var hasKoPoint = capturedPositions.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
+    game.moves.pop();
+
+    if (hasKoPoint) {
+      moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
+    } else {
+      moveInfo["koPoint"] = null;
+    }
+
+    return new GameState(moveInfo);
+  },
+
   intersectionAt: function intersectionAt(y, x) {
     // TODO: this is going to lead to mn-ish performance. not good.
     return this.points.filter(function (i) {
@@ -556,6 +671,24 @@ GameState.prototype = {
     var _ = _partitionTraverse2[1];
 
     return group;
+  },
+
+  libertiesAt: function libertiesAt(y, x) {
+    var _this3 = this;
+
+    var point = this.intersectionAt(y, x);
+
+    var emptyPoints = _utils2.default.flatMap(this.groupAt(point.y, point.x), function (groupPoint) {
+      return _this3.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
+        return intersection.isEmpty();
+      });
+    });
+
+    // this is not great, but we need a representation that will be unique-able,
+    // and Y-X does the job.
+    return _utils2.default.unique(emptyPoints.map(function (emptyPoint) {
+      return emptyPoint.y + "-" + emptyPoint.x;
+    })).length;
   },
 
   neighborsFor: function neighborsFor(y, x) {
@@ -628,9 +761,7 @@ GameState.prototype = {
 
     var checkedPoints = [];
     var territoryPoints = { black: [], white: [] };
-    var pointsToCheck = emptyOrDeadPoints.map(function (i) {
-      return i.duplicate();
-    });
+    var pointsToCheck = emptyOrDeadPoints;
 
     while (pointsToCheck.length > 0) {
       var nextPoint = pointsToCheck.pop();
@@ -676,55 +807,21 @@ GameState.prototype = {
   }
 };
 
-GameState.forPlay = function (game, y, x, captures) {
-  var moveInfo = {
-    y: y,
-    x: x,
-    color: game.currentPlayer,
-    pass: false,
-    points: _utils2.default.flatten(game._intersectionGrid).map(function (i) {
-      return i.duplicate();
-    }),
-    blackStonesCaptured: (game.currentMove() && game.currentMove().blackStonesCaptured || 0) + (game.isBlackPlaying() ? 0 : captures.length),
-    whiteStonesCaptured: (game.currentMove() && game.currentMove().whiteStonesCaptured || 0) + (game.isWhitePlaying() ? 0 : captures.length),
-    capturedPositions: captures.map(function (capturedStone) {
-      return { y: capturedStone.y, x: capturedStone.x, color: game.isBlackPlaying() ? "white" : "black" };
-    }),
-    boardSize: game.boardSize
-  };
+GameState.initialFor = function (game) {
+  var emptyPoints = [];
 
-  // TODO: haaacks.
-  // this is needed because the game
-  // has to calculate the liberties
-  // of the stone _we're playing right now_,
-  // but "before" it's been played
-  game.moves.push(new GameState(moveInfo));
-  var hasKoPoint = captures.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
-  game.moves.pop();
-
-  if (hasKoPoint) {
-    var koPoint = captures[0];
-    moveInfo["koPoint"] = { y: koPoint.y, x: koPoint.x };
-  } else {
-    moveInfo["koPoint"] = null;
+  for (var y = 0; y < game.boardSize; y++) {
+    for (var x = 0; x < game.boardSize; x++) {
+      var intersection = new _intersection2.default(y, x);
+      emptyPoints[y] || (emptyPoints[y] = []);
+      emptyPoints[y][x] = intersection;
+    }
   }
 
-  return new GameState(moveInfo);
-};
-
-GameState.forPass = function (game) {
   return new GameState({
-    y: null,
-    x: null,
-    color: game.currentPlayer,
-    pass: true,
-    points: _utils2.default.flatten(game._intersectionGrid).map(function (i) {
-      return i.duplicate();
-    }),
-    blackStonesCaptured: game.currentMove() && game.currentMove().blackStonesCaptured || 0,
-    whiteStonesCaptured: game.currentMove() && game.currentMove().whiteStonesCaptured || 0,
-    capturedPositions: [],
-    koPoint: null,
+    points: Object.freeze(_utils2.default.flatten(emptyPoints)),
+    blackStonesCaptured: 0,
+    whiteStonesCaptured: 0,
     boardSize: game.boardSize
   });
 };
@@ -732,7 +829,7 @@ GameState.forPass = function (game) {
 exports.default = GameState;
 
 
-},{"./utils":8}],4:[function(require,module,exports){
+},{"./intersection":5,"./utils":8}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -771,8 +868,6 @@ function _interopRequireDefault(obj) {
 function Game(boardElement) {
   this._defaultBoardSize = 19;
   this.boardSize = null;
-  this._intersectionGrid = [];
-  this.currentPlayer = "black";
   this.moves = [];
   this.renderer = boardElement ? new _domRenderer2.default(this, boardElement) : new _nullRenderer2.default();
   this.callbacks = {
@@ -797,35 +892,15 @@ function Game(boardElement) {
     }
 
     this.renderer.setup();
-
-    for (var y = 0; y < this.boardSize; y++) {
-      for (var x = 0; x < this.boardSize; x++) {
-        var intersection = new _intersection2.default(y, x);
-        this._intersectionGrid[y] || (this._intersectionGrid[y] = []);
-        this._intersectionGrid[y][x] = intersection;
-      }
-    }
-
     this.render();
   };
 
   this.intersectionAt = function (y, x) {
-    // TODO: should there be a specific state (through currentState()?)
-    // that describes the empty board so that this sort of check isn't
-    // necessary and that way we don't need to rely on _intersectionGrid ?
-    if (this.currentMove()) {
-      return this.currentMove().intersectionAt(y, x);
-    } else {
-      return this._intersectionGrid[y][x];
-    }
+    return this.currentMove().intersectionAt(y, x);
   };
 
   this.intersections = function () {
-    if (this.currentMove()) {
-      return this.currentMove().points;
-    } else {
-      return _utils2.default.flatten(this._intersectionGrid);
-    }
+    return this.currentMove().points;
   };
 
   this.yCoordinateFor = function (y) {
@@ -842,22 +917,8 @@ function Game(boardElement) {
     return this.xCoordinateFor(x) + this.yCoordinateFor(y);
   };
 
-  this.stateFor = function (y, x, captures) {
-    return _gameState2.default.forPlay(this, y, x, captures);
-  };
-
-  this.whiteAt = function (y, x) {
-    this._intersectionGrid[y][x].setWhite();
-  };
-  this.blackAt = function (y, x) {
-    this._intersectionGrid[y][x].setBlack();
-  };
-  this.removeAt = function (y, x) {
-    this._intersectionGrid[y][x].setEmpty();
-  };
-
-  this.stateForPass = function () {
-    return _gameState2.default.forPass(this);
+  this.currentPlayer = function () {
+    return this.currentMove()._nextColor();
   };
 
   this.playAt = function (y, x) {
@@ -865,26 +926,22 @@ function Game(boardElement) {
       return false;
     }
 
-    this[this.currentPlayer + "At"](y, x);
-
-    var captures = this.clearCapturesFor(y, x);
-
-    this.moves.push(this.stateFor(y, x, captures));
+    this.moves.push(this.currentMove().playAt(y, x, this));
     this.render();
 
     return true;
   };
 
   this.currentMove = function () {
-    return this.moves[this.moves.length - 1];
+    return this.moves[this.moves.length - 1] || _gameState2.default.initialFor(this);
   };
 
   this.isWhitePlaying = function () {
-    return this.currentPlayer == "white";
+    return this.currentPlayer() == "white";
   };
 
   this.isBlackPlaying = function () {
-    return this.currentPlayer == "black";
+    return this.currentPlayer() == "black";
   };
 
   this.inAtari = function (y, x) {
@@ -906,12 +963,12 @@ function Game(boardElement) {
     var suicide = true;
 
     var friendlyNeighbors = this.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
-      return neighbor.isOccupiedWith(_this.currentPlayer);
+      return neighbor.isOccupiedWith(_this.currentPlayer());
     });
 
     var someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
       var inAtari = _this.inAtari(neighbor.y, neighbor.x);
-      var friendly = neighbor.isOccupiedWith(_this.currentPlayer);
+      var friendly = neighbor.isOccupiedWith(_this.currentPlayer());
 
       return friendly && !inAtari;
     });
@@ -922,7 +979,7 @@ function Game(boardElement) {
 
     var someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
       var inAtari = _this.inAtari(neighbor.y, neighbor.x);
-      var enemy = !neighbor.isOccupiedWith(_this.currentPlayer);
+      var enemy = !neighbor.isOccupiedWith(_this.currentPlayer());
 
       return enemy && inAtari;
     });
@@ -936,7 +993,7 @@ function Game(boardElement) {
 
   this.pass = function () {
     if (!this.isOver()) {
-      this.moves.push(this.stateForPass());
+      this.moves.push(this.currentMove().playPass());
       this.render();
     }
   };
@@ -985,21 +1042,7 @@ function Game(boardElement) {
   };
 
   this.libertiesAt = function (y, x) {
-    var _this3 = this;
-
-    var point = this.intersectionAt(y, x);
-
-    var emptyPoints = _utils2.default.flatMap(this.groupAt(point.y, point.x), function (groupPoint) {
-      return _this3.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
-        return intersection.isEmpty();
-      });
-    });
-
-    // this is not great, but we need a representation that will be unique-able,
-    // and Y-X does the job.
-    return _utils2.default.unique(emptyPoints.map(function (emptyPoint) {
-      return emptyPoint.y + "-" + emptyPoint.x;
-    })).length;
+    return this.currentMove().libertiesAt(y, x);
   };
 
   this.groupAt = function (y, x) {
@@ -1011,49 +1054,15 @@ function Game(boardElement) {
   };
 
   this.hasCapturesFor = function (y, x) {
-    var _this4 = this;
-
-    // TODO:
-    if (!this.currentMove()) {
-      return false;
-    }
+    var _this3 = this;
 
     var point = this.intersectionAt(y, x);
 
     var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && _this4.libertiesAt(neighbor.y, neighbor.x) == 0;
+      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && _this3.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
     return capturedNeighbors.length > 0;
-  };
-
-  this.clearCapturesFor = function (y, x) {
-    var _this5 = this;
-
-    // TODO:
-    if (!this.currentMove()) {
-      return [];
-    }
-
-    var point = this._intersectionGrid[y][x];
-
-    var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      // TODO: this value of 1 is potentially weird.
-      // we're checking against the move before the stone we just played
-      // where this space is not occupied yet. things should possibly be
-      // reworked.
-      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && _this5.libertiesAt(neighbor.y, neighbor.x) == 1;
-    });
-
-    var capturedStones = _utils2.default.flatMap(capturedNeighbors, function (neighbor) {
-      return _this5.groupAt(neighbor.y, neighbor.x);
-    });
-
-    capturedStones.forEach(function (capturedStone) {
-      _this5.removeAt(capturedStone.y, capturedStone.x);
-    });
-
-    return capturedStones;
   };
 
   this.isIllegalAt = function (y, x) {
@@ -1072,32 +1081,10 @@ function Game(boardElement) {
   };
 
   this.render = function () {
-    var _this6 = this;
-
     var currentMove = this.currentMove();
 
     if (!this.isOver()) {
       this.removeScoringState();
-    }
-
-    var points = currentMove ? currentMove.points : this.intersections();
-
-    points.forEach(function (intersection) {
-      if (!currentMove) {
-        intersection.setEmpty();
-      }
-
-      _this6._intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
-    });
-
-    if (!currentMove) {
-      this.currentPlayer = "black";
-    } else {
-      if (currentMove.color == "black") {
-        this.currentPlayer = "white";
-      } else {
-        this.currentPlayer = "black";
-      }
     }
 
     this.renderer.render();
@@ -1130,17 +1117,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = Intersection;
-function Intersection(y, x) {
+function Intersection(y, x, value) {
   this.y = y;
   this.x = x;
-  this.value = "empty";
-
-  this.duplicate = function () {
-    var duplicateIntersection = new Intersection(this.y, this.x);
-    duplicateIntersection.value = this.value;
-
-    return duplicateIntersection;
-  };
+  this.value = value || "empty";
 
   this.setWhite = function () {
     this.value = "white";
@@ -1177,6 +1157,8 @@ function Intersection(y, x) {
   this.sameColorAs = function (otherIntersection) {
     return this.value === otherIntersection.value;
   };
+
+  Object.freeze(this);
 };
 
 

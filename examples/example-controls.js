@@ -18,7 +18,7 @@ ExampleGameControls = function(element, game) {
 
     newGameInfo += "Move " + this.game.moves.length;
 
-    if (this.game.currentMove() && !this.game.currentMove().pass) {
+    if (this.game.currentMove().y && this.game.currentMove().x) {
       newGameInfo += " (" + this.game.coordinatesFor(this.game.currentMove().y, this.game.currentMove().x) + ")";
     }
 
@@ -26,17 +26,14 @@ ExampleGameControls = function(element, game) {
 
     var currentMove = this.game.currentMove();
 
-    if (currentMove) {
+    if (currentMove.pass) {
       var player = currentMove.color[0].toUpperCase() + currentMove.color.substr(1);
-
-      if (currentMove.pass) {
-        newGameInfo += player + " passed."
-      }
+      newGameInfo += player + " passed."
     }
 
     this.gameInfo.innerText = newGameInfo;
 
-    if (typeof currentMove != "undefined" && currentMove.pass) {
+    if (currentMove.pass) {
       var str = "";
 
       if (this.game.isOver()) {

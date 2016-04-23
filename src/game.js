@@ -8,8 +8,6 @@ import GameState from "./game-state";
 export default function Game(boardElement) {
   this._defaultBoardSize = 19;
   this.boardSize = null;
-  this._intersectionGrid = [];
-  this.currentPlayer = "black";
   this.moves = [];
   this.renderer = (boardElement ? new DOMRenderer(this, boardElement) : new NullRenderer());
   this.callbacks = {
@@ -29,35 +27,15 @@ export default function Game(boardElement) {
     }
 
     this.renderer.setup();
-
-    for (let y = 0; y < this.boardSize; y++) {
-      for (let x = 0; x < this.boardSize; x++) {
-        const intersection = new Intersection(y, x);
-        this._intersectionGrid[y] || (this._intersectionGrid[y] = []);
-        this._intersectionGrid[y][x] = intersection;
-      }
-    }
-
     this.render();
   };
 
   this.intersectionAt = function(y, x) {
-    // TODO: should there be a specific state (through currentState()?)
-    // that describes the empty board so that this sort of check isn't
-    // necessary and that way we don't need to rely on _intersectionGrid ?
-    if (this.currentMove()) {
-      return this.currentMove().intersectionAt(y, x);
-    } else {
-      return this._intersectionGrid[y][x];
-    }
+    return this.currentMove().intersectionAt(y, x);
   };
 
   this.intersections = function() {
-    if (this.currentMove()) {
-      return this.currentMove().points;
-    } else {
-      return utils.flatten(this._intersectionGrid);
-    }
+    return this.currentMove().points;
   };
 
   this.yCoordinateFor = function(y) {
@@ -74,22 +52,8 @@ export default function Game(boardElement) {
     return this.xCoordinateFor(x) + this.yCoordinateFor(y);
   };
 
-  this.stateFor = function(y, x, captures) {
-    return GameState.forPlay(this, y, x, captures);
-  };
-
-  this.whiteAt = function(y, x) {
-    this._intersectionGrid[y][x].setWhite();
-  };
-  this.blackAt = function(y, x) {
-    this._intersectionGrid[y][x].setBlack();
-  };
-  this.removeAt = function(y, x) {
-    this._intersectionGrid[y][x].setEmpty();
-  };
-
-  this.stateForPass = function() {
-    return GameState.forPass(this);
+  this.currentPlayer = function() {
+    return this.currentMove()._nextColor();
   };
 
   this.playAt = function(y, x) {
@@ -97,26 +61,22 @@ export default function Game(boardElement) {
       return false;
     }
 
-    this[this.currentPlayer + "At"](y, x);
-
-    const captures = this.clearCapturesFor(y, x);
-
-    this.moves.push(this.stateFor(y, x, captures));
+    this.moves.push(this.currentMove().playAt(y, x, this));
     this.render();
 
     return true;
   };
 
   this.currentMove = function() {
-    return this.moves[this.moves.length - 1];
+    return this.moves[this.moves.length - 1] || GameState.initialFor(this);
   };
 
   this.isWhitePlaying = function() {
-    return this.currentPlayer == "white";
+    return this.currentPlayer() == "white";
   };
 
   this.isBlackPlaying = function() {
-    return this.currentPlayer == "black";
+    return this.currentPlayer() == "black";
   };
 
   this.inAtari = function(y, x) {
@@ -133,11 +93,11 @@ export default function Game(boardElement) {
 
     let suicide = true;
 
-    const friendlyNeighbors = this.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isOccupiedWith(this.currentPlayer));
+    const friendlyNeighbors = this.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isOccupiedWith(this.currentPlayer()));
 
     const someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
       const inAtari = this.inAtari(neighbor.y, neighbor.x);
-      const friendly = neighbor.isOccupiedWith(this.currentPlayer);
+      const friendly = neighbor.isOccupiedWith(this.currentPlayer());
 
       return friendly && !inAtari;
     });
@@ -148,7 +108,7 @@ export default function Game(boardElement) {
 
     const someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
       const inAtari = this.inAtari(neighbor.y, neighbor.x);
-      const enemy = !neighbor.isOccupiedWith(this.currentPlayer);
+      const enemy = !neighbor.isOccupiedWith(this.currentPlayer());
 
       return enemy && inAtari;
     });
@@ -162,7 +122,7 @@ export default function Game(boardElement) {
 
   this.pass = function() {
     if (!this.isOver()) {
-      this.moves.push(this.stateForPass())
+      this.moves.push(this.currentMove().playPass())
       this.render();
     }
   };
@@ -205,15 +165,7 @@ export default function Game(boardElement) {
   };
 
   this.libertiesAt = function(y, x) {
-    const point = this.intersectionAt(y, x);
-
-    const emptyPoints = utils.flatMap(this.groupAt(point.y, point.x), groupPoint => {
-      return this.neighborsFor(groupPoint.y, groupPoint.x).filter(intersection => intersection.isEmpty());
-    });
-
-    // this is not great, but we need a representation that will be unique-able,
-    // and Y-X does the job.
-    return utils.unique(emptyPoints.map(emptyPoint => emptyPoint.y + "-" + emptyPoint.x)).length;
+    return this.currentMove().libertiesAt(y, x);
   };
 
   this.groupAt = function(y, x) {
@@ -225,11 +177,6 @@ export default function Game(boardElement) {
   };
 
   this.hasCapturesFor = function(y, x) {
-    // TODO:
-    if (!this.currentMove()) {
-      return false;
-    }
-
     const point = this.intersectionAt(y, x);
 
     const capturedNeighbors = this.neighborsFor(point.y, point.x).filter(neighbor => {
@@ -237,31 +184,6 @@ export default function Game(boardElement) {
     });
 
     return capturedNeighbors.length > 0
-  };
-
-  this.clearCapturesFor = function(y, x) {
-    // TODO:
-    if (!this.currentMove()) {
-      return [];
-    }
-
-    const point = this._intersectionGrid[y][x];
-
-    const capturedNeighbors = this.neighborsFor(point.y, point.x).filter(neighbor => {
-      // TODO: this value of 1 is potentially weird.
-      // we're checking against the move before the stone we just played
-      // where this space is not occupied yet. things should possibly be
-      // reworked.
-      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && this.libertiesAt(neighbor.y, neighbor.x) == 1;
-    });
-
-    const capturedStones = utils.flatMap(capturedNeighbors, neighbor => this.groupAt(neighbor.y, neighbor.x));
-
-    capturedStones.forEach(capturedStone => {
-      this.removeAt(capturedStone.y, capturedStone.x);
-    });
-
-    return capturedStones;
   };
 
   this.isIllegalAt = function(y, x) {
@@ -284,26 +206,6 @@ export default function Game(boardElement) {
 
     if (!this.isOver()) {
       this.removeScoringState();
-    }
-
-    const points = currentMove ? currentMove.points : this.intersections();
-
-    points.forEach(intersection => {
-      if (!currentMove) {
-        intersection.setEmpty();
-      }
-
-      this._intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
-    });
-
-    if (!currentMove) {
-      this.currentPlayer = "black";
-    } else {
-      if (currentMove.color == "black") {
-        this.currentPlayer = "white";
-      } else {
-        this.currentPlayer = "black";
-      }
     }
 
     this.renderer.render();

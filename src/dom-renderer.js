@@ -351,7 +351,7 @@ export default function DOMRenderer(game, boardElement) {
     const renderer = this;
     const game = renderer.game;
     const currentMove = game.currentMove();
-    const points = currentMove ? currentMove.points : game.intersections();
+    const points = game.intersections();
 
     points.forEach(function(intersection) {
       renderer.renderIntersection(intersection);
@@ -377,16 +377,19 @@ export default function DOMRenderer(game, boardElement) {
       utils.addClass(renderer.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
     }
 
-    if (!currentMove.pass) {
+    // TODO: this is awkward naming. it seems like currentState should be separate from currentMove?
+    // but then you constantly have to check currentMove everywhere?
+    // what if there were a flag that represented the presence of y and x?
+    if (currentMove.y && currentMove.x) {
       utils.addClass(renderer.grid[currentMove.y][currentMove.x], "marker");
     }
   };
 
   this.updateCurrentPlayer = function() {
     const game = this.game;
-    const previousPlayer = (game.currentPlayer == "black" ? "white" : "black");
+    const previousPlayer = (game.currentPlayer() == "black" ? "white" : "black");
     utils.removeClass(boardElement, previousPlayer + "-to-play");
-    utils.addClass(boardElement, game.currentPlayer + "-to-play");
+    utils.addClass(boardElement, game.currentPlayer() + "-to-play");
 
     if (game.isOver()) {
       utils.removeClass(boardElement, "black-to-play");

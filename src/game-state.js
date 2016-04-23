@@ -1,4 +1,5 @@
 import utils from "./utils";
+import Intersection from "./intersection";
 
 const GameState = function({ y, x, color, pass, points, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
   this.y = y;
@@ -18,6 +19,108 @@ const GameState = function({ y, x, color, pass, points, blackStonesCaptured, whi
 };
 
 GameState.prototype = {
+  _nextColor: function() {
+    if (!this.color || this.color == "white") {
+      return "black";
+    } else {
+      return "white";
+    }
+  },
+
+  _capturesFrom: function(y, x, color) {
+    const point = this.intersectionAt(y, x);
+
+    const capturedNeighbors = this.neighborsFor(point.y, point.x).filter(neighbor => {
+      // TODO: this value of 1 is potentially weird.
+      // we're checking against the move before the stone we just played
+      // where this space is not occupied yet. things should possibly be
+      // reworked.
+      return !neighbor.isEmpty() && neighbor.value != color && this.libertiesAt(neighbor.y, neighbor.x) == 1;
+    });
+
+    const capturedStones = utils.flatMap(capturedNeighbors, neighbor => this.groupAt(neighbor.y, neighbor.x));
+
+    return capturedStones;
+  },
+
+  _updatePoint: function(intersection, points, color) {
+    const index = points.indexOf(intersection);
+
+    const prefix = points.slice(0, index);
+    const newPoint = new Intersection(intersection.y, intersection.x, color);
+    const suffix = points.slice(index + 1);
+
+    return prefix.concat([newPoint], suffix);
+  },
+
+  _removePoint: function(intersection, points) {
+    return this._updatePoint(intersection, points, "empty");
+  },
+
+  playPass: function() {
+    const newState = new GameState({
+      y: null,
+      x: null,
+      color: this._nextColor(),
+      pass: true,
+      points: this.points,
+      blackStonesCaptured: this.blackStonesCaptured,
+      whiteStonesCaptured: this.whiteStonesCaptured,
+      capturedPositions: [],
+      koPoint: null,
+      boardSize: this.boardSize
+    });
+
+    return newState;
+  },
+
+  playAt: function(y, x, game) {
+    const playedColor = this._nextColor();
+    const capturedPositions = this._capturesFrom(y, x, playedColor);
+    let playedPoint = this.intersectionAt(y, x);
+    let newPoints = this.points;
+
+    capturedPositions.forEach(i => {
+      newPoints = this._removePoint(i, newPoints);
+    });
+
+    newPoints = this._updatePoint(playedPoint, newPoints, playedColor);
+
+    const newTotalBlackCaptured = this.blackStonesCaptured + (playedColor == "black" ? 0 : capturedPositions.length);
+    const newTotalWhiteCaptured = this.whiteStonesCaptured + (playedColor == "white" ? 0 : capturedPositions.length);
+
+    const boardSize = this.boardSize;
+
+    const moveInfo = {
+      y: y,
+      x: x,
+      color: playedColor,
+      pass: false,
+      points: newPoints,
+      blackStonesCaptured: newTotalBlackCaptured,
+      whiteStonesCaptured: newTotalWhiteCaptured,
+      capturedPositions: capturedPositions,
+      boardSize: boardSize
+    };
+
+    // TODO: haaacks.
+    // this is needed because the game
+    // has to calculate the liberties
+    // of the stone _we're playing right now_,
+    // but "before" it's been played
+    game.moves.push(new GameState(moveInfo));
+    const hasKoPoint = capturedPositions.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
+    game.moves.pop();
+
+    if (hasKoPoint) {
+      moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
+    } else {
+      moveInfo["koPoint"] = null;
+    }
+
+    return new GameState(moveInfo);
+  },
+
   intersectionAt: function(y, x) {
     // TODO: this is going to lead to mn-ish performance. not good.
     return this.points.filter(i => i.y == y && i.x == x)[0];
@@ -31,6 +134,18 @@ GameState.prototype = {
     });
 
     return group;
+  },
+
+  libertiesAt: function(y, x) {
+    const point = this.intersectionAt(y, x);
+
+    const emptyPoints = utils.flatMap(this.groupAt(point.y, point.x), groupPoint => {
+      return this.neighborsFor(groupPoint.y, groupPoint.x).filter(intersection => intersection.isEmpty());
+    });
+
+    // this is not great, but we need a representation that will be unique-able,
+    // and Y-X does the job.
+    return utils.unique(emptyPoints.map(emptyPoint => emptyPoint.y + "-" + emptyPoint.x)).length;
   },
 
   neighborsFor: function(y, x) {
@@ -103,7 +218,7 @@ GameState.prototype = {
 
     var checkedPoints = [];
     var territoryPoints = { black: [], white: [] };
-    var pointsToCheck = emptyOrDeadPoints.map(i => i.duplicate());
+    var pointsToCheck = emptyOrDeadPoints;
 
     while (pointsToCheck.length > 0) {
       const nextPoint = pointsToCheck.pop();
@@ -136,51 +251,23 @@ GameState.prototype = {
   }
 }
 
-GameState.forPlay = function(game, y, x, captures) {
-  const moveInfo = {
-    y: y,
-    x: x,
-    color: game.currentPlayer,
-    pass: false,
-    points: utils.flatten(game._intersectionGrid).map(i => i.duplicate()),
-    blackStonesCaptured: ((game.currentMove() && game.currentMove().blackStonesCaptured) || 0) + (game.isBlackPlaying() ? 0 : captures.length),
-    whiteStonesCaptured: ((game.currentMove() && game.currentMove().whiteStonesCaptured) || 0) + (game.isWhitePlaying() ? 0 : captures.length),
-    capturedPositions: captures.map(capturedStone => ({ y: capturedStone.y, x: capturedStone.x, color: (game.isBlackPlaying() ? "white" : "black") })),
-    boardSize: game.boardSize
-  };
+GameState.initialFor = function(game) {
+  let emptyPoints = [];
 
-  // TODO: haaacks.
-  // this is needed because the game
-  // has to calculate the liberties
-  // of the stone _we're playing right now_,
-  // but "before" it's been played
-  game.moves.push(new GameState(moveInfo));
-  const hasKoPoint = captures.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
-  game.moves.pop();
-
-  if (hasKoPoint) {
-    const koPoint = captures[0];
-    moveInfo["koPoint"] = { y: koPoint.y, x: koPoint.x };
-  } else {
-    moveInfo["koPoint"] = null;
+  for (let y = 0; y < game.boardSize; y++) {
+    for (let x = 0; x < game.boardSize; x++) {
+      const intersection = new Intersection(y, x);
+      emptyPoints[y] || (emptyPoints[y] = []);
+      emptyPoints[y][x] = intersection;
+    }
   }
 
-  return new GameState(moveInfo);
-};
-
-GameState.forPass = function(game) {
   return new GameState({
-    y: null,
-    x: null,
-    color: game.currentPlayer,
-    pass: true,
-    points: utils.flatten(game._intersectionGrid).map(i => i.duplicate()),
-    blackStonesCaptured: ((game.currentMove() && game.currentMove().blackStonesCaptured) || 0),
-    whiteStonesCaptured: ((game.currentMove() && game.currentMove().whiteStonesCaptured) || 0),
-    capturedPositions: [],
-    koPoint: null,
+    points: Object.freeze(utils.flatten(emptyPoints)),
+    blackStonesCaptured: 0,
+    whiteStonesCaptured: 0,
     boardSize: game.boardSize
   });
-};
+}
 
 export default GameState;

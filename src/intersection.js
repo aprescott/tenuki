@@ -1,14 +1,7 @@
-export default function Intersection(y, x) {
+export default function Intersection(y, x, value) {
   this.y = y;
   this.x = x;
-  this.value = "empty";
-
-  this.duplicate = function() {
-    const duplicateIntersection = new Intersection(this.y, this.x);
-    duplicateIntersection.value = this.value;
-
-    return duplicateIntersection;
-  }
+  this.value = value || "empty";
 
   this.setWhite = function() {
     this.value = "white";
@@ -45,4 +38,6 @@ export default function Intersection(y, x) {
   this.sameColorAs = function(otherIntersection) {
     return this.value === otherIntersection.value;
   };
+
+  Object.freeze(this);
 };
