@@ -968,10 +968,6 @@ Game.prototype = {
 
     var suicide = true;
 
-    var friendlyNeighbors = this.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
-      return neighbor.isOccupiedWith(_this.currentPlayer());
-    });
-
     var someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
       var inAtari = _this.inAtari(neighbor.y, neighbor.x);
       var friendly = neighbor.isOccupiedWith(_this.currentPlayer());

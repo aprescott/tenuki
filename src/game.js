@@ -95,8 +95,6 @@ Game.prototype = {
 
     let suicide = true;
 
-    const friendlyNeighbors = this.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isOccupiedWith(this.currentPlayer()));
-
     const someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
       const inAtari = this.inAtari(neighbor.y, neighbor.x);
       const friendly = neighbor.isOccupiedWith(this.currentPlayer());
