@@ -966,8 +966,6 @@ Game.prototype = {
       return false;
     }
 
-    var suicide = true;
-
     var someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
       var inAtari = _this.inAtari(neighbor.y, neighbor.x);
       var friendly = neighbor.isOccupiedWith(_this.currentPlayer());
@@ -976,7 +974,7 @@ Game.prototype = {
     });
 
     if (someFriendlyNotInAtari) {
-      suicide = false;
+      return false;
     }
 
     var someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
@@ -987,10 +985,10 @@ Game.prototype = {
     });
 
     if (someEnemyInAtari) {
-      suicide = false;
+      return false;
     }
 
-    return suicide;
+    return true;
   },
 
   pass: function pass() {

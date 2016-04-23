@@ -93,8 +93,6 @@ Game.prototype = {
       return false;
     }
 
-    let suicide = true;
-
     const someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
       const inAtari = this.inAtari(neighbor.y, neighbor.x);
       const friendly = neighbor.isOccupiedWith(this.currentPlayer());
@@ -103,7 +101,7 @@ Game.prototype = {
     });
 
     if (someFriendlyNotInAtari) {
-      suicide = false;
+      return false;
     }
 
     const someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
@@ -114,10 +112,10 @@ Game.prototype = {
     });
 
     if (someEnemyInAtari) {
-      suicide = false;
+      return false;
     }
 
-    return suicide;
+    return true;
   },
 
   pass: function() {
