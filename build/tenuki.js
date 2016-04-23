@@ -882,7 +882,7 @@ var Game = function Game(boardElement) {
   this.callbacks = {
     postRender: function postRender() {}
   };
-  this.deadPoints = [];
+  this._deadPoints = [];
 };
 
 Game.prototype = {
@@ -1022,11 +1022,11 @@ Game.prototype = {
 
     this.groupAt(y, x).forEach(function (intersection) {
       if (alreadyDead) {
-        _this2.deadPoints = _this2.deadPoints.filter(function (dead) {
+        _this2._deadPoints = _this2._deadPoints.filter(function (dead) {
           return !(dead.y == intersection.y && dead.x == intersection.x);
         });
       } else {
-        _this2.deadPoints.push({ y: intersection.y, x: intersection.x });
+        _this2._deadPoints.push({ y: intersection.y, x: intersection.x });
       }
     });
 
@@ -1034,7 +1034,7 @@ Game.prototype = {
   },
 
   isDeadAt: function isDeadAt(y, x) {
-    return this.deadPoints.some(function (dead) {
+    return this._deadPoints.some(function (dead) {
       return dead.y == y && dead.x == x;
     });
   },
@@ -1098,7 +1098,7 @@ Game.prototype = {
   },
 
   removeScoringState: function removeScoringState() {
-    this.deadPoints = [];
+    this._deadPoints = [];
   },
 
   territory: function territory() {
@@ -1182,10 +1182,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
   territoryResultFor: function territoryResultFor(game) {
-    var blackDeadAsCaptures = game.deadPoints.filter(function (deadPoint) {
+    var blackDeadAsCaptures = game._deadPoints.filter(function (deadPoint) {
       return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack();
     });
-    var whiteDeadAsCaptures = game.deadPoints.filter(function (deadPoint) {
+    var whiteDeadAsCaptures = game._deadPoints.filter(function (deadPoint) {
       return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite();
     });
 

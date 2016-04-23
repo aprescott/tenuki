@@ -1,7 +1,7 @@
 export default {
   territoryResultFor: function(game) {
-    const blackDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
-    const whiteDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
+    const blackDeadAsCaptures = game._deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
+    const whiteDeadAsCaptures = game._deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
 
     return {
       black: game.territory().black.length + game.currentMove().whiteStonesCaptured + whiteDeadAsCaptures.length,

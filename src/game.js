@@ -13,7 +13,7 @@ const Game = function(boardElement) {
   this.callbacks = {
     postRender: function() {}
   };
-  this.deadPoints = [];
+  this._deadPoints = [];
 };
 
 Game.prototype = {
@@ -142,9 +142,9 @@ Game.prototype = {
 
     this.groupAt(y, x).forEach(intersection => {
       if (alreadyDead) {
-        this.deadPoints = this.deadPoints.filter(dead => !(dead.y == intersection.y && dead.x == intersection.x));
+        this._deadPoints = this._deadPoints.filter(dead => !(dead.y == intersection.y && dead.x == intersection.x));
       } else {
-        this.deadPoints.push({ y: intersection.y, x: intersection.x });
+        this._deadPoints.push({ y: intersection.y, x: intersection.x });
       }
     });
 
@@ -152,7 +152,7 @@ Game.prototype = {
   },
 
   isDeadAt: function(y, x) {
-    return this.deadPoints.some(dead => dead.y == y && dead.x == x);
+    return this._deadPoints.some(dead => dead.y == y && dead.x == x);
   },
 
   territoryScore: function() {
@@ -212,7 +212,7 @@ Game.prototype = {
   },
 
   removeScoringState: function() {
-    this.deadPoints = [];
+    this._deadPoints = [];
   },
 
   territory: function() {
