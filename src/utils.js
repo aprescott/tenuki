@@ -1,6 +1,4 @@
-"use strict";
-
-const utils = {
+export default {
   flatten: function(ary) {
     return ary.reduce((a, b) => a.concat(b));
   },
@@ -59,5 +57,3 @@ const utils = {
     return unique;
   }
 };
-
-module.exports = utils;

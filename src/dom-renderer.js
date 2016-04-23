@@ -1,8 +1,6 @@
-"use strict";
+import utils from "./utils";
 
-const utils = require("./utils");
-
-const DOMRenderer = function(game, boardElement) {
+export default function DOMRenderer(game, boardElement) {
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
   this.BASE_MARGIN = this.INTERSECTION_GAP_SIZE - 10;
@@ -441,5 +439,3 @@ const DOMRenderer = function(game, boardElement) {
     });
   };
 };
-
-module.exports = DOMRenderer;

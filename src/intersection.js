@@ -1,6 +1,4 @@
-"use strict";
-
-const Intersection = function(y, x) {
+export default function Intersection(y, x) {
   this.y = y;
   this.x = x;
   this.value = "empty";
@@ -48,5 +46,3 @@ const Intersection = function(y, x) {
     return this.value === otherIntersection.value;
   };
 };
-
-module.exports = Intersection;

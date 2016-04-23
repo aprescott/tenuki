@@ -1,6 +1,4 @@
-"use strict";
-
-const Scorer = {
+export default {
   territoryResultFor: function(game) {
     const blackDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
     const whiteDeadAsCaptures = game.deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
@@ -21,5 +19,3 @@ const Scorer = {
     };
   }
 };
-
-module.exports = Scorer;

@@ -6,15 +6,26 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.tenuki = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-exports.Game = require("./lib/game");
-exports.utils = require("./lib/utils");
+exports.Game = require("./lib/game").default;
+exports.utils = require("./lib/utils").default;
 
 },{"./lib/game":3,"./lib/utils":7}],2:[function(require,module,exports){
 "use strict";
 
-var utils = require("./utils");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DOMRenderer;
 
-var DOMRenderer = function DOMRenderer(game, boardElement) {
+var _utils = require("./utils");
+
+var _utils2 = _interopRequireDefault(_utils);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function DOMRenderer(game, boardElement) {
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
   this.BASE_MARGIN = this.INTERSECTION_GAP_SIZE - 10;
@@ -29,37 +40,37 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
     var game = renderer.game;
     var boardElement = this.boardElement;
 
-    var innerContainer = utils.createElement("div", { class: "tenuki-inner-container" });
+    var innerContainer = _utils2.default.createElement("div", { class: "tenuki-inner-container" });
     renderer.innerContainer = innerContainer;
-    utils.appendElement(boardElement, innerContainer);
+    _utils2.default.appendElement(boardElement, innerContainer);
 
-    var zoomContainer = utils.createElement("div", { class: "tenuki-zoom-container" });
+    var zoomContainer = _utils2.default.createElement("div", { class: "tenuki-zoom-container" });
     renderer.zoomContainer = zoomContainer;
-    utils.appendElement(innerContainer, zoomContainer);
+    _utils2.default.appendElement(innerContainer, zoomContainer);
 
-    utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines horizontal" }));
-    utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines vertical" }));
-    utils.appendElement(zoomContainer, utils.createElement("div", { class: "hoshi-points" }));
-    utils.appendElement(zoomContainer, utils.createElement("div", { class: "intersections" }));
+    _utils2.default.appendElement(zoomContainer, _utils2.default.createElement("div", { class: "lines horizontal" }));
+    _utils2.default.appendElement(zoomContainer, _utils2.default.createElement("div", { class: "lines vertical" }));
+    _utils2.default.appendElement(zoomContainer, _utils2.default.createElement("div", { class: "hoshi-points" }));
+    _utils2.default.appendElement(zoomContainer, _utils2.default.createElement("div", { class: "intersections" }));
 
-    renderer.cancelZoomElement = utils.createElement("div", { class: "cancel-zoom" });
-    var cancelZoomBackdrop = utils.createElement("div", { class: "cancel-zoom-backdrop" });
-    utils.addEventListener(renderer.cancelZoomElement, "click", function (e) {
+    renderer.cancelZoomElement = _utils2.default.createElement("div", { class: "cancel-zoom" });
+    var cancelZoomBackdrop = _utils2.default.createElement("div", { class: "cancel-zoom-backdrop" });
+    _utils2.default.addEventListener(renderer.cancelZoomElement, "click", function (e) {
       renderer.zoomOut();
     });
-    utils.addEventListener(cancelZoomBackdrop, "click", function (e) {
+    _utils2.default.addEventListener(cancelZoomBackdrop, "click", function (e) {
       renderer.zoomOut();
     });
-    utils.appendElement(innerContainer, renderer.cancelZoomElement);
-    utils.appendElement(innerContainer, cancelZoomBackdrop);
+    _utils2.default.appendElement(innerContainer, renderer.cancelZoomElement);
+    _utils2.default.appendElement(innerContainer, cancelZoomBackdrop);
 
     if (game.boardSize < 7) {
       if (game.boardSize > 1 && game.boardSize % 2 == 1) {
-        var hoshi = utils.createElement("div", { class: "hoshi" });
+        var hoshi = _utils2.default.createElement("div", { class: "hoshi" });
         hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - 1) / 2 + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
         hoshi.style.left = hoshi.style.top;
 
-        utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
+        _utils2.default.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
       } else {
         // no hoshi
       }
@@ -72,7 +83,7 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
               continue;
             }
 
-            var _hoshi = utils.createElement("div", { class: "hoshi" });
+            var _hoshi = _utils2.default.createElement("div", { class: "hoshi" });
 
             if (hoshiY == 0) {
               _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
@@ -98,24 +109,24 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
               _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
-            utils.appendElement(boardElement.querySelector(".hoshi-points"), _hoshi);
+            _utils2.default.appendElement(boardElement.querySelector(".hoshi-points"), _hoshi);
           }
         }
       }
 
     for (var y = 0; y < game.boardSize; y++) {
-      var horizontalLine = utils.createElement("div", { class: "line horizontal" });
+      var horizontalLine = _utils2.default.createElement("div", { class: "line horizontal" });
       horizontalLine.setAttribute("data-left-gutter", game.yCoordinateFor(y));
-      utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
+      _utils2.default.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
 
-      var verticalLine = utils.createElement("div", { class: "line vertical" });
+      var verticalLine = _utils2.default.createElement("div", { class: "line vertical" });
       verticalLine.setAttribute("data-top-gutter", game.xCoordinateFor(y));
-      utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
+      _utils2.default.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
 
       for (var x = 0; x < game.boardSize; x++) {
-        var intersectionElement = utils.createElement("div", { class: "intersection empty" });
-        var highlightElement = utils.createElement("div", { class: "highlight" });
-        utils.appendElement(intersectionElement, highlightElement);
+        var intersectionElement = _utils2.default.createElement("div", { class: "intersection empty" });
+        var highlightElement = _utils2.default.createElement("div", { class: "highlight" });
+        _utils2.default.appendElement(intersectionElement, highlightElement);
 
         intersectionElement.setAttribute("data-position-x", x);
         intersectionElement.setAttribute("data-position-y", y);
@@ -124,7 +135,7 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
         intersectionElement.style.left = x * (renderer.INTERSECTION_GAP_SIZE + 1) + "px";
         intersectionElement.style.top = y * (renderer.INTERSECTION_GAP_SIZE + 1) + "px";
 
-        utils.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
+        _utils2.default.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
 
         renderer.grid[y] || (renderer.grid[y] = []);
         renderer.grid[y][x] = intersectionElement;
@@ -132,10 +143,10 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
     }
 
     // prevent the text-selection cursor
-    utils.addEventListener(boardElement.querySelector(".lines.horizontal"), "mousedown", function (e) {
+    _utils2.default.addEventListener(boardElement.querySelector(".lines.horizontal"), "mousedown", function (e) {
       e.preventDefault();
     });
-    utils.addEventListener(boardElement.querySelector(".lines.vertical"), "mousedown", function (e) {
+    _utils2.default.addEventListener(boardElement.querySelector(".lines.vertical"), "mousedown", function (e) {
       e.preventDefault();
     });
 
@@ -153,25 +164,25 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
     zoomContainer.style.width = boardWidth + "px";
     zoomContainer.style.height = boardHeight + "px";
 
-    utils.flatten(renderer.grid).forEach(function (intersectionEl) {
-      utils.addEventListener(intersectionEl, "touchstart", function () {
+    _utils2.default.flatten(renderer.grid).forEach(function (intersectionEl) {
+      _utils2.default.addEventListener(intersectionEl, "touchstart", function () {
         renderer.touchEventFired = true;
       });
 
-      utils.addEventListener(intersectionEl, "mouseenter", function () {
+      _utils2.default.addEventListener(intersectionEl, "mouseenter", function () {
         var intersectionElement = this;
 
-        utils.addClass(intersectionElement, "hovered");
+        _utils2.default.addClass(intersectionElement, "hovered");
       });
 
-      utils.addEventListener(intersectionEl, "mouseleave", function () {
+      _utils2.default.addEventListener(intersectionEl, "mouseleave", function () {
         var intersectionElement = this;
 
-        utils.removeClass(intersectionElement, "hovered");
+        _utils2.default.removeClass(intersectionElement, "hovered");
         game.renderer.resetTouchedPoint();
       });
 
-      utils.addEventListener(intersectionEl, "click", function () {
+      _utils2.default.addEventListener(intersectionEl, "click", function () {
         var intersectionElement = this;
         var playedYPosition = Number(intersectionElement.getAttribute("data-position-y"));
         var playedXPosition = Number(intersectionElement.getAttribute("data-position-x"));
@@ -210,7 +221,7 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
     var scale = Math.min(scaleX, scaleY);
 
     if (scale > 0 && scale < 1) {
-      utils.addClass(boardElement, "tenuki-scaled");
+      _utils2.default.addClass(boardElement, "tenuki-scaled");
       innerContainer.style["transform-origin"] = "top left";
       innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
 
@@ -219,12 +230,12 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
       boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
     }
 
-    utils.addEventListener(boardElement, "touchstart", function (event) {
+    _utils2.default.addEventListener(boardElement, "touchstart", function (event) {
       if (event.touches.length > 1) {
         return;
       }
 
-      if (!utils.hasClass(boardElement, "tenuki-zoomed")) {
+      if (!_utils2.default.hasClass(boardElement, "tenuki-zoomed")) {
         return;
       }
 
@@ -236,12 +247,12 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
       zoomContainer.style.transition = "none";
     });
 
-    utils.addEventListener(innerContainer, "touchend", function (event) {
+    _utils2.default.addEventListener(innerContainer, "touchend", function (event) {
       if (event.touches.length > 1) {
         return;
       }
 
-      if (!utils.hasClass(boardElement, "tenuki-zoomed")) {
+      if (!_utils2.default.hasClass(boardElement, "tenuki-zoomed")) {
         return;
       }
 
@@ -255,12 +266,12 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
       renderer.moveInProgress = false;
     });
 
-    utils.addEventListener(innerContainer, "touchmove", function (event) {
+    _utils2.default.addEventListener(innerContainer, "touchmove", function (event) {
       if (event.touches.length > 1) {
         return;
       }
 
-      if (!utils.hasClass(boardElement, "tenuki-zoomed")) {
+      if (!_utils2.default.hasClass(boardElement, "tenuki-zoomed")) {
         return true;
       }
 
@@ -309,7 +320,7 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
 
     renderer.touchedPoint = intersectionElement;
 
-    if (utils.hasClass(boardElement, "tenuki-scaled")) {
+    if (_utils2.default.hasClass(boardElement, "tenuki-scaled")) {
       var top = intersectionElement.offsetTop;
       var left = intersectionElement.offsetLeft;
 
@@ -320,8 +331,8 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
       renderer.translateY = translateY;
       renderer.translateX = translateX;
 
-      utils.addClass(renderer.cancelZoomElement, "visible");
-      utils.addClass(renderer.boardElement, "tenuki-zoomed");
+      _utils2.default.addClass(renderer.cancelZoomElement, "visible");
+      _utils2.default.addClass(renderer.boardElement, "tenuki-zoomed");
     }
   };
 
@@ -345,8 +356,8 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
     renderer.lastTranslateX = null;
     renderer.lastTranslateY = null;
 
-    utils.removeClass(renderer.cancelZoomElement, "visible");
-    utils.removeClass(renderer.boardElement, "tenuki-zoomed");
+    _utils2.default.removeClass(renderer.cancelZoomElement, "visible");
+    _utils2.default.removeClass(renderer.boardElement, "tenuki-zoomed");
   };
 
   this.render = function () {
@@ -383,28 +394,28 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
 
     game.intersections().forEach(function (intersection) {
       if (game.wouldBeSuicide(intersection.y, intersection.x)) {
-        utils.addClass(renderer.grid[intersection.y][intersection.x], "suicide");
+        _utils2.default.addClass(renderer.grid[intersection.y][intersection.x], "suicide");
       }
     });
 
     if (currentMove.koPoint) {
-      utils.addClass(renderer.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
+      _utils2.default.addClass(renderer.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
     }
 
     if (!currentMove.pass) {
-      utils.addClass(renderer.grid[currentMove.y][currentMove.x], "marker");
+      _utils2.default.addClass(renderer.grid[currentMove.y][currentMove.x], "marker");
     }
   };
 
   this.updateCurrentPlayer = function () {
     var game = this.game;
     var previousPlayer = game.currentPlayer == "black" ? "white" : "black";
-    utils.removeClass(boardElement, previousPlayer + "-to-play");
-    utils.addClass(boardElement, game.currentPlayer + "-to-play");
+    _utils2.default.removeClass(boardElement, previousPlayer + "-to-play");
+    _utils2.default.addClass(boardElement, game.currentPlayer + "-to-play");
 
     if (game.isOver()) {
-      utils.removeClass(boardElement, "black-to-play");
-      utils.removeClass(boardElement, "white-to-play");
+      _utils2.default.removeClass(boardElement, "black-to-play");
+      _utils2.default.removeClass(boardElement, "white-to-play");
     }
   };
 
@@ -414,17 +425,17 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
 
     var intersectionEl = renderer.grid[intersection.y][intersection.x];
     intersectionEl.className = ""; // be clear that we're removing all classes
-    utils.addClass(intersectionEl, "intersection");
+    _utils2.default.addClass(intersectionEl, "intersection");
 
     if (intersection.isEmpty()) {
-      utils.addClass(intersectionEl, "empty");
+      _utils2.default.addClass(intersectionEl, "empty");
     } else {
-      utils.addClass(intersectionEl, "stone");
+      _utils2.default.addClass(intersectionEl, "stone");
 
       if (intersection.isBlack()) {
-        utils.addClass(intersectionEl, "black");
+        _utils2.default.addClass(intersectionEl, "black");
       } else {
-        utils.addClass(intersectionEl, "white");
+        _utils2.default.addClass(intersectionEl, "white");
       }
     }
   };
@@ -434,38 +445,59 @@ var DOMRenderer = function DOMRenderer(game, boardElement) {
     var game = this.game;
 
     game.intersections().forEach(function (intersection) {
-      utils.removeClass(renderer.grid[intersection.y][intersection.x], "territory-black");
-      utils.removeClass(renderer.grid[intersection.y][intersection.x], "territory-white");
+      _utils2.default.removeClass(renderer.grid[intersection.y][intersection.x], "territory-black");
+      _utils2.default.removeClass(renderer.grid[intersection.y][intersection.x], "territory-white");
 
       if (game.isDeadAt(intersection.y, intersection.x)) {
-        utils.addClass(renderer.grid[intersection.y][intersection.x], "dead");
+        _utils2.default.addClass(renderer.grid[intersection.y][intersection.x], "dead");
       } else {
-        utils.removeClass(renderer.grid[intersection.y][intersection.x], "dead");
+        _utils2.default.removeClass(renderer.grid[intersection.y][intersection.x], "dead");
       }
     });
 
     game.territoryPoints.black.forEach(function (territoryPoint) {
-      utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-black");
+      _utils2.default.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-black");
     });
 
     game.territoryPoints.white.forEach(function (territoryPoint) {
-      utils.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-white");
+      _utils2.default.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
   };
 };
 
-module.exports = DOMRenderer;
-
 },{"./utils":7}],3:[function(require,module,exports){
 "use strict";
 
-var utils = require("./utils");
-var DOMRenderer = require("./dom-renderer");
-var NullRenderer = require("./null-renderer");
-var Intersection = require("./intersection");
-var Scorer = require("./scorer");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Game;
 
-var Game = function Game(boardElement, boardSize) {
+var _utils = require("./utils");
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _domRenderer = require("./dom-renderer");
+
+var _domRenderer2 = _interopRequireDefault(_domRenderer);
+
+var _nullRenderer = require("./null-renderer");
+
+var _nullRenderer2 = _interopRequireDefault(_nullRenderer);
+
+var _intersection = require("./intersection");
+
+var _intersection2 = _interopRequireDefault(_intersection);
+
+var _scorer = require("./scorer");
+
+var _scorer2 = _interopRequireDefault(_scorer);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function Game(boardElement, boardSize) {
   this.boardSize = boardSize || 19;
   this.intersectionGrid = [];
   this.currentPlayer = "black";
@@ -474,7 +506,7 @@ var Game = function Game(boardElement, boardSize) {
     black: 0,
     white: 0
   };
-  this.renderer = boardElement ? new DOMRenderer(this, boardElement) : new NullRenderer();
+  this.renderer = boardElement ? new _domRenderer2.default(this, boardElement) : new _nullRenderer2.default();
   this.callbacks = {
     postRender: function postRender() {}
   };
@@ -490,7 +522,7 @@ var Game = function Game(boardElement, boardSize) {
 
     for (var y = 0; y < this.boardSize; y++) {
       for (var x = 0; x < this.boardSize; x++) {
-        var intersection = new Intersection(y, x);
+        var intersection = new _intersection2.default(y, x);
         this.intersectionGrid[y] || (this.intersectionGrid[y] = []);
         this.intersectionGrid[y][x] = intersection;
       }
@@ -504,7 +536,7 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.intersections = function () {
-    return utils.flatten(this.intersectionGrid);
+    return _utils2.default.flatten(this.intersectionGrid);
   };
 
   this.yCoordinateFor = function (y) {
@@ -692,11 +724,11 @@ var Game = function Game(boardElement, boardSize) {
   };
 
   this.territoryScore = function () {
-    return Scorer.territoryResultFor(this);
+    return _scorer2.default.territoryResultFor(this);
   };
 
   this.areaScore = function () {
-    return Scorer.areaResultFor(this);
+    return _scorer2.default.areaResultFor(this);
   };
 
   this.isKoFrom = function (y, x, captures) {
@@ -710,7 +742,7 @@ var Game = function Game(boardElement, boardSize) {
 
     var point = this.intersectionAt(y, x);
 
-    var emptyPoints = utils.flatMap(this.groupAt(point.y, point.x), function (groupPoint) {
+    var emptyPoints = _utils2.default.flatMap(this.groupAt(point.y, point.x), function (groupPoint) {
       return _this4.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
         return intersection.isEmpty();
       });
@@ -718,7 +750,7 @@ var Game = function Game(boardElement, boardSize) {
 
     // this is not great, but we need a representation that will be unique-able,
     // and Y-X does the job.
-    return utils.unique(emptyPoints.map(function (emptyPoint) {
+    return _utils2.default.unique(emptyPoints.map(function (emptyPoint) {
       return emptyPoint.y + "-" + emptyPoint.x;
     })).length;
   };
@@ -776,7 +808,7 @@ var Game = function Game(boardElement, boardSize) {
       return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && _this6.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
-    var capturedStones = utils.flatMap(capturedNeighbors, function (neighbor) {
+    var capturedStones = _utils2.default.flatMap(capturedNeighbors, function (neighbor) {
       return _this6.groupAt(neighbor.y, neighbor.x);
     });
 
@@ -929,7 +961,7 @@ var Game = function Game(boardElement, boardSize) {
     var nonOccupiedPoints = partition[0];
     var occupiedPoints = partition[1];
 
-    var surroundingColors = utils.unique(occupiedPoints.map(function (occupiedPoint) {
+    var surroundingColors = _utils2.default.unique(occupiedPoints.map(function (occupiedPoint) {
       return occupiedPoint.value;
     }));
 
@@ -962,12 +994,14 @@ var Game = function Game(boardElement, boardSize) {
   };
 };
 
-module.exports = Game;
-
 },{"./dom-renderer":2,"./intersection":4,"./null-renderer":5,"./scorer":6,"./utils":7}],4:[function(require,module,exports){
 "use strict";
 
-var Intersection = function Intersection(y, x) {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Intersection;
+function Intersection(y, x) {
   this.y = y;
   this.x = x;
   this.value = "empty";
@@ -1016,22 +1050,25 @@ var Intersection = function Intersection(y, x) {
   };
 };
 
-module.exports = Intersection;
-
 },{}],5:[function(require,module,exports){
 "use strict";
 
-var NullRenderer = function NullRenderer() {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = NullRenderer;
+function NullRenderer() {
   this.setup = function () {};
   this.render = function () {};
-};
-
-module.exports = NullRenderer;
+}
 
 },{}],6:[function(require,module,exports){
 "use strict";
 
-var Scorer = {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
   territoryResultFor: function territoryResultFor(game) {
     var blackDeadAsCaptures = game.deadPoints.filter(function (deadPoint) {
       return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack();
@@ -1061,12 +1098,13 @@ var Scorer = {
   }
 };
 
-module.exports = Scorer;
-
 },{}],7:[function(require,module,exports){
 "use strict";
 
-var utils = {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
   flatten: function flatten(ary) {
     return ary.reduce(function (a, b) {
       return a.concat(b);
@@ -1127,8 +1165,6 @@ var utils = {
     return unique;
   }
 };
-
-module.exports = utils;
 
 },{}]},{},[1])(1)
 });

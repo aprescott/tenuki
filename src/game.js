@@ -1,12 +1,10 @@
-"use strict";
+import utils from "./utils";
+import DOMRenderer from "./dom-renderer";
+import NullRenderer from "./null-renderer";
+import Intersection from "./intersection";
+import Scorer from "./scorer";
 
-const utils = require("./utils");
-const DOMRenderer = require("./dom-renderer");
-const NullRenderer = require("./null-renderer");
-const Intersection = require("./intersection");
-const Scorer = require("./scorer");
-
-const Game = function(boardElement, boardSize) {
+export default function Game(boardElement, boardSize) {
   this.boardSize = boardSize || 19;
   this.intersectionGrid = [];
   this.currentPlayer = "black";
@@ -452,5 +450,3 @@ const Game = function(boardElement, boardSize) {
     this.render();
   };
 };
-
-module.exports = Game;
