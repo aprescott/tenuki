@@ -3,6 +3,7 @@ import DOMRenderer from "./dom-renderer";
 import NullRenderer from "./null-renderer";
 import Intersection from "./intersection";
 import Scorer from "./scorer";
+import GameState from "./game-state";
 
 export default function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -63,25 +64,7 @@ export default function Game(boardElement) {
   };
 
   this.stateFor = function(y, x, captures) {
-    const moveInfo = {
-      y: y,
-      x: x,
-      color: this.currentPlayer,
-      pass: false,
-      points: this.intersections().map(i => i.duplicate()),
-      blackStonesCaptured: ((this.currentMove() && this.currentMove().blackStonesCaptured) || 0) + (this.isBlackPlaying() ? 0 : captures.length),
-      whiteStonesCaptured: ((this.currentMove() && this.currentMove().whiteStonesCaptured) || 0) + (this.isWhitePlaying() ? 0 : captures.length),
-      capturedPositions: captures.map(capturedStone => ({ y: capturedStone.y, x: capturedStone.x, color: (this.isBlackPlaying() ? "white" : "black") }))
-    };
-
-    if (this.isKoFrom(y, x, captures)) {
-      moveInfo["koPoint"] = { y: captures[0].y, x: captures[0].x };
-    } else {
-      moveInfo["koPoint"] = null;
-    }
-
-    Object.freeze(moveInfo);
-    return moveInfo;
+    return GameState.forPlay(this, y, x, captures);
   };
 
   this.whiteAt = function(y, x) {
@@ -95,19 +78,7 @@ export default function Game(boardElement) {
   };
 
   this.stateForPass = function() {
-    const moveInfo = {
-      y: null,
-      x: null,
-      color: this.currentPlayer,
-      pass: true,
-      points: this.intersections().map(i => i.duplicate()),
-      blackStonesCaptured: ((this.currentMove() && this.currentMove().blackStonesCaptured) || 0),
-      whiteStonesCaptured: ((this.currentMove() && this.currentMove().whiteStonesCaptured) || 0),
-      capturedPositions: []
-    };
-
-    Object.freeze(moveInfo);
-    return moveInfo;
+    return GameState.forPass(this);
   };
 
   this.playAt = function(y, x) {
@@ -220,12 +191,6 @@ export default function Game(boardElement) {
 
   this.areaScore = function() {
     return Scorer.areaResultFor(this);
-  };
-
-  this.isKoFrom = function(y, x, captures) {
-    const point = this.intersectionAt(y, x);
-
-    return captures.length == 1 && this.groupAt(point.y, point.x).length == 1 && this.inAtari(point.y, point.x);
   };
 
   this.libertiesAt = function(y, x) {

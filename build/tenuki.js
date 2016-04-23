@@ -9,7 +9,7 @@
 exports.Game = require("./lib/game").default;
 exports.utils = require("./lib/utils").default;
 
-},{"./lib/game":3,"./lib/utils":7}],2:[function(require,module,exports){
+},{"./lib/game":4,"./lib/utils":8}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -466,7 +466,84 @@ function DOMRenderer(game, boardElement) {
 };
 
 
-},{"./utils":7}],3:[function(require,module,exports){
+},{"./utils":8}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var GameState = function GameState(_ref) {
+  var y = _ref.y;
+  var x = _ref.x;
+  var color = _ref.color;
+  var pass = _ref.pass;
+  var points = _ref.points;
+  var blackStonesCaptured = _ref.blackStonesCaptured;
+  var whiteStonesCaptured = _ref.whiteStonesCaptured;
+  var capturedPositions = _ref.capturedPositions;
+  var koPoint = _ref.koPoint;
+
+  this.y = y;
+  this.x = x;
+  this.color = color;
+  this.pass = pass;
+  this.points = points;
+  this.blackStonesCaptured = blackStonesCaptured;
+  this.whiteStonesCaptured = whiteStonesCaptured;
+  this.capturedPositions = capturedPositions;
+  this.koPoint = koPoint;
+
+  Object.freeze(this);
+};
+
+GameState.forPlay = function (game, y, x, captures) {
+  var moveInfo = {
+    y: y,
+    x: x,
+    color: game.currentPlayer,
+    pass: false,
+    points: game.intersections().map(function (i) {
+      return i.duplicate();
+    }),
+    blackStonesCaptured: (game.currentMove() && game.currentMove().blackStonesCaptured || 0) + (game.isBlackPlaying() ? 0 : captures.length),
+    whiteStonesCaptured: (game.currentMove() && game.currentMove().whiteStonesCaptured || 0) + (game.isWhitePlaying() ? 0 : captures.length),
+    capturedPositions: captures.map(function (capturedStone) {
+      return { y: capturedStone.y, x: capturedStone.x, color: game.isBlackPlaying() ? "white" : "black" };
+    })
+  };
+
+  var hasKoPoint = captures.length == 1 && game.groupAt(y, x).length == 1 && game.inAtari(y, x);
+
+  if (hasKoPoint) {
+    var koPoint = captures[0];
+    moveInfo["koPoint"] = { y: koPoint.y, x: koPoint.x };
+  } else {
+    moveInfo["koPoint"] = null;
+  }
+
+  return new GameState(moveInfo);
+};
+
+GameState.forPass = function (game) {
+  return new GameState({
+    y: null,
+    x: null,
+    color: game.currentPlayer,
+    pass: true,
+    points: game.intersections().map(function (i) {
+      return i.duplicate();
+    }),
+    blackStonesCaptured: game.currentMove() && game.currentMove().blackStonesCaptured || 0,
+    whiteStonesCaptured: game.currentMove() && game.currentMove().whiteStonesCaptured || 0,
+    capturedPositions: [],
+    koPoint: null
+  });
+};
+
+exports.default = GameState;
+
+
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -520,6 +597,10 @@ var _intersection2 = _interopRequireDefault(_intersection);
 var _scorer = require("./scorer");
 
 var _scorer2 = _interopRequireDefault(_scorer);
+
+var _gameState = require("./game-state");
+
+var _gameState2 = _interopRequireDefault(_gameState);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
@@ -589,31 +670,7 @@ function Game(boardElement) {
   };
 
   this.stateFor = function (y, x, captures) {
-    var _this = this;
-
-    var moveInfo = {
-      y: y,
-      x: x,
-      color: this.currentPlayer,
-      pass: false,
-      points: this.intersections().map(function (i) {
-        return i.duplicate();
-      }),
-      blackStonesCaptured: (this.currentMove() && this.currentMove().blackStonesCaptured || 0) + (this.isBlackPlaying() ? 0 : captures.length),
-      whiteStonesCaptured: (this.currentMove() && this.currentMove().whiteStonesCaptured || 0) + (this.isWhitePlaying() ? 0 : captures.length),
-      capturedPositions: captures.map(function (capturedStone) {
-        return { y: capturedStone.y, x: capturedStone.x, color: _this.isBlackPlaying() ? "white" : "black" };
-      })
-    };
-
-    if (this.isKoFrom(y, x, captures)) {
-      moveInfo["koPoint"] = { y: captures[0].y, x: captures[0].x };
-    } else {
-      moveInfo["koPoint"] = null;
-    }
-
-    Object.freeze(moveInfo);
-    return moveInfo;
+    return _gameState2.default.forPlay(this, y, x, captures);
   };
 
   this.whiteAt = function (y, x) {
@@ -627,21 +684,7 @@ function Game(boardElement) {
   };
 
   this.stateForPass = function () {
-    var moveInfo = {
-      y: null,
-      x: null,
-      color: this.currentPlayer,
-      pass: true,
-      points: this.intersections().map(function (i) {
-        return i.duplicate();
-      }),
-      blackStonesCaptured: this.currentMove() && this.currentMove().blackStonesCaptured || 0,
-      whiteStonesCaptured: this.currentMove() && this.currentMove().whiteStonesCaptured || 0,
-      capturedPositions: []
-    };
-
-    Object.freeze(moveInfo);
-    return moveInfo;
+    return _gameState2.default.forPass(this);
   };
 
   this.playAt = function (y, x) {
@@ -676,7 +719,7 @@ function Game(boardElement) {
   };
 
   this.wouldBeSuicide = function (y, x) {
-    var _this2 = this;
+    var _this = this;
 
     var intersection = this.intersectionAt(y, x);
     var surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
@@ -690,12 +733,12 @@ function Game(boardElement) {
     var suicide = true;
 
     var friendlyNeighbors = this.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
-      return neighbor.isOccupiedWith(_this2.currentPlayer);
+      return neighbor.isOccupiedWith(_this.currentPlayer);
     });
 
     var someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
-      var inAtari = _this2.inAtari(neighbor.y, neighbor.x);
-      var friendly = neighbor.isOccupiedWith(_this2.currentPlayer);
+      var inAtari = _this.inAtari(neighbor.y, neighbor.x);
+      var friendly = neighbor.isOccupiedWith(_this.currentPlayer);
 
       return friendly && !inAtari;
     });
@@ -705,8 +748,8 @@ function Game(boardElement) {
     }
 
     var someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
-      var inAtari = _this2.inAtari(neighbor.y, neighbor.x);
-      var enemy = !neighbor.isOccupiedWith(_this2.currentPlayer);
+      var inAtari = _this.inAtari(neighbor.y, neighbor.x);
+      var enemy = !neighbor.isOccupiedWith(_this.currentPlayer);
 
       return enemy && inAtari;
     });
@@ -737,17 +780,17 @@ function Game(boardElement) {
   };
 
   this.toggleDeadAt = function (y, x) {
-    var _this3 = this;
+    var _this2 = this;
 
     var alreadyDead = this.isDeadAt(y, x);
 
     this.groupAt(y, x).forEach(function (intersection) {
       if (alreadyDead) {
-        _this3.deadPoints = _this3.deadPoints.filter(function (dead) {
+        _this2.deadPoints = _this2.deadPoints.filter(function (dead) {
           return !(dead.y == intersection.y && dead.x == intersection.x);
         });
       } else {
-        _this3.deadPoints.push({ y: intersection.y, x: intersection.x });
+        _this2.deadPoints.push({ y: intersection.y, x: intersection.x });
       }
     });
 
@@ -768,19 +811,13 @@ function Game(boardElement) {
     return _scorer2.default.areaResultFor(this);
   };
 
-  this.isKoFrom = function (y, x, captures) {
-    var point = this.intersectionAt(y, x);
-
-    return captures.length == 1 && this.groupAt(point.y, point.x).length == 1 && this.inAtari(point.y, point.x);
-  };
-
   this.libertiesAt = function (y, x) {
-    var _this4 = this;
+    var _this3 = this;
 
     var point = this.intersectionAt(y, x);
 
     var emptyPoints = _utils2.default.flatMap(this.groupAt(point.y, point.x), function (groupPoint) {
-      return _this4.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
+      return _this3.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
         return intersection.isEmpty();
       });
     });
@@ -830,32 +867,32 @@ function Game(boardElement) {
   };
 
   this.hasCapturesFor = function (y, x) {
-    var _this5 = this;
+    var _this4 = this;
 
     var point = this.intersectionAt(y, x);
 
     var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && _this5.libertiesAt(neighbor.y, neighbor.x) == 0;
+      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && _this4.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
     return capturedNeighbors.length > 0;
   };
 
   this.clearCapturesFor = function (y, x) {
-    var _this6 = this;
+    var _this5 = this;
 
     var point = this.intersectionAt(y, x);
 
     var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && _this6.libertiesAt(neighbor.y, neighbor.x) == 0;
+      return !neighbor.isEmpty() && !neighbor.sameColorAs(point) && _this5.libertiesAt(neighbor.y, neighbor.x) == 0;
     });
 
     var capturedStones = _utils2.default.flatMap(capturedNeighbors, function (neighbor) {
-      return _this6.groupAt(neighbor.y, neighbor.x);
+      return _this5.groupAt(neighbor.y, neighbor.x);
     });
 
     capturedStones.forEach(function (capturedStone) {
-      _this6.removeAt(capturedStone.y, capturedStone.x);
+      _this5.removeAt(capturedStone.y, capturedStone.x);
     });
 
     return capturedStones;
@@ -877,7 +914,7 @@ function Game(boardElement) {
   };
 
   this.render = function () {
-    var _this7 = this;
+    var _this6 = this;
 
     var currentMove = this.currentMove();
 
@@ -892,7 +929,7 @@ function Game(boardElement) {
         intersection.setEmpty();
       }
 
-      _this7._intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
+      _this6._intersectionGrid[intersection.y][intersection.x] = intersection.duplicate();
     });
 
     if (!currentMove) {
@@ -951,10 +988,10 @@ function Game(boardElement) {
   };
 
   this.territory = function () {
-    var _this8 = this;
+    var _this7 = this;
 
     var emptyOrDeadPoints = this.intersections().filter(function (intersection) {
-      return intersection.isEmpty() || _this8.isDeadAt(intersection.y, intersection.x);
+      return intersection.isEmpty() || _this7.isDeadAt(intersection.y, intersection.x);
     });
 
     if (!this.isOver() || emptyOrDeadPoints.length == 0) {
@@ -986,12 +1023,12 @@ function Game(boardElement) {
   };
 
   this.checkTerritoryStartingAt = function (y, x, territoryPoints) {
-    var _this9 = this;
+    var _this8 = this;
 
     var startingPoint = this.intersectionAt(y, x);
 
     var _partitionTraverse3 = this.partitionTraverse(startingPoint, function (neighbor) {
-      return neighbor.isEmpty() || _this9.isDeadAt(neighbor.y, neighbor.x);
+      return neighbor.isEmpty() || _this8.isDeadAt(neighbor.y, neighbor.x);
     });
 
     var _partitionTraverse4 = _slicedToArray(_partitionTraverse3, 2);
@@ -1019,7 +1056,7 @@ function Game(boardElement) {
 };
 
 
-},{"./dom-renderer":2,"./intersection":4,"./null-renderer":5,"./scorer":6,"./utils":7}],4:[function(require,module,exports){
+},{"./dom-renderer":2,"./game-state":3,"./intersection":5,"./null-renderer":6,"./scorer":7,"./utils":8}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1076,7 +1113,7 @@ function Intersection(y, x) {
 };
 
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1089,7 +1126,7 @@ function NullRenderer() {
 }
 
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1126,7 +1163,7 @@ exports.default = {
 };
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
