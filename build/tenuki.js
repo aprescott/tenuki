@@ -652,10 +652,7 @@ GameState.prototype = {
   },
 
   intersectionAt: function intersectionAt(y, x) {
-    // TODO: this is going to lead to mn-ish performance. not good.
-    return this.points.filter(function (i) {
-      return i.y == y && i.x == x;
-    })[0];
+    return this.points[y * this.boardSize + x];
   },
 
   groupAt: function groupAt(y, x) {
