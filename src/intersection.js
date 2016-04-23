@@ -1,43 +1,35 @@
-export default function Intersection(y, x, value) {
+const Intersection = function(y, x, value) {
   this.y = y;
   this.x = x;
   this.value = value || "empty";
 
-  this.setWhite = function() {
-    this.value = "white";
-  };
+  Object.freeze(this);
+};
 
-  this.isOccupiedWith = function(color) {
+Intersection.prototype = {
+  isOccupiedWith: function(color) {
     if (this.isEmpty()) {
       return false;
     }
 
     return this.value === color;
-  };
+  },
 
-  this.setBlack = function() {
-    this.value = "black";
-  };
-
-  this.isBlack = function() {
+  isBlack: function() {
     return this.value === "black";
-  };
+  },
 
-  this.isWhite = function() {
+  isWhite: function() {
     return this.value === "white";
-  }
+  },
 
-  this.setEmpty = function() {
-    this.value = "empty";
-  };
-
-  this.isEmpty = function() {
+  isEmpty: function() {
     return this.value === "empty";
-  };
+  },
 
-  this.sameColorAs = function(otherIntersection) {
+  sameColorAs: function(otherIntersection) {
     return this.value === otherIntersection.value;
-  };
-
-  Object.freeze(this);
+  },
 };
+
+export default Intersection;

@@ -1113,50 +1113,41 @@ function Game(boardElement) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = Intersection;
-function Intersection(y, x, value) {
+var Intersection = function Intersection(y, x, value) {
   this.y = y;
   this.x = x;
   this.value = value || "empty";
 
-  this.setWhite = function () {
-    this.value = "white";
-  };
+  Object.freeze(this);
+};
 
-  this.isOccupiedWith = function (color) {
+Intersection.prototype = {
+  isOccupiedWith: function isOccupiedWith(color) {
     if (this.isEmpty()) {
       return false;
     }
 
     return this.value === color;
-  };
+  },
 
-  this.setBlack = function () {
-    this.value = "black";
-  };
-
-  this.isBlack = function () {
+  isBlack: function isBlack() {
     return this.value === "black";
-  };
+  },
 
-  this.isWhite = function () {
+  isWhite: function isWhite() {
     return this.value === "white";
-  };
+  },
 
-  this.setEmpty = function () {
-    this.value = "empty";
-  };
-
-  this.isEmpty = function () {
+  isEmpty: function isEmpty() {
     return this.value === "empty";
-  };
+  },
 
-  this.sameColorAs = function (otherIntersection) {
+  sameColorAs: function sameColorAs(otherIntersection) {
     return this.value === otherIntersection.value;
-  };
-
-  Object.freeze(this);
+  }
 };
+
+exports.default = Intersection;
 
 
 },{}],6:[function(require,module,exports){
