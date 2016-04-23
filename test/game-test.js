@@ -29,4 +29,16 @@ describe("Game", function() {
       expect(game.coordinatesFor(9, 9)).to.equal("K10");
     });
   });
+
+  describe("move state", function() {
+    it("is immutable", function() {
+      var game = new Game();
+      game.setup();
+      game.playAt(2, 3);
+
+      expect(game.moves[0].y).to.equal(2);
+      game.moves[0].y = 10;
+      expect(game.moves[0].y).to.equal(2);
+    });
+  });
 });

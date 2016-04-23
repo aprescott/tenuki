@@ -612,6 +612,7 @@ function Game(boardElement) {
       moveInfo["koPoint"] = null;
     }
 
+    Object.freeze(moveInfo);
     return moveInfo;
   };
 
@@ -626,7 +627,7 @@ function Game(boardElement) {
   };
 
   this.stateForPass = function () {
-    return {
+    var moveInfo = {
       y: null,
       x: null,
       color: this.currentPlayer,
@@ -638,6 +639,9 @@ function Game(boardElement) {
       whiteStonesCaptured: this.currentMove() && this.currentMove().whiteStonesCaptured || 0,
       capturedPositions: []
     };
+
+    Object.freeze(moveInfo);
+    return moveInfo;
   };
 
   this.playAt = function (y, x) {

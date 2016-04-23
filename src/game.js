@@ -80,6 +80,7 @@ export default function Game(boardElement) {
       moveInfo["koPoint"] = null;
     }
 
+    Object.freeze(moveInfo);
     return moveInfo;
   };
 
@@ -94,7 +95,7 @@ export default function Game(boardElement) {
   };
 
   this.stateForPass = function() {
-    return {
+    const moveInfo = {
       y: null,
       x: null,
       color: this.currentPlayer,
@@ -104,6 +105,9 @@ export default function Game(boardElement) {
       whiteStonesCaptured: ((this.currentMove() && this.currentMove().whiteStonesCaptured) || 0),
       capturedPositions: []
     };
+
+    Object.freeze(moveInfo);
+    return moveInfo;
   };
 
   this.playAt = function(y, x) {
