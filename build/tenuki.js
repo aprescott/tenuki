@@ -805,18 +805,13 @@ GameState.prototype = {
 };
 
 GameState.initialFor = function (game) {
-  var emptyPoints = [];
-
-  for (var y = 0; y < game.boardSize; y++) {
-    for (var x = 0; x < game.boardSize; x++) {
-      var intersection = new _intersection2.default(y, x);
-      emptyPoints[y] || (emptyPoints[y] = []);
-      emptyPoints[y][x] = intersection;
-    }
-  }
+  var emptyPoints = Array.apply(null, Array(game.boardSize * game.boardSize));
+  emptyPoints = emptyPoints.map(function (x, i) {
+    return new _intersection2.default(Math.floor(i / game.boardSize), i % game.boardSize);
+  });
 
   return new GameState({
-    points: Object.freeze(_utils2.default.flatten(emptyPoints)),
+    points: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
     whiteStonesCaptured: 0,
     boardSize: game.boardSize
