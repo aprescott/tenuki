@@ -959,7 +959,6 @@ Game.prototype = {
     return this.xCoordinateFor(x) + this.yCoordinateFor(y);
   },
 
-  // TODO: boardState().color != currentPlayer() and this is weird.
   currentPlayer: function currentPlayer() {
     return this.boardState()._nextColor();
   },
