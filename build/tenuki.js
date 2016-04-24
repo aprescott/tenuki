@@ -92,9 +92,7 @@ BoardState.prototype = {
   _capturesFrom: function _capturesFrom(y, x, color) {
     var _this = this;
 
-    var point = this.intersectionAt(y, x);
-
-    var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
+    var capturedNeighbors = this.neighborsFor(y, x).filter(function (neighbor) {
       // TODO: this value of 1 is potentially weird.
       // we're checking against the move before the stone we just played
       // where this space is not occupied yet. things should possibly be
@@ -244,6 +242,53 @@ BoardState.prototype = {
     }
 
     return neighbors;
+  },
+
+  wouldBeSuicide: function wouldBeSuicide(y, x) {
+    var _this4 = this;
+
+    var intersection = this.intersectionAt(y, x);
+    var surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
+      return neighbor.isEmpty();
+    }).length == 0;
+
+    if (!surroundedEmptyPoint) {
+      return false;
+    }
+
+    var someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
+      var inAtari = _this4.inAtari(neighbor.y, neighbor.x);
+      var friendly = neighbor.isOccupiedWith(_this4._nextColor());
+
+      return friendly && !inAtari;
+    });
+
+    if (someFriendlyNotInAtari) {
+      return false;
+    }
+
+    var someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
+      var inAtari = _this4.inAtari(neighbor.y, neighbor.x);
+      var enemy = !neighbor.isOccupiedWith(_this4._nextColor());
+
+      return enemy && inAtari;
+    });
+
+    if (someEnemyInAtari) {
+      return false;
+    }
+
+    return true;
+  },
+
+  isIllegalAt: function isIllegalAt(y, x) {
+    var intersection = this.intersectionAt(y, x);
+    var isEmpty = intersection.isEmpty();
+    var isSuicide = this.wouldBeSuicide(y, x);
+    var koPoint = this.koPoint;
+    var isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
+
+    return !isEmpty || isKoViolation || isSuicide;
   },
 
   // Iterative depth-first search traversal. Start from
@@ -991,40 +1036,7 @@ Game.prototype = {
   },
 
   wouldBeSuicide: function wouldBeSuicide(y, x) {
-    var _this = this;
-
-    var intersection = this.intersectionAt(y, x);
-    var surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
-      return neighbor.isEmpty();
-    }).length == 0;
-
-    if (!surroundedEmptyPoint) {
-      return false;
-    }
-
-    var someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
-      var inAtari = _this.inAtari(neighbor.y, neighbor.x);
-      var friendly = neighbor.isOccupiedWith(_this.currentPlayer());
-
-      return friendly && !inAtari;
-    });
-
-    if (someFriendlyNotInAtari) {
-      return false;
-    }
-
-    var someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(function (neighbor) {
-      var inAtari = _this.inAtari(neighbor.y, neighbor.x);
-      var enemy = !neighbor.isOccupiedWith(_this.currentPlayer());
-
-      return enemy && inAtari;
-    });
-
-    if (someEnemyInAtari) {
-      return false;
-    }
-
-    return true;
+    return this.boardState().wouldBeSuicide(y, x);
   },
 
   pass: function pass() {
@@ -1046,17 +1058,17 @@ Game.prototype = {
   },
 
   toggleDeadAt: function toggleDeadAt(y, x) {
-    var _this2 = this;
+    var _this = this;
 
     var alreadyDead = this.isDeadAt(y, x);
 
     this.groupAt(y, x).forEach(function (intersection) {
       if (alreadyDead) {
-        _this2._deadPoints = _this2._deadPoints.filter(function (dead) {
+        _this._deadPoints = _this._deadPoints.filter(function (dead) {
           return !(dead.y == intersection.y && dead.x == intersection.x);
         });
       } else {
-        _this2._deadPoints.push({ y: intersection.y, x: intersection.x });
+        _this._deadPoints.push({ y: intersection.y, x: intersection.x });
       }
     });
 
@@ -1089,31 +1101,12 @@ Game.prototype = {
     return this.boardState().neighborsFor(y, x);
   },
 
-  hasCapturesFor: function hasCapturesFor(y, x) {
-    var _this3 = this;
-
-    var point = this.intersectionAt(y, x);
-
-    var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && _this3.libertiesAt(neighbor.y, neighbor.x) == 0;
-    });
-
-    return capturedNeighbors.length > 0;
-  },
-
   isIllegalAt: function isIllegalAt(y, x) {
     if (this._moves.length == 0) {
       return false;
     }
 
-    var intersection = this.intersectionAt(y, x);
-    var isEmpty = intersection.isEmpty();
-    var isCapturing = this.hasCapturesFor(y, x);
-    var isSuicide = this.wouldBeSuicide(y, x);
-    var koPoint = this.boardState().koPoint;
-    var isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
-
-    return !isEmpty || isKoViolation || isSuicide && !isCapturing;
+    return this.boardState().isIllegalAt(y, x);
   },
 
   render: function render() {

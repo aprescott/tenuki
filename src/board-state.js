@@ -26,9 +26,7 @@ BoardState.prototype = {
   },
 
   _capturesFrom: function(y, x, color) {
-    const point = this.intersectionAt(y, x);
-
-    const capturedNeighbors = this.neighborsFor(point.y, point.x).filter(neighbor => {
+    const capturedNeighbors = this.neighborsFor(y, x).filter(neighbor => {
       // TODO: this value of 1 is potentially weird.
       // we're checking against the move before the stone we just played
       // where this space is not occupied yet. things should possibly be
@@ -165,6 +163,49 @@ BoardState.prototype = {
     }
 
     return neighbors;
+  },
+
+  wouldBeSuicide: function(y, x) {
+    const intersection = this.intersectionAt(y, x);
+    const surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isEmpty()).length == 0;
+
+    if (!surroundedEmptyPoint) {
+      return false;
+    }
+
+    const someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
+      const inAtari = this.inAtari(neighbor.y, neighbor.x);
+      const friendly = neighbor.isOccupiedWith(this._nextColor());
+
+      return friendly && !inAtari;
+    });
+
+    if (someFriendlyNotInAtari) {
+      return false;
+    }
+
+    const someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
+      const inAtari = this.inAtari(neighbor.y, neighbor.x);
+      const enemy = !neighbor.isOccupiedWith(this._nextColor());
+
+      return enemy && inAtari;
+    });
+
+    if (someEnemyInAtari) {
+      return false;
+    }
+
+    return true;
+  },
+
+  isIllegalAt: function(y, x) {
+    const intersection = this.intersectionAt(y, x);
+    const isEmpty = intersection.isEmpty();
+    const isSuicide = this.wouldBeSuicide(y, x);
+    const koPoint = this.koPoint;
+    const isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
+
+    return !isEmpty || isKoViolation || isSuicide;
   },
 
   // Iterative depth-first search traversal. Start from

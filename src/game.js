@@ -95,36 +95,7 @@ Game.prototype = {
   },
 
   wouldBeSuicide: function(y, x) {
-    const intersection = this.intersectionAt(y, x);
-    const surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isEmpty()).length == 0;
-
-    if (!surroundedEmptyPoint) {
-      return false;
-    }
-
-    const someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
-      const inAtari = this.inAtari(neighbor.y, neighbor.x);
-      const friendly = neighbor.isOccupiedWith(this.currentPlayer());
-
-      return friendly && !inAtari;
-    });
-
-    if (someFriendlyNotInAtari) {
-      return false;
-    }
-
-    const someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
-      const inAtari = this.inAtari(neighbor.y, neighbor.x);
-      const enemy = !neighbor.isOccupiedWith(this.currentPlayer());
-
-      return enemy && inAtari;
-    });
-
-    if (someEnemyInAtari) {
-      return false;
-    }
-
-    return true;
+    return this.boardState().wouldBeSuicide(y, x);
   },
 
   pass: function() {
@@ -183,29 +154,12 @@ Game.prototype = {
     return this.boardState().neighborsFor(y, x);
   },
 
-  hasCapturesFor: function(y, x) {
-    const point = this.intersectionAt(y, x);
-
-    const capturedNeighbors = this.neighborsFor(point.y, point.x).filter(neighbor => {
-      return !neighbor.isEmpty && !neighbor.sameColorAs(point) && this.libertiesAt(neighbor.y, neighbor.x) == 0;
-    });
-
-    return capturedNeighbors.length > 0
-  },
-
   isIllegalAt: function(y, x) {
     if (this._moves.length == 0) {
       return false;
     }
 
-    const intersection = this.intersectionAt(y, x);
-    const isEmpty = intersection.isEmpty();
-    const isCapturing = this.hasCapturesFor(y, x);
-    const isSuicide = this.wouldBeSuicide(y, x);
-    const koPoint = this.boardState().koPoint;
-    const isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
-
-    return !isEmpty || isKoViolation || (isSuicide && !isCapturing);
+    return this.boardState().isIllegalAt(y, x);
   },
 
   render: function() {
