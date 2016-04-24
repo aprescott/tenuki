@@ -10,6 +10,51 @@ describe("Game", function() {
       game.setup();
       expect(game.boardSize).to.equal(19);
     });
+
+    it("defaults to no handicap stones", function() {
+      var game = new Game();
+      game.setup();
+
+      expect(game.handicapStones).to.equal(0);
+      var nonEmptyPoints = game.currentMove().points.filter(i => !i.isEmpty());
+      expect(nonEmptyPoints.length).to.equal(0);
+    });
+
+    it("allows 2-9 handicap stones", function() {
+      [2, 3, 4, 5, 6, 7, 8, 9].forEach(function(h) {
+        var game = new Game();
+        game.setup({ handicapStones: h });
+
+        expect(game.handicapStones).to.equal(h);
+        var nonEmptyPoints = game.currentMove().points.filter(i => !i.isEmpty());
+        expect(nonEmptyPoints.length).to.equal(h);
+        expect(game.currentPlayer()).to.equal("white");
+      });
+
+      var game = new Game();
+      game.setup({ handicapStones: 2 });
+      expect(game.handicapStones).to.equal(2);
+      var nonEmptyPoints = game.currentMove().points.filter(i => !i.isEmpty());
+      expect(nonEmptyPoints.length).to.equal(2);
+      expect(nonEmptyPoints[0].value).to.equal("black");
+      expect(nonEmptyPoints[0].y).to.equal(3);
+      expect(nonEmptyPoints[0].x).to.equal(15);
+      expect(nonEmptyPoints[1].y).to.equal(15);
+      expect(nonEmptyPoints[1].x).to.equal(3);
+    });
+
+    it("does not allow invalid handicap stone values", function() {
+      var game = new Game();
+      expect(function() { game.setup({ handicapStones: -1 }); }).to.throw(Error, "Only 2 to 9 handicap stones are supported");
+      expect(function() { game.setup({ handicapStones: 1 }); }).to.throw(Error, "Only 2 to 9 handicap stones are supported");
+      expect(function() { game.setup({ handicapStones: 10 }); }).to.throw(Error, "Only 2 to 9 handicap stones are supported");
+    });
+
+    it("does not allow handicap stones on non-standard sizes", function() {
+      var game = new Game();
+      expect(function() { game.setup({ boardSize: 19, handicapStones: 2 }); }).to.not.throw(Error);
+      expect(function() { game.setup({ boardSize: 17, handicapStones: 2 }); }).to.throw(Error, "Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
+    });
   });
 
   describe("coordinatesFor", function() {

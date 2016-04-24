@@ -21,7 +21,7 @@ const GameState = function({ number, y, x, color, pass, points, blackStonesCaptu
 
 GameState.prototype = {
   _nextColor: function() {
-    if (!this.color || this.color == "white") {
+    if (this.color == "white") {
       return "black";
     } else {
       return "white";
@@ -253,11 +253,12 @@ GameState.prototype = {
   }
 }
 
-GameState.initialFor = function(boardSize) {
+GameState._initialFor = function(boardSize, handicapStones) {
   this._cache = this._cache || {};
+  this._cache[boardSize] = this._cache[boardSize] || {};
 
-  if (this._cache[boardSize]) {
-    return this._cache[boardSize];
+  if (this._cache[boardSize][handicapStones]) {
+    return this._cache[boardSize][handicapStones];
   }
 
   let emptyPoints = Array.apply(null, Array(boardSize * boardSize));
@@ -265,7 +266,37 @@ GameState.initialFor = function(boardSize) {
     return new Intersection(Math.floor(i / boardSize), i % boardSize);
   });
 
+  const hoshiOffset = boardSize > 11 ? 3 : 2;
+  const hoshiPoints = {
+    topRight:     { y: hoshiOffset,                 x: boardSize - hoshiOffset - 1 },
+    bottomLeft:   { y: boardSize - hoshiOffset - 1, x: hoshiOffset },
+    bottomRight:  { y: boardSize - hoshiOffset - 1, x: boardSize - hoshiOffset - 1 },
+    topLeft:      { y: hoshiOffset,                 x: hoshiOffset },
+    middle:       { y: (boardSize + 1)/2 - 1,       x: (boardSize + 1)/2 - 1 },
+    middleLeft:   { y: (boardSize + 1)/2 - 1,       x: hoshiOffset },
+    middleRight:  { y: (boardSize + 1)/2 - 1,       x: boardSize - hoshiOffset - 1 },
+    middleTop:    { y: hoshiOffset,                 x: (boardSize + 1)/2 - 1 },
+    middleBottom: { y: boardSize - hoshiOffset - 1, x: (boardSize + 1)/2 - 1 }
+  };
+  const handicapPlacements = {
+    0: [],
+    1: [],
+    2: [hoshiPoints.topRight, hoshiPoints.bottomLeft],
+    3: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight],
+    4: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft],
+    5: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middle],
+    6: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight],
+    7: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middle],
+    8: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middleTop, hoshiPoints.middleBottom],
+    9: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middleTop, hoshiPoints.middleBottom, hoshiPoints.middle]
+  };
+
+  handicapPlacements[handicapStones].forEach(p => {
+    emptyPoints[p.y*boardSize + p.x] = new Intersection(p.y, p.x, "black");
+  });
+
   const initialState = new GameState({
+    color: handicapStones > 1 ? "black" : "white",
     number: 0,
     points: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
@@ -273,7 +304,7 @@ GameState.initialFor = function(boardSize) {
     boardSize: boardSize
   });
 
-  this._cache[boardSize] = initialState;
+  this._cache[boardSize][handicapStones] = initialState;
   return initialState;
 }
 

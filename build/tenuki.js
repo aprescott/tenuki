@@ -550,7 +550,7 @@ var GameState = function GameState(_ref) {
 
 GameState.prototype = {
   _nextColor: function _nextColor() {
-    if (!this.color || this.color == "white") {
+    if (this.color == "white") {
       return "black";
     } else {
       return "white";
@@ -810,11 +810,12 @@ GameState.prototype = {
   }
 };
 
-GameState.initialFor = function (boardSize) {
+GameState._initialFor = function (boardSize, handicapStones) {
   this._cache = this._cache || {};
+  this._cache[boardSize] = this._cache[boardSize] || {};
 
-  if (this._cache[boardSize]) {
-    return this._cache[boardSize];
+  if (this._cache[boardSize][handicapStones]) {
+    return this._cache[boardSize][handicapStones];
   }
 
   var emptyPoints = Array.apply(null, Array(boardSize * boardSize));
@@ -822,7 +823,37 @@ GameState.initialFor = function (boardSize) {
     return new _intersection2.default(Math.floor(i / boardSize), i % boardSize);
   });
 
+  var hoshiOffset = boardSize > 11 ? 3 : 2;
+  var hoshiPoints = {
+    topRight: { y: hoshiOffset, x: boardSize - hoshiOffset - 1 },
+    bottomLeft: { y: boardSize - hoshiOffset - 1, x: hoshiOffset },
+    bottomRight: { y: boardSize - hoshiOffset - 1, x: boardSize - hoshiOffset - 1 },
+    topLeft: { y: hoshiOffset, x: hoshiOffset },
+    middle: { y: (boardSize + 1) / 2 - 1, x: (boardSize + 1) / 2 - 1 },
+    middleLeft: { y: (boardSize + 1) / 2 - 1, x: hoshiOffset },
+    middleRight: { y: (boardSize + 1) / 2 - 1, x: boardSize - hoshiOffset - 1 },
+    middleTop: { y: hoshiOffset, x: (boardSize + 1) / 2 - 1 },
+    middleBottom: { y: boardSize - hoshiOffset - 1, x: (boardSize + 1) / 2 - 1 }
+  };
+  var handicapPlacements = {
+    0: [],
+    1: [],
+    2: [hoshiPoints.topRight, hoshiPoints.bottomLeft],
+    3: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight],
+    4: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft],
+    5: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middle],
+    6: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight],
+    7: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middle],
+    8: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middleTop, hoshiPoints.middleBottom],
+    9: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middleTop, hoshiPoints.middleBottom, hoshiPoints.middle]
+  };
+
+  handicapPlacements[handicapStones].forEach(function (p) {
+    emptyPoints[p.y * boardSize + p.x] = new _intersection2.default(p.y, p.x, "black");
+  });
+
   var initialState = new GameState({
+    color: handicapStones > 1 ? "black" : "white",
     number: 0,
     points: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
@@ -830,7 +861,7 @@ GameState.initialFor = function (boardSize) {
     boardSize: boardSize
   });
 
-  this._cache[boardSize] = initialState;
+  this._cache[boardSize][handicapStones] = initialState;
   return initialState;
 };
 
@@ -889,8 +920,19 @@ Game.prototype = {
 
     var _ref$boardSize = _ref.boardSize;
     var boardSize = _ref$boardSize === undefined ? this._defaultBoardSize : _ref$boardSize;
+    var _ref$handicapStones = _ref.handicapStones;
+    var handicapStones = _ref$handicapStones === undefined ? 0 : _ref$handicapStones;
+
+    if (handicapStones > 0 && boardSize != 9 && boardSize != 13 && boardSize != 19) {
+      throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
+    }
+
+    if (handicapStones < 0 || handicapStones == 1 || handicapStones > 9) {
+      throw new Error("Only 2 to 9 handicap stones are supported");
+    }
 
     this.boardSize = boardSize;
+    this.handicapStones = handicapStones;
   },
 
   setup: function setup(options) {
@@ -943,7 +985,7 @@ Game.prototype = {
   },
 
   currentMove: function currentMove() {
-    return this._moves[this._moves.length - 1] || _gameState2.default.initialFor(this.boardSize);
+    return this._moves[this._moves.length - 1] || _gameState2.default._initialFor(this.boardSize, this.handicapStones);
   },
 
   isWhitePlaying: function isWhitePlaying() {

@@ -17,8 +17,17 @@ const Game = function(boardElement) {
 };
 
 Game.prototype = {
-  _configureOptions: function({ boardSize = this._defaultBoardSize } = {}) {
+  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0 } = {}) {
+    if (handicapStones > 0 && boardSize != 9 && boardSize != 13 && boardSize != 19) {
+      throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
+    }
+
+    if (handicapStones < 0 || handicapStones == 1 || handicapStones > 9) {
+      throw new Error("Only 2 to 9 handicap stones are supported");
+    }
+
     this.boardSize = boardSize;
+    this.handicapStones = handicapStones;
   },
 
   setup: function(options) {
@@ -71,7 +80,7 @@ Game.prototype = {
   },
 
   currentMove: function() {
-    return this._moves[this._moves.length - 1] || GameState.initialFor(this.boardSize);
+    return this._moves[this._moves.length - 1] || GameState._initialFor(this.boardSize, this.handicapStones);
   },
 
   isWhitePlaying: function() {
