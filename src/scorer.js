@@ -4,8 +4,8 @@ export default {
     const whiteDeadAsCaptures = game._deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
 
     return {
-      black: game.territory().black.length + game.currentMove().whiteStonesCaptured + whiteDeadAsCaptures.length,
-      white: game.territory().white.length + game.currentMove().blackStonesCaptured + blackDeadAsCaptures.length
+      black: game.territory().black.length + game.boardState().whiteStonesCaptured + whiteDeadAsCaptures.length,
+      white: game.territory().white.length + game.boardState().blackStonesCaptured + blackDeadAsCaptures.length
     };
   },
 

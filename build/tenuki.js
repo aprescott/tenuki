@@ -15,6 +15,395 @@ exports.utils = require("./lib/utils").default;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];var _n = true;var _d = false;var _e = undefined;try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;_e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }return _arr;
+  }return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
+
+var _utils = require("./utils");
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _intersection = require("./intersection");
+
+var _intersection2 = _interopRequireDefault(_intersection);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+var BoardState = function BoardState(_ref) {
+  var moveNumber = _ref.moveNumber;
+  var playedPoint = _ref.playedPoint;
+  var color = _ref.color;
+  var pass = _ref.pass;
+  var points = _ref.points;
+  var blackStonesCaptured = _ref.blackStonesCaptured;
+  var whiteStonesCaptured = _ref.whiteStonesCaptured;
+  var capturedPositions = _ref.capturedPositions;
+  var koPoint = _ref.koPoint;
+  var boardSize = _ref.boardSize;
+
+  this.moveNumber = moveNumber;
+  this.playedPoint = playedPoint;
+  this.color = color;
+  this.pass = pass;
+  this.points = points;
+  this.blackStonesCaptured = blackStonesCaptured;
+  this.whiteStonesCaptured = whiteStonesCaptured;
+  this.capturedPositions = capturedPositions;
+  this.koPoint = koPoint;
+  this.boardSize = boardSize;
+
+  Object.freeze(this);
+};
+
+BoardState.prototype = {
+  _nextColor: function _nextColor() {
+    if (this.color == "white") {
+      return "black";
+    } else {
+      return "white";
+    }
+  },
+
+  _capturesFrom: function _capturesFrom(y, x, color) {
+    var _this = this;
+
+    var point = this.intersectionAt(y, x);
+
+    var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
+      // TODO: this value of 1 is potentially weird.
+      // we're checking against the move before the stone we just played
+      // where this space is not occupied yet. things should possibly be
+      // reworked.
+      return !neighbor.isEmpty() && neighbor.value != color && _this.libertiesAt(neighbor.y, neighbor.x) == 1;
+    });
+
+    var capturedStones = _utils2.default.flatMap(capturedNeighbors, function (neighbor) {
+      return _this.groupAt(neighbor.y, neighbor.x);
+    });
+
+    return _utils2.default.unique(capturedStones);
+  },
+
+  _updatePoint: function _updatePoint(intersection, points, color) {
+    var index = points.indexOf(intersection);
+
+    if (index < 0) {
+      throw "unexpected negative index " + index + " when attempting to update " + intersection.y + "," + intersection.x + " to " + color;
+    }
+
+    var prefix = points.slice(0, index);
+    var newPoint = new _intersection2.default(intersection.y, intersection.x, color);
+    var suffix = points.slice(index + 1);
+
+    return prefix.concat([newPoint], suffix);
+  },
+
+  _removePoint: function _removePoint(intersection, points) {
+    return this._updatePoint(intersection, points, "empty");
+  },
+
+  playPass: function playPass() {
+    var newState = new BoardState({
+      moveNumber: this.moveNumber + 1,
+      playedPoint: null,
+      color: this._nextColor(),
+      pass: true,
+      points: this.points,
+      blackStonesCaptured: this.blackStonesCaptured,
+      whiteStonesCaptured: this.whiteStonesCaptured,
+      capturedPositions: [],
+      koPoint: null,
+      boardSize: this.boardSize
+    });
+
+    return newState;
+  },
+
+  playAt: function playAt(y, x) {
+    var _this2 = this;
+
+    var playedColor = this._nextColor();
+    var capturedPositions = this._capturesFrom(y, x, playedColor);
+    var playedPoint = this.intersectionAt(y, x);
+    var newPoints = this.points;
+
+    capturedPositions.forEach(function (i) {
+      newPoints = _this2._removePoint(i, newPoints);
+    });
+
+    newPoints = this._updatePoint(playedPoint, newPoints, playedColor);
+
+    var newTotalBlackCaptured = this.blackStonesCaptured + (playedColor == "black" ? 0 : capturedPositions.length);
+    var newTotalWhiteCaptured = this.whiteStonesCaptured + (playedColor == "white" ? 0 : capturedPositions.length);
+
+    var boardSize = this.boardSize;
+
+    var moveInfo = {
+      moveNumber: this.moveNumber + 1,
+      playedPoint: playedPoint,
+      color: playedColor,
+      pass: false,
+      points: newPoints,
+      blackStonesCaptured: newTotalBlackCaptured,
+      whiteStonesCaptured: newTotalWhiteCaptured,
+      capturedPositions: capturedPositions,
+      boardSize: boardSize
+    };
+
+    var withPlayedPoint = new BoardState(moveInfo);
+    var hasKoPoint = capturedPositions.length == 1 && withPlayedPoint.groupAt(y, x).length == 1 && withPlayedPoint.inAtari(y, x);
+
+    if (hasKoPoint) {
+      moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
+    } else {
+      moveInfo["koPoint"] = null;
+    }
+
+    return new BoardState(moveInfo);
+  },
+
+  intersectionAt: function intersectionAt(y, x) {
+    return this.points[y * this.boardSize + x];
+  },
+
+  groupAt: function groupAt(y, x) {
+    var startingPoint = this.intersectionAt(y, x);
+
+    var _partitionTraverse = this.partitionTraverse(startingPoint, function (neighbor) {
+      return neighbor.sameColorAs(startingPoint);
+    });
+
+    var _partitionTraverse2 = _slicedToArray(_partitionTraverse, 2);
+
+    var group = _partitionTraverse2[0];
+    var _ = _partitionTraverse2[1];
+
+    return group;
+  },
+
+  libertiesAt: function libertiesAt(y, x) {
+    var _this3 = this;
+
+    var point = this.intersectionAt(y, x);
+
+    var emptyPoints = _utils2.default.flatMap(this.groupAt(point.y, point.x), function (groupPoint) {
+      return _this3.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
+        return intersection.isEmpty();
+      });
+    });
+
+    return _utils2.default.unique(emptyPoints).length;
+  },
+
+  inAtari: function inAtari(y, x) {
+    return this.libertiesAt(y, x) == 1;
+  },
+
+  neighborsFor: function neighborsFor(y, x) {
+    var neighbors = [];
+
+    if (x > 0) {
+      neighbors.push(this.intersectionAt(y, x - 1));
+    }
+
+    if (x < this.boardSize - 1) {
+      neighbors.push(this.intersectionAt(y, x + 1));
+    }
+
+    if (y > 0) {
+      neighbors.push(this.intersectionAt(y - 1, x));
+    }
+
+    if (y < this.boardSize - 1) {
+      neighbors.push(this.intersectionAt(y + 1, x));
+    }
+
+    return neighbors;
+  },
+
+  // Iterative depth-first search traversal. Start from
+  // startingPoint, iteratively follow all neighbors.
+  // If inclusionConditionis met for a neighbor, include it
+  // otherwise, exclude it. At the end, return two arrays:
+  // One for the included neighbors, another for the remaining neighbors.
+  partitionTraverse: function partitionTraverse(startingPoint, inclusionCondition) {
+    var checkedPoints = [];
+    var boundaryPoints = [];
+    var pointsToCheck = [];
+
+    pointsToCheck.push(startingPoint);
+
+    while (pointsToCheck.length > 0) {
+      var point = pointsToCheck.pop();
+
+      if (checkedPoints.indexOf(point) > -1) {
+        // skip it, we already checked
+      } else {
+          checkedPoints.push(point);
+
+          this.neighborsFor(point.y, point.x).forEach(function (neighbor) {
+            if (checkedPoints.indexOf(neighbor) > -1) {
+              // skip this neighbor, we already checked it
+            } else {
+                if (inclusionCondition(neighbor)) {
+                  pointsToCheck.push(neighbor);
+                } else {
+                  boundaryPoints.push(neighbor);
+                }
+              }
+          });
+        }
+    }
+
+    return [checkedPoints, boundaryPoints];
+  },
+
+  territory: function territory(game) {
+    var emptyOrDeadPoints = this.points.filter(function (intersection) {
+      return intersection.isEmpty() || game.isDeadAt(intersection.y, intersection.x);
+    });
+
+    if (emptyOrDeadPoints.length == 0) {
+      return;
+    }
+
+    var checkedPoints = [];
+    var territoryPoints = { black: [], white: [] };
+    var pointsToCheck = emptyOrDeadPoints;
+
+    while (pointsToCheck.length > 0) {
+      var nextPoint = pointsToCheck.pop();
+      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(game, nextPoint.y, nextPoint.x, territoryPoints));
+      pointsToCheck = emptyOrDeadPoints.filter(function (i) {
+        return checkedPoints.indexOf(i) < 0;
+      });
+    }
+
+    return {
+      black: territoryPoints.black.map(function (i) {
+        return { y: i.y, x: i.x };
+      }),
+      white: territoryPoints.white.map(function (i) {
+        return { y: i.y, x: i.x };
+      })
+    };
+  },
+
+  checkTerritoryStartingAt: function checkTerritoryStartingAt(game, y, x, territoryPoints) {
+    var startingPoint = this.intersectionAt(y, x);
+
+    var _partitionTraverse3 = this.partitionTraverse(startingPoint, function (neighbor) {
+      return neighbor.isEmpty() || game.isDeadAt(neighbor.y, neighbor.x);
+    });
+
+    var _partitionTraverse4 = _slicedToArray(_partitionTraverse3, 2);
+
+    var nonOccupiedPoints = _partitionTraverse4[0];
+    var occupiedPoints = _partitionTraverse4[1];
+
+    var surroundingColors = _utils2.default.unique(occupiedPoints.map(function (occupiedPoint) {
+      return occupiedPoint.value;
+    }));
+
+    if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
+      var territoryColor = surroundingColors[0];
+
+      territoryPoints[territoryColor] = territoryPoints[territoryColor].concat(nonOccupiedPoints);
+    }
+
+    return nonOccupiedPoints;
+  }
+};
+
+BoardState._initialFor = function (boardSize, handicapStones) {
+  this._cache = this._cache || {};
+  this._cache[boardSize] = this._cache[boardSize] || {};
+
+  if (this._cache[boardSize][handicapStones]) {
+    return this._cache[boardSize][handicapStones];
+  }
+
+  var emptyPoints = Array.apply(null, Array(boardSize * boardSize));
+  emptyPoints = emptyPoints.map(function (x, i) {
+    return new _intersection2.default(Math.floor(i / boardSize), i % boardSize);
+  });
+
+  var hoshiOffset = boardSize > 11 ? 3 : 2;
+  var hoshiPoints = {
+    topRight: { y: hoshiOffset, x: boardSize - hoshiOffset - 1 },
+    bottomLeft: { y: boardSize - hoshiOffset - 1, x: hoshiOffset },
+    bottomRight: { y: boardSize - hoshiOffset - 1, x: boardSize - hoshiOffset - 1 },
+    topLeft: { y: hoshiOffset, x: hoshiOffset },
+    middle: { y: (boardSize + 1) / 2 - 1, x: (boardSize + 1) / 2 - 1 },
+    middleLeft: { y: (boardSize + 1) / 2 - 1, x: hoshiOffset },
+    middleRight: { y: (boardSize + 1) / 2 - 1, x: boardSize - hoshiOffset - 1 },
+    middleTop: { y: hoshiOffset, x: (boardSize + 1) / 2 - 1 },
+    middleBottom: { y: boardSize - hoshiOffset - 1, x: (boardSize + 1) / 2 - 1 }
+  };
+  var handicapPlacements = {
+    0: [],
+    1: [],
+    2: [hoshiPoints.topRight, hoshiPoints.bottomLeft],
+    3: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight],
+    4: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft],
+    5: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middle],
+    6: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight],
+    7: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middle],
+    8: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middleTop, hoshiPoints.middleBottom],
+    9: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middleTop, hoshiPoints.middleBottom, hoshiPoints.middle]
+  };
+
+  handicapPlacements[handicapStones].forEach(function (p) {
+    emptyPoints[p.y * boardSize + p.x] = new _intersection2.default(p.y, p.x, "black");
+  });
+
+  var initialState = new BoardState({
+    color: handicapStones > 1 ? "black" : "white",
+    moveNumber: 0,
+    points: Object.freeze(emptyPoints),
+    blackStonesCaptured: 0,
+    whiteStonesCaptured: 0,
+    boardSize: boardSize
+  });
+
+  this._cache[boardSize][handicapStones] = initialState;
+  return initialState;
+};
+
+exports.default = BoardState;
+
+
+},{"./intersection":5,"./utils":8}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.default = DOMRenderer;
 
 var _utils = require("./utils");
@@ -375,7 +764,7 @@ function DOMRenderer(game, boardElement) {
   this.renderStonesPlayed = function () {
     var renderer = this;
     var game = renderer.game;
-    var currentMove = game.currentMove();
+    var boardState = game.boardState();
     var points = game.intersections();
 
     points.forEach(function (intersection) {
@@ -386,9 +775,9 @@ function DOMRenderer(game, boardElement) {
   this.updateMarkerPoints = function () {
     var renderer = this;
     var game = this.game;
-    var currentMove = game.currentMove();
+    var boardState = game.boardState();
 
-    if (!currentMove) {
+    if (!boardState) {
       return;
     }
 
@@ -398,15 +787,12 @@ function DOMRenderer(game, boardElement) {
       }
     });
 
-    if (currentMove.koPoint) {
-      _utils2.default.addClass(renderer.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
+    if (boardState.koPoint) {
+      _utils2.default.addClass(renderer.grid[boardState.koPoint.y][boardState.koPoint.x], "ko");
     }
 
-    // TODO: this is awkward naming. it seems like currentState should be separate from currentMove?
-    // but then you constantly have to check currentMove everywhere?
-    // what if there were a flag that represented the presence of y and x?
-    if (currentMove.y && currentMove.x) {
-      _utils2.default.addClass(renderer.grid[currentMove.y][currentMove.x], "marker");
+    if (boardState.playedPoint) {
+      _utils2.default.addClass(renderer.grid[boardState.playedPoint.y][boardState.playedPoint.x], "marker");
     }
   };
 
@@ -473,402 +859,7 @@ function DOMRenderer(game, boardElement) {
 };
 
 
-},{"./utils":8}],3:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _slicedToArray = function () {
-  function sliceIterator(arr, i) {
-    var _arr = [];var _n = true;var _d = false;var _e = undefined;try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;_e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"]) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
-    }return _arr;
-  }return function (arr, i) {
-    if (Array.isArray(arr)) {
-      return arr;
-    } else if (Symbol.iterator in Object(arr)) {
-      return sliceIterator(arr, i);
-    } else {
-      throw new TypeError("Invalid attempt to destructure non-iterable instance");
-    }
-  };
-}();
-
-var _utils = require("./utils");
-
-var _utils2 = _interopRequireDefault(_utils);
-
-var _intersection = require("./intersection");
-
-var _intersection2 = _interopRequireDefault(_intersection);
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : { default: obj };
-}
-
-var GameState = function GameState(_ref) {
-  var number = _ref.number;
-  var y = _ref.y;
-  var x = _ref.x;
-  var color = _ref.color;
-  var pass = _ref.pass;
-  var points = _ref.points;
-  var blackStonesCaptured = _ref.blackStonesCaptured;
-  var whiteStonesCaptured = _ref.whiteStonesCaptured;
-  var capturedPositions = _ref.capturedPositions;
-  var koPoint = _ref.koPoint;
-  var boardSize = _ref.boardSize;
-
-  this.number = number;
-  this.y = y;
-  this.x = x;
-  this.color = color;
-  this.pass = pass;
-  // "points" -- we can do better
-  this.points = points;
-  // we can probably do better here, too
-  this.blackStonesCaptured = blackStonesCaptured;
-  this.whiteStonesCaptured = whiteStonesCaptured;
-  this.capturedPositions = capturedPositions;
-  this.koPoint = koPoint;
-  this.boardSize = boardSize;
-
-  Object.freeze(this);
-};
-
-GameState.prototype = {
-  _nextColor: function _nextColor() {
-    if (this.color == "white") {
-      return "black";
-    } else {
-      return "white";
-    }
-  },
-
-  _capturesFrom: function _capturesFrom(y, x, color) {
-    var _this = this;
-
-    var point = this.intersectionAt(y, x);
-
-    var capturedNeighbors = this.neighborsFor(point.y, point.x).filter(function (neighbor) {
-      // TODO: this value of 1 is potentially weird.
-      // we're checking against the move before the stone we just played
-      // where this space is not occupied yet. things should possibly be
-      // reworked.
-      return !neighbor.isEmpty() && neighbor.value != color && _this.libertiesAt(neighbor.y, neighbor.x) == 1;
-    });
-
-    var capturedStones = _utils2.default.flatMap(capturedNeighbors, function (neighbor) {
-      return _this.groupAt(neighbor.y, neighbor.x);
-    });
-
-    return _utils2.default.unique(capturedStones);
-  },
-
-  _updatePoint: function _updatePoint(intersection, points, color) {
-    var index = points.indexOf(intersection);
-
-    if (index < 0) {
-      throw "unexpected negative index " + index + " when attempting to update " + intersection.y + "," + intersection.x + " to " + color;
-    }
-
-    var prefix = points.slice(0, index);
-    var newPoint = new _intersection2.default(intersection.y, intersection.x, color);
-    var suffix = points.slice(index + 1);
-
-    return prefix.concat([newPoint], suffix);
-  },
-
-  _removePoint: function _removePoint(intersection, points) {
-    return this._updatePoint(intersection, points, "empty");
-  },
-
-  playPass: function playPass() {
-    var newState = new GameState({
-      number: this.number + 1,
-      y: null,
-      x: null,
-      color: this._nextColor(),
-      pass: true,
-      points: this.points,
-      blackStonesCaptured: this.blackStonesCaptured,
-      whiteStonesCaptured: this.whiteStonesCaptured,
-      capturedPositions: [],
-      koPoint: null,
-      boardSize: this.boardSize
-    });
-
-    return newState;
-  },
-
-  playAt: function playAt(y, x) {
-    var _this2 = this;
-
-    var playedColor = this._nextColor();
-    var capturedPositions = this._capturesFrom(y, x, playedColor);
-    var playedPoint = this.intersectionAt(y, x);
-    var newPoints = this.points;
-
-    capturedPositions.forEach(function (i) {
-      newPoints = _this2._removePoint(i, newPoints);
-    });
-
-    newPoints = this._updatePoint(playedPoint, newPoints, playedColor);
-
-    var newTotalBlackCaptured = this.blackStonesCaptured + (playedColor == "black" ? 0 : capturedPositions.length);
-    var newTotalWhiteCaptured = this.whiteStonesCaptured + (playedColor == "white" ? 0 : capturedPositions.length);
-
-    var boardSize = this.boardSize;
-
-    var moveInfo = {
-      number: this.number + 1,
-      y: y,
-      x: x,
-      color: playedColor,
-      pass: false,
-      points: newPoints,
-      blackStonesCaptured: newTotalBlackCaptured,
-      whiteStonesCaptured: newTotalWhiteCaptured,
-      capturedPositions: capturedPositions,
-      boardSize: boardSize
-    };
-
-    var withPlayedPoint = new GameState(moveInfo);
-    var hasKoPoint = capturedPositions.length == 1 && withPlayedPoint.groupAt(y, x).length == 1 && withPlayedPoint.inAtari(y, x);
-
-    if (hasKoPoint) {
-      moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
-    } else {
-      moveInfo["koPoint"] = null;
-    }
-
-    return new GameState(moveInfo);
-  },
-
-  intersectionAt: function intersectionAt(y, x) {
-    return this.points[y * this.boardSize + x];
-  },
-
-  groupAt: function groupAt(y, x) {
-    var startingPoint = this.intersectionAt(y, x);
-
-    var _partitionTraverse = this.partitionTraverse(startingPoint, function (neighbor) {
-      return neighbor.sameColorAs(startingPoint);
-    });
-
-    var _partitionTraverse2 = _slicedToArray(_partitionTraverse, 2);
-
-    var group = _partitionTraverse2[0];
-    var _ = _partitionTraverse2[1];
-
-    return group;
-  },
-
-  libertiesAt: function libertiesAt(y, x) {
-    var _this3 = this;
-
-    var point = this.intersectionAt(y, x);
-
-    var emptyPoints = _utils2.default.flatMap(this.groupAt(point.y, point.x), function (groupPoint) {
-      return _this3.neighborsFor(groupPoint.y, groupPoint.x).filter(function (intersection) {
-        return intersection.isEmpty();
-      });
-    });
-
-    return _utils2.default.unique(emptyPoints).length;
-  },
-
-  inAtari: function inAtari(y, x) {
-    return this.libertiesAt(y, x) == 1;
-  },
-
-  neighborsFor: function neighborsFor(y, x) {
-    var neighbors = [];
-
-    if (x > 0) {
-      neighbors.push(this.intersectionAt(y, x - 1));
-    }
-
-    if (x < this.boardSize - 1) {
-      neighbors.push(this.intersectionAt(y, x + 1));
-    }
-
-    if (y > 0) {
-      neighbors.push(this.intersectionAt(y - 1, x));
-    }
-
-    if (y < this.boardSize - 1) {
-      neighbors.push(this.intersectionAt(y + 1, x));
-    }
-
-    return neighbors;
-  },
-
-  // Iterative depth-first search traversal. Start from
-  // startingPoint, iteratively follow all neighbors.
-  // If inclusionConditionis met for a neighbor, include it
-  // otherwise, exclude it. At the end, return two arrays:
-  // One for the included neighbors, another for the remaining neighbors.
-  partitionTraverse: function partitionTraverse(startingPoint, inclusionCondition) {
-    var checkedPoints = [];
-    var boundaryPoints = [];
-    var pointsToCheck = [];
-
-    pointsToCheck.push(startingPoint);
-
-    while (pointsToCheck.length > 0) {
-      var point = pointsToCheck.pop();
-
-      if (checkedPoints.indexOf(point) > -1) {
-        // skip it, we already checked
-      } else {
-          checkedPoints.push(point);
-
-          this.neighborsFor(point.y, point.x).forEach(function (neighbor) {
-            if (checkedPoints.indexOf(neighbor) > -1) {
-              // skip this neighbor, we already checked it
-            } else {
-                if (inclusionCondition(neighbor)) {
-                  pointsToCheck.push(neighbor);
-                } else {
-                  boundaryPoints.push(neighbor);
-                }
-              }
-          });
-        }
-    }
-
-    return [checkedPoints, boundaryPoints];
-  },
-
-  territory: function territory(game) {
-    var emptyOrDeadPoints = this.points.filter(function (intersection) {
-      return intersection.isEmpty() || game.isDeadAt(intersection.y, intersection.x);
-    });
-
-    if (emptyOrDeadPoints.length == 0) {
-      return;
-    }
-
-    var checkedPoints = [];
-    var territoryPoints = { black: [], white: [] };
-    var pointsToCheck = emptyOrDeadPoints;
-
-    while (pointsToCheck.length > 0) {
-      var nextPoint = pointsToCheck.pop();
-      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(game, nextPoint.y, nextPoint.x, territoryPoints));
-      pointsToCheck = emptyOrDeadPoints.filter(function (i) {
-        return checkedPoints.indexOf(i) < 0;
-      });
-    }
-
-    return {
-      black: territoryPoints.black.map(function (i) {
-        return { y: i.y, x: i.x };
-      }),
-      white: territoryPoints.white.map(function (i) {
-        return { y: i.y, x: i.x };
-      })
-    };
-  },
-
-  checkTerritoryStartingAt: function checkTerritoryStartingAt(game, y, x, territoryPoints) {
-    var startingPoint = this.intersectionAt(y, x);
-
-    var _partitionTraverse3 = this.partitionTraverse(startingPoint, function (neighbor) {
-      return neighbor.isEmpty() || game.isDeadAt(neighbor.y, neighbor.x);
-    });
-
-    var _partitionTraverse4 = _slicedToArray(_partitionTraverse3, 2);
-
-    var nonOccupiedPoints = _partitionTraverse4[0];
-    var occupiedPoints = _partitionTraverse4[1];
-
-    var surroundingColors = _utils2.default.unique(occupiedPoints.map(function (occupiedPoint) {
-      return occupiedPoint.value;
-    }));
-
-    if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
-      var territoryColor = surroundingColors[0];
-
-      territoryPoints[territoryColor] = territoryPoints[territoryColor].concat(nonOccupiedPoints);
-    }
-
-    return nonOccupiedPoints;
-  }
-};
-
-GameState._initialFor = function (boardSize, handicapStones) {
-  this._cache = this._cache || {};
-  this._cache[boardSize] = this._cache[boardSize] || {};
-
-  if (this._cache[boardSize][handicapStones]) {
-    return this._cache[boardSize][handicapStones];
-  }
-
-  var emptyPoints = Array.apply(null, Array(boardSize * boardSize));
-  emptyPoints = emptyPoints.map(function (x, i) {
-    return new _intersection2.default(Math.floor(i / boardSize), i % boardSize);
-  });
-
-  var hoshiOffset = boardSize > 11 ? 3 : 2;
-  var hoshiPoints = {
-    topRight: { y: hoshiOffset, x: boardSize - hoshiOffset - 1 },
-    bottomLeft: { y: boardSize - hoshiOffset - 1, x: hoshiOffset },
-    bottomRight: { y: boardSize - hoshiOffset - 1, x: boardSize - hoshiOffset - 1 },
-    topLeft: { y: hoshiOffset, x: hoshiOffset },
-    middle: { y: (boardSize + 1) / 2 - 1, x: (boardSize + 1) / 2 - 1 },
-    middleLeft: { y: (boardSize + 1) / 2 - 1, x: hoshiOffset },
-    middleRight: { y: (boardSize + 1) / 2 - 1, x: boardSize - hoshiOffset - 1 },
-    middleTop: { y: hoshiOffset, x: (boardSize + 1) / 2 - 1 },
-    middleBottom: { y: boardSize - hoshiOffset - 1, x: (boardSize + 1) / 2 - 1 }
-  };
-  var handicapPlacements = {
-    0: [],
-    1: [],
-    2: [hoshiPoints.topRight, hoshiPoints.bottomLeft],
-    3: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight],
-    4: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft],
-    5: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middle],
-    6: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight],
-    7: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middle],
-    8: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middleTop, hoshiPoints.middleBottom],
-    9: [hoshiPoints.topRight, hoshiPoints.bottomLeft, hoshiPoints.bottomRight, hoshiPoints.topLeft, hoshiPoints.middleLeft, hoshiPoints.middleRight, hoshiPoints.middleTop, hoshiPoints.middleBottom, hoshiPoints.middle]
-  };
-
-  handicapPlacements[handicapStones].forEach(function (p) {
-    emptyPoints[p.y * boardSize + p.x] = new _intersection2.default(p.y, p.x, "black");
-  });
-
-  var initialState = new GameState({
-    color: handicapStones > 1 ? "black" : "white",
-    number: 0,
-    points: Object.freeze(emptyPoints),
-    blackStonesCaptured: 0,
-    whiteStonesCaptured: 0,
-    boardSize: boardSize
-  });
-
-  this._cache[boardSize][handicapStones] = initialState;
-  return initialState;
-};
-
-exports.default = GameState;
-
-
-},{"./intersection":5,"./utils":8}],4:[function(require,module,exports){
+},{"./utils":8}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -895,9 +886,9 @@ var _scorer = require("./scorer");
 
 var _scorer2 = _interopRequireDefault(_scorer);
 
-var _gameState = require("./game-state");
+var _boardState = require("./board-state");
 
-var _gameState2 = _interopRequireDefault(_gameState);
+var _boardState2 = _interopRequireDefault(_boardState);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
@@ -947,11 +938,11 @@ Game.prototype = {
   },
 
   intersectionAt: function intersectionAt(y, x) {
-    return this.currentMove().intersectionAt(y, x);
+    return this.boardState().intersectionAt(y, x);
   },
 
   intersections: function intersections() {
-    return this.currentMove().points;
+    return this.boardState().points;
   },
 
   yCoordinateFor: function yCoordinateFor(y) {
@@ -968,9 +959,9 @@ Game.prototype = {
     return this.xCoordinateFor(x) + this.yCoordinateFor(y);
   },
 
-  // TODO: currentMove().color != currentPlayer() and this is weird.
+  // TODO: boardState().color != currentPlayer() and this is weird.
   currentPlayer: function currentPlayer() {
-    return this.currentMove()._nextColor();
+    return this.boardState()._nextColor();
   },
 
   playAt: function playAt(y, x) {
@@ -978,14 +969,14 @@ Game.prototype = {
       return false;
     }
 
-    this._moves.push(this.currentMove().playAt(y, x));
+    this._moves.push(this.boardState().playAt(y, x));
     this.render();
 
     return true;
   },
 
-  currentMove: function currentMove() {
-    return this._moves[this._moves.length - 1] || _gameState2.default._initialFor(this.boardSize, this.handicapStones);
+  boardState: function boardState() {
+    return this._moves[this._moves.length - 1] || _boardState2.default._initialFor(this.boardSize, this.handicapStones);
   },
 
   isWhitePlaying: function isWhitePlaying() {
@@ -997,7 +988,7 @@ Game.prototype = {
   },
 
   inAtari: function inAtari(y, x) {
-    return this.currentMove().inAtari(y, x);
+    return this.boardState().inAtari(y, x);
   },
 
   wouldBeSuicide: function wouldBeSuicide(y, x) {
@@ -1039,7 +1030,7 @@ Game.prototype = {
 
   pass: function pass() {
     if (!this.isOver()) {
-      this._moves.push(this.currentMove().playPass());
+      this._moves.push(this.boardState().playPass());
       this.render();
     }
   },
@@ -1049,10 +1040,10 @@ Game.prototype = {
       return false;
     }
 
-    var currentMove = this.currentMove();
+    var boardState = this.boardState();
     var previousMove = this._moves[this._moves.length - 2];
 
-    return currentMove.pass && previousMove.pass;
+    return boardState.pass && previousMove.pass;
   },
 
   toggleDeadAt: function toggleDeadAt(y, x) {
@@ -1088,15 +1079,15 @@ Game.prototype = {
   },
 
   libertiesAt: function libertiesAt(y, x) {
-    return this.currentMove().libertiesAt(y, x);
+    return this.boardState().libertiesAt(y, x);
   },
 
   groupAt: function groupAt(y, x) {
-    return this.currentMove().groupAt(y, x);
+    return this.boardState().groupAt(y, x);
   },
 
   neighborsFor: function neighborsFor(y, x) {
-    return this.currentMove().neighborsFor(y, x);
+    return this.boardState().neighborsFor(y, x);
   },
 
   hasCapturesFor: function hasCapturesFor(y, x) {
@@ -1120,14 +1111,14 @@ Game.prototype = {
     var isEmpty = intersection.isEmpty();
     var isCapturing = this.hasCapturesFor(y, x);
     var isSuicide = this.wouldBeSuicide(y, x);
-    var koPoint = this.currentMove().koPoint;
+    var koPoint = this.boardState().koPoint;
     var isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
 
     return !isEmpty || isKoViolation || isSuicide && !isCapturing;
   },
 
   render: function render() {
-    var currentMove = this.currentMove();
+    var boardState = this.boardState();
 
     if (!this.isOver()) {
       this.removeScoringState();
@@ -1146,7 +1137,7 @@ Game.prototype = {
       return;
     }
 
-    return this.currentMove().territory(this);
+    return this.boardState().territory(this);
   },
 
   undo: function undo() {
@@ -1158,7 +1149,7 @@ Game.prototype = {
 exports.default = Game;
 
 
-},{"./dom-renderer":2,"./game-state":3,"./intersection":5,"./null-renderer":6,"./scorer":7,"./utils":8}],5:[function(require,module,exports){
+},{"./board-state":2,"./dom-renderer":3,"./intersection":5,"./null-renderer":6,"./scorer":7,"./utils":8}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1230,8 +1221,8 @@ exports.default = {
     });
 
     return {
-      black: game.territory().black.length + game.currentMove().whiteStonesCaptured + whiteDeadAsCaptures.length,
-      white: game.territory().white.length + game.currentMove().blackStonesCaptured + blackDeadAsCaptures.length
+      black: game.territory().black.length + game.boardState().whiteStonesCaptured + whiteDeadAsCaptures.length,
+      white: game.territory().white.length + game.boardState().blackStonesCaptured + blackDeadAsCaptures.length
     };
   },
 

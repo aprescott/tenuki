@@ -350,7 +350,7 @@ export default function DOMRenderer(game, boardElement) {
   this.renderStonesPlayed = function() {
     const renderer = this;
     const game = renderer.game;
-    const currentMove = game.currentMove();
+    const boardState = game.boardState();
     const points = game.intersections();
 
     points.forEach(function(intersection) {
@@ -361,9 +361,9 @@ export default function DOMRenderer(game, boardElement) {
   this.updateMarkerPoints = function() {
     const renderer = this;
     const game = this.game;
-    const currentMove = game.currentMove();
+    const boardState = game.boardState();
 
-    if (!currentMove) {
+    if (!boardState) {
       return;
     }
 
@@ -373,15 +373,12 @@ export default function DOMRenderer(game, boardElement) {
       }
     });
 
-    if (currentMove.koPoint) {
-      utils.addClass(renderer.grid[currentMove.koPoint.y][currentMove.koPoint.x], "ko");
+    if (boardState.koPoint) {
+      utils.addClass(renderer.grid[boardState.koPoint.y][boardState.koPoint.x], "ko");
     }
 
-    // TODO: this is awkward naming. it seems like currentState should be separate from currentMove?
-    // but then you constantly have to check currentMove everywhere?
-    // what if there were a flag that represented the presence of y and x?
-    if (currentMove.y && currentMove.x) {
-      utils.addClass(renderer.grid[currentMove.y][currentMove.x], "marker");
+    if (boardState.playedPoint) {
+      utils.addClass(renderer.grid[boardState.playedPoint.y][boardState.playedPoint.x], "marker");
     }
   };
 

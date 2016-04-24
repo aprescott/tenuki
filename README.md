@@ -170,10 +170,12 @@ var game = new tenuki.Game(boardElement);
 game.setup();
 
 game.callbacks.postRender = function(game) {
-  if (game.currentMove().pass) {
-    console.log(game.currentMove().color + " passed");
-  } else {
-    console.log(game.currentMove().color + " played " + game.currentMove().y + "," + game.currentMove().x);
+  if (game.boardState().pass) {
+    console.log(game.boardState().color + " passed");
+  }
+
+  if (game.boardState().playedPoint) {
+    console.log(game.boardState().color + " played " + game.boardState().playedPoint.y + "," + game.boardState().playedPoint.x);
   }
 };
 ```

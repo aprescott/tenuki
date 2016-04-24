@@ -1,15 +1,12 @@
 import utils from "./utils";
 import Intersection from "./intersection";
 
-const GameState = function({ number, y, x, color, pass, points, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
-  this.number = number;
-  this.y = y;
-  this.x = x;
+const BoardState = function({ moveNumber, playedPoint, color, pass, points, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
+  this.moveNumber = moveNumber;
+  this.playedPoint = playedPoint;
   this.color = color;
   this.pass = pass;
-  // "points" -- we can do better
   this.points = points;
-  // we can probably do better here, too
   this.blackStonesCaptured = blackStonesCaptured;
   this.whiteStonesCaptured = whiteStonesCaptured;
   this.capturedPositions = capturedPositions;
@@ -19,7 +16,7 @@ const GameState = function({ number, y, x, color, pass, points, blackStonesCaptu
   Object.freeze(this);
 };
 
-GameState.prototype = {
+BoardState.prototype = {
   _nextColor: function() {
     if (this.color == "white") {
       return "black";
@@ -63,10 +60,9 @@ GameState.prototype = {
   },
 
   playPass: function() {
-    const newState = new GameState({
-      number: this.number + 1,
-      y: null,
-      x: null,
+    const newState = new BoardState({
+      moveNumber: this.moveNumber + 1,
+      playedPoint: null,
       color: this._nextColor(),
       pass: true,
       points: this.points,
@@ -98,9 +94,8 @@ GameState.prototype = {
     const boardSize = this.boardSize;
 
     const moveInfo = {
-      number: this.number + 1,
-      y: y,
-      x: x,
+      moveNumber: this.moveNumber + 1,
+      playedPoint: playedPoint,
       color: playedColor,
       pass: false,
       points: newPoints,
@@ -110,7 +105,7 @@ GameState.prototype = {
       boardSize: boardSize
     };
 
-    const withPlayedPoint = new GameState(moveInfo);
+    const withPlayedPoint = new BoardState(moveInfo);
     const hasKoPoint = capturedPositions.length == 1 && withPlayedPoint.groupAt(y, x).length == 1 && withPlayedPoint.inAtari(y, x);
 
     if (hasKoPoint) {
@@ -119,7 +114,7 @@ GameState.prototype = {
       moveInfo["koPoint"] = null;
     }
 
-    return new GameState(moveInfo);
+    return new BoardState(moveInfo);
   },
 
   intersectionAt: function(y, x) {
@@ -253,7 +248,7 @@ GameState.prototype = {
   }
 }
 
-GameState._initialFor = function(boardSize, handicapStones) {
+BoardState._initialFor = function(boardSize, handicapStones) {
   this._cache = this._cache || {};
   this._cache[boardSize] = this._cache[boardSize] || {};
 
@@ -295,9 +290,9 @@ GameState._initialFor = function(boardSize, handicapStones) {
     emptyPoints[p.y*boardSize + p.x] = new Intersection(p.y, p.x, "black");
   });
 
-  const initialState = new GameState({
+  const initialState = new BoardState({
     color: handicapStones > 1 ? "black" : "white",
-    number: 0,
+    moveNumber: 0,
     points: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
     whiteStonesCaptured: 0,
@@ -308,4 +303,4 @@ GameState._initialFor = function(boardSize, handicapStones) {
   return initialState;
 }
 
-export default GameState;
+export default BoardState;

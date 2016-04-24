@@ -3,7 +3,7 @@ import DOMRenderer from "./dom-renderer";
 import NullRenderer from "./null-renderer";
 import Intersection from "./intersection";
 import Scorer from "./scorer";
-import GameState from "./game-state";
+import BoardState from "./board-state";
 
 const Game = function(boardElement) {
   this._defaultBoardSize = 19;
@@ -42,11 +42,11 @@ Game.prototype = {
   },
 
   intersectionAt: function(y, x) {
-    return this.currentMove().intersectionAt(y, x);
+    return this.boardState().intersectionAt(y, x);
   },
 
   intersections: function() {
-    return this.currentMove().points;
+    return this.boardState().points;
   },
 
   yCoordinateFor: function(y) {
@@ -63,9 +63,9 @@ Game.prototype = {
     return this.xCoordinateFor(x) + this.yCoordinateFor(y);
   },
 
-  // TODO: currentMove().color != currentPlayer() and this is weird.
+  // TODO: boardState().color != currentPlayer() and this is weird.
   currentPlayer: function() {
-    return this.currentMove()._nextColor();
+    return this.boardState()._nextColor();
   },
 
   playAt: function(y, x) {
@@ -73,14 +73,14 @@ Game.prototype = {
       return false;
     }
 
-    this._moves.push(this.currentMove().playAt(y, x));
+    this._moves.push(this.boardState().playAt(y, x));
     this.render();
 
     return true;
   },
 
-  currentMove: function() {
-    return this._moves[this._moves.length - 1] || GameState._initialFor(this.boardSize, this.handicapStones);
+  boardState: function() {
+    return this._moves[this._moves.length - 1] || BoardState._initialFor(this.boardSize, this.handicapStones);
   },
 
   isWhitePlaying: function() {
@@ -92,7 +92,7 @@ Game.prototype = {
   },
 
   inAtari: function(y, x) {
-    return this.currentMove().inAtari(y, x);
+    return this.boardState().inAtari(y, x);
   },
 
   wouldBeSuicide: function(y, x) {
@@ -130,7 +130,7 @@ Game.prototype = {
 
   pass: function() {
     if (!this.isOver()) {
-      this._moves.push(this.currentMove().playPass())
+      this._moves.push(this.boardState().playPass())
       this.render();
     }
   },
@@ -140,10 +140,10 @@ Game.prototype = {
       return false;
     }
 
-    const currentMove = this.currentMove();
+    const boardState = this.boardState();
     const previousMove = this._moves[this._moves.length - 2];
 
-    return currentMove.pass && previousMove.pass;
+    return boardState.pass && previousMove.pass;
   },
 
   toggleDeadAt: function(y, x) {
@@ -173,15 +173,15 @@ Game.prototype = {
   },
 
   libertiesAt: function(y, x) {
-    return this.currentMove().libertiesAt(y, x);
+    return this.boardState().libertiesAt(y, x);
   },
 
   groupAt: function(y, x) {
-    return this.currentMove().groupAt(y, x);
+    return this.boardState().groupAt(y, x);
   },
 
   neighborsFor: function(y, x) {
-    return this.currentMove().neighborsFor(y, x);
+    return this.boardState().neighborsFor(y, x);
   },
 
   hasCapturesFor: function(y, x) {
@@ -203,14 +203,14 @@ Game.prototype = {
     const isEmpty = intersection.isEmpty();
     const isCapturing = this.hasCapturesFor(y, x);
     const isSuicide = this.wouldBeSuicide(y, x);
-    const koPoint = this.currentMove().koPoint;
+    const koPoint = this.boardState().koPoint;
     const isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
 
     return !isEmpty || isKoViolation || (isSuicide && !isCapturing);
   },
 
   render: function() {
-    const currentMove = this.currentMove();
+    const boardState = this.boardState();
 
     if (!this.isOver()) {
       this.removeScoringState();
@@ -229,7 +229,7 @@ Game.prototype = {
       return;
     }
 
-    return this.currentMove().territory(this);
+    return this.boardState().territory(this);
   },
 
   undo: function() {
