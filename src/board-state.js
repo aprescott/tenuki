@@ -1,12 +1,12 @@
 import utils from "./utils";
 import Intersection from "./intersection";
 
-const BoardState = function({ moveNumber, playedPoint, color, pass, points, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
+const BoardState = function({ moveNumber, playedPoint, color, pass, intersections, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
   this.moveNumber = moveNumber;
   this.playedPoint = playedPoint;
   this.color = color;
   this.pass = pass;
-  this.points = points;
+  this.intersections = intersections;
   this.blackStonesCaptured = blackStonesCaptured;
   this.whiteStonesCaptured = whiteStonesCaptured;
   this.capturedPositions = capturedPositions;
@@ -41,22 +41,22 @@ BoardState.prototype = {
     return utils.unique(capturedStones);
   },
 
-  _updatePoint: function(intersection, points, color) {
-    const index = points.indexOf(intersection);
+  _updateIntersection: function(intersection, intersections, color) {
+    const index = intersections.indexOf(intersection);
 
     if (index < 0) {
       throw "unexpected negative index " + index + " when attempting to update " + intersection.y + "," + intersection.x + " to " + color;
     }
 
-    const prefix = points.slice(0, index);
+    const prefix = intersections.slice(0, index);
     const newPoint = new Intersection(intersection.y, intersection.x, color);
-    const suffix = points.slice(index + 1);
+    const suffix = intersections.slice(index + 1);
 
     return prefix.concat([newPoint], suffix);
   },
 
-  _removePoint: function(intersection, points) {
-    return this._updatePoint(intersection, points, "empty");
+  _removeIntersection: function(intersection, intersections) {
+    return this._updateIntersection(intersection, intersections, "empty");
   },
 
   playPass: function() {
@@ -65,7 +65,7 @@ BoardState.prototype = {
       playedPoint: null,
       color: this._nextColor(),
       pass: true,
-      points: this.points,
+      intersections: this.intersections,
       blackStonesCaptured: this.blackStonesCaptured,
       whiteStonesCaptured: this.whiteStonesCaptured,
       capturedPositions: [],
@@ -80,13 +80,13 @@ BoardState.prototype = {
     const playedColor = this._nextColor();
     const capturedPositions = this._capturesFrom(y, x, playedColor);
     let playedPoint = this.intersectionAt(y, x);
-    let newPoints = this.points;
+    let newPoints = this.intersections;
 
     capturedPositions.forEach(i => {
-      newPoints = this._removePoint(i, newPoints);
+      newPoints = this._removeIntersection(i, newPoints);
     });
 
-    newPoints = this._updatePoint(playedPoint, newPoints, playedColor);
+    newPoints = this._updateIntersection(playedPoint, newPoints, playedColor);
 
     const newTotalBlackCaptured = this.blackStonesCaptured + (playedColor == "black" ? 0 : capturedPositions.length);
     const newTotalWhiteCaptured = this.whiteStonesCaptured + (playedColor == "white" ? 0 : capturedPositions.length);
@@ -98,7 +98,7 @@ BoardState.prototype = {
       playedPoint: playedPoint,
       color: playedColor,
       pass: false,
-      points: newPoints,
+      intersections: newPoints,
       blackStonesCaptured: newTotalBlackCaptured,
       whiteStonesCaptured: newTotalWhiteCaptured,
       capturedPositions: capturedPositions,
@@ -118,7 +118,7 @@ BoardState.prototype = {
   },
 
   intersectionAt: function(y, x) {
-    return this.points[y*this.boardSize + x];
+    return this.intersections[y*this.boardSize + x];
   },
 
   groupAt: function(y, x) {
@@ -205,7 +205,7 @@ BoardState.prototype = {
   },
 
   territory: function(game) {
-    const emptyOrDeadPoints = this.points.filter(intersection => {
+    const emptyOrDeadPoints = this.intersections.filter(intersection => {
       return intersection.isEmpty() || game.isDeadAt(intersection.y, intersection.x);
     });
 
@@ -293,7 +293,7 @@ BoardState._initialFor = function(boardSize, handicapStones) {
   const initialState = new BoardState({
     color: handicapStones > 1 ? "black" : "white",
     moveNumber: 0,
-    points: Object.freeze(emptyPoints),
+    intersections: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
     whiteStonesCaptured: 0,
     boardSize: boardSize

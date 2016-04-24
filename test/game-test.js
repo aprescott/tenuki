@@ -16,7 +16,7 @@ describe("Game", function() {
       game.setup();
 
       expect(game.handicapStones).to.equal(0);
-      var nonEmptyPoints = game.boardState().points.filter(i => !i.isEmpty());
+      var nonEmptyPoints = game.boardState().intersections.filter(i => !i.isEmpty());
       expect(nonEmptyPoints.length).to.equal(0);
     });
 
@@ -26,7 +26,7 @@ describe("Game", function() {
         game.setup({ handicapStones: h });
 
         expect(game.handicapStones).to.equal(h);
-        var nonEmptyPoints = game.boardState().points.filter(i => !i.isEmpty());
+        var nonEmptyPoints = game.boardState().intersections.filter(i => !i.isEmpty());
         expect(nonEmptyPoints.length).to.equal(h);
         expect(game.currentPlayer()).to.equal("white");
       });
@@ -34,7 +34,7 @@ describe("Game", function() {
       var game = new Game();
       game.setup({ handicapStones: 2 });
       expect(game.handicapStones).to.equal(2);
-      var nonEmptyPoints = game.boardState().points.filter(i => !i.isEmpty());
+      var nonEmptyPoints = game.boardState().intersections.filter(i => !i.isEmpty());
       expect(nonEmptyPoints.length).to.equal(2);
       expect(nonEmptyPoints[0].value).to.equal("black");
       expect(nonEmptyPoints[0].y).to.equal(3);

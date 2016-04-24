@@ -46,7 +46,7 @@ Game.prototype = {
   },
 
   intersections: function() {
-    return this.boardState().points;
+    return this.boardState().intersections;
   },
 
   yCoordinateFor: function(y) {
