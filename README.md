@@ -136,7 +136,7 @@ From there, the JavaScript interface is the same as in a browser console:
 ```js
 game.intersectionAt(0, 0).value;
 // 'empty'
-game.currentPlayer;
+game.currentPlayer();
 // 'black'
 game.isOver();
 // false

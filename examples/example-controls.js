@@ -64,7 +64,6 @@ ExampleGameControls = function(element, game) {
     passButton.addEventListener("click", function(e) {
       e.preventDefault();
 
-      var player = controls.game.currentPlayer;
       controls.game.pass();
       controls.updateStats();
     });
