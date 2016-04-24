@@ -20,6 +20,7 @@ Features:
   * Ko rule.
   * Pass.
   * Undo.
+  * Handicap stones.
   * Optional coordinate markers for points A19 through T1.
   * Built-in mobile support for touch devices and small screens, even with a 19x19 board.
   * End-game functionality: dead stone marking, area/territory scoring.
@@ -99,6 +100,16 @@ var game = new tenuki.Game(boardElement);
 // use a 13x13 board
 game.setup({
   boardSize: 13
+});
+```
+
+# Handicap stones
+
+Handicap stones (2 through 9) are supported on sizes 9x9, 13x13 and 19x19.
+
+```js
+game.setup({
+  handicapStones: 5
 });
 ```
 

@@ -29,12 +29,13 @@ var boardElementTest = document.querySelector(".tenuki-board");
 var gameTest = window.gameTest = new tenuki.Game(boardElementTest);
 gameTest.setup();
 
-resetTests = window.resetTests = function () {
+resetTests = window.resetTests = function(handicapStones) {
   boardElementTest.innerHTML = "";
   var boardSize = gameTest.boardSize;
   gameTest = new tenuki.Game(boardElementTest);
   gameTest.setup({
-    boardSize: boardSize
+    boardSize: boardSize,
+    handicapStones: handicapStones || 0
   });
 };
 
@@ -473,6 +474,48 @@ gameTest.renderer.grid[0][0].click(); // w
 if (gameTest.currentMove().blackStonesCaptured != 3 || gameTest.currentMove().whiteStonesCaptured != 0) {
   throw "tests failed";
 }
+
+// handicap placement
+resetTests(6);
+
+if (gameTest.currentPlayer() != "white") {
+  throw "tests failed";
+}
+
+[
+  [3, 3],
+  [9, 3],
+  [15, 3],
+  [3, 15],
+  [9, 15],
+  [15, 15]
+].forEach(function(el) {
+  if (!tenuki.utils.hasClass(gameTest.renderer.grid[el[0]][el[1]], "black")) {
+    throw "tests failed";
+  }
+});
+
+resetTests(9);
+
+if (gameTest.currentPlayer() != "white") {
+  throw "tests failed";
+}
+
+[
+  [3, 3],
+  [9, 3],
+  [15, 3],
+  [9, 3],
+  [9, 9],
+  [9, 15],
+  [3, 15],
+  [9, 15],
+  [15, 15]
+].forEach(function(el) {
+  if (!tenuki.utils.hasClass(gameTest.renderer.grid[el[0]][el[1]], "black")) {
+    throw "tests failed";
+  }
+});
 
 // fancy "pass" print
 resetTests();
