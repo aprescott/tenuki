@@ -798,7 +798,7 @@ function DOMRenderer(game, boardElement) {
 
   this.updateCurrentPlayer = function () {
     var game = this.game;
-    var previousPlayer = game.currentPlayer() == "black" ? "white" : "black";
+    var previousPlayer = game.boardState().color;
     _utils2.default.removeClass(boardElement, previousPlayer + "-to-play");
     _utils2.default.addClass(boardElement, game.currentPlayer() + "-to-play");
 

@@ -384,7 +384,7 @@ export default function DOMRenderer(game, boardElement) {
 
   this.updateCurrentPlayer = function() {
     const game = this.game;
-    const previousPlayer = (game.currentPlayer() == "black" ? "white" : "black");
+    const previousPlayer = game.boardState().color;
     utils.removeClass(boardElement, previousPlayer + "-to-play");
     utils.addClass(boardElement, game.currentPlayer() + "-to-play");
 
