@@ -9,7 +9,11 @@
 exports.Game = require("./lib/game").default;
 exports.utils = require("./lib/utils").default;
 
-},{"./lib/game":4,"./lib/utils":8}],2:[function(require,module,exports){
+exports.Region = require("./lib/region").default;
+exports.EyePoint = require("./lib/eye-point").default;
+exports.Intersection = require("./lib/intersection").default;
+
+},{"./lib/eye-point":4,"./lib/game":5,"./lib/intersection":6,"./lib/region":8,"./lib/utils":10}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -108,21 +112,46 @@ BoardState.prototype = {
   },
 
   _updateIntersection: function _updateIntersection(intersection, intersections, color) {
-    var index = intersections.indexOf(intersection);
-
-    if (index < 0) {
-      throw "unexpected negative index " + index + " when attempting to update " + intersection.y + "," + intersection.x + " to " + color;
-    }
-
-    var prefix = intersections.slice(0, index);
-    var newPoint = new _intersection2.default(intersection.y, intersection.x, color);
-    var suffix = intersections.slice(index + 1);
-
-    return prefix.concat([newPoint], suffix);
+    return intersections.map(function (i) {
+      if (i.y == intersection.y && i.x == intersection.x) {
+        return new _intersection2.default(i.y, i.x, color);
+      } else {
+        return i;
+      }
+    });
   },
 
   _removeIntersection: function _removeIntersection(intersection, intersections) {
     return this._updateIntersection(intersection, intersections, "empty");
+  },
+
+  _withoutIntersectionsMatching: function _withoutIntersectionsMatching(condition) {
+    var newPoints = this.intersections.map(function (i) {
+      if (condition(i)) {
+        return new _intersection2.default(i.y, i.x, "empty");
+      } else {
+        return i;
+      }
+    });
+
+    return this._withNewPoints(newPoints);
+  },
+
+  _withNewPoints: function _withNewPoints(newPoints) {
+    var newState = new BoardState({
+      moveNumber: this.moveNumber,
+      playedPoint: this.playedPoint,
+      color: this.color,
+      pass: this.pass,
+      intersections: newPoints,
+      blackStonesCaptured: this.blackStonesCaptured,
+      whiteStonesCaptured: this.whiteStonesCaptured,
+      capturedPositions: this.capturedPositions,
+      koPoint: this.koPoint,
+      boardSize: this.boardSize
+    });
+
+    return newState;
   },
 
   playPass: function playPass() {
@@ -281,16 +310,6 @@ BoardState.prototype = {
     return true;
   },
 
-  isIllegalAt: function isIllegalAt(y, x) {
-    var intersection = this.intersectionAt(y, x);
-    var isEmpty = intersection.isEmpty();
-    var isSuicide = this.wouldBeSuicide(y, x);
-    var koPoint = this.koPoint;
-    var isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
-
-    return !isEmpty || isKoViolation || isSuicide;
-  },
-
   // Iterative depth-first search traversal. Start from
   // startingPoint, iteratively follow all neighbors.
   // If inclusionConditionis met for a neighbor, include it
@@ -325,63 +344,7 @@ BoardState.prototype = {
         }
     }
 
-    return [checkedPoints, boundaryPoints];
-  },
-
-  territory: function territory(game) {
-    var emptyOrDeadPoints = this.intersections.filter(function (intersection) {
-      return intersection.isEmpty() || game.isDeadAt(intersection.y, intersection.x);
-    });
-
-    if (emptyOrDeadPoints.length == 0) {
-      return;
-    }
-
-    var checkedPoints = [];
-    var territoryPoints = { black: [], white: [] };
-    var pointsToCheck = emptyOrDeadPoints;
-
-    while (pointsToCheck.length > 0) {
-      var nextPoint = pointsToCheck.pop();
-      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(game, nextPoint.y, nextPoint.x, territoryPoints));
-      pointsToCheck = emptyOrDeadPoints.filter(function (i) {
-        return checkedPoints.indexOf(i) < 0;
-      });
-    }
-
-    return {
-      black: territoryPoints.black.map(function (i) {
-        return { y: i.y, x: i.x };
-      }),
-      white: territoryPoints.white.map(function (i) {
-        return { y: i.y, x: i.x };
-      })
-    };
-  },
-
-  checkTerritoryStartingAt: function checkTerritoryStartingAt(game, y, x, territoryPoints) {
-    var startingPoint = this.intersectionAt(y, x);
-
-    var _partitionTraverse3 = this.partitionTraverse(startingPoint, function (neighbor) {
-      return neighbor.isEmpty() || game.isDeadAt(neighbor.y, neighbor.x);
-    });
-
-    var _partitionTraverse4 = _slicedToArray(_partitionTraverse3, 2);
-
-    var nonOccupiedPoints = _partitionTraverse4[0];
-    var occupiedPoints = _partitionTraverse4[1];
-
-    var surroundingColors = _utils2.default.unique(occupiedPoints.map(function (occupiedPoint) {
-      return occupiedPoint.value;
-    }));
-
-    if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
-      var territoryColor = surroundingColors[0];
-
-      territoryPoints[territoryColor] = territoryPoints[territoryColor].concat(nonOccupiedPoints);
-    }
-
-    return nonOccupiedPoints;
+    return [checkedPoints, _utils2.default.unique(boundaryPoints)];
   }
 };
 
@@ -443,7 +406,7 @@ BoardState._initialFor = function (boardSize, handicapStones) {
 exports.default = BoardState;
 
 
-},{"./intersection":5,"./utils":8}],3:[function(require,module,exports){
+},{"./intersection":6,"./utils":10}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -893,18 +856,115 @@ function DOMRenderer(game, boardElement) {
       }
     });
 
-    game.territory().black.forEach(function (territoryPoint) {
+    var territory = game.territory();
+
+    territory.black.forEach(function (territoryPoint) {
       _utils2.default.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-black");
     });
 
-    game.territory().white.forEach(function (territoryPoint) {
+    territory.white.forEach(function (territoryPoint) {
       _utils2.default.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
   };
 };
 
 
-},{"./utils":8}],4:[function(require,module,exports){
+},{"./utils":10}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var EyePoint = function EyePoint(boardState, intersection) {
+  this.boardState = boardState;
+  this.intersection = intersection;
+
+  Object.freeze(this);
+};
+
+EyePoint.prototype = {
+  diagonals: function diagonals() {
+    var _this = this;
+
+    var diagonals = [];
+
+    var possibleX = [];
+    var possibleY = [];
+
+    if (this.intersection.x > 0) {
+      possibleX.push(this.intersection.x - 1);
+    }
+
+    if (this.intersection.x < this.boardState.boardSize - 1) {
+      possibleX.push(this.intersection.x + 1);
+    }
+
+    if (this.intersection.y > 0) {
+      possibleY.push(this.intersection.y - 1);
+    }
+
+    if (this.intersection.y < this.boardState.boardSize - 1) {
+      possibleY.push(this.intersection.y + 1);
+    }
+
+    possibleX.forEach(function (x) {
+      possibleY.forEach(function (y) {
+        diagonals.push(_this.boardState.intersectionAt(y, x));
+      });
+    });
+
+    return diagonals;
+  },
+
+  isFalse: function isFalse() {
+    if (!this.intersection.isEmpty()) {
+      return false;
+    }
+
+    var diagonals = this.diagonals();
+    var onFirstLine = diagonals.length <= 2;
+
+    var neighbors = this.neighbors();
+    var occupiedNeighbors = neighbors.filter(function (i) {
+      return !i.isEmpty();
+    });
+
+    if (onFirstLine && occupiedNeighbors.length < 1) {
+      return false;
+    }
+
+    if (!onFirstLine && occupiedNeighbors.length < 2) {
+      return false;
+    }
+
+    var opposingOccupiedDiagonals = diagonals.filter(function (d) {
+      return !d.isEmpty() && !d.sameColorAs(occupiedNeighbors[0]);
+    });
+
+    if (onFirstLine) {
+      return opposingOccupiedDiagonals.length >= 1;
+    } else {
+      return opposingOccupiedDiagonals.length >= 2;
+    }
+  },
+
+  neighbors: function neighbors() {
+    return this.boardState.neighborsFor(this.intersection.y, this.intersection.x);
+  },
+
+  filledColor: function filledColor() {
+    if (!this.isFalse()) {
+      throw new Error("Attempting to find filled color for a non-false eye");
+    }
+
+    return this.neighbors()[0].value;
+  }
+};
+
+exports.default = EyePoint;
+
+
+},{}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -927,13 +987,11 @@ var _intersection = require("./intersection");
 
 var _intersection2 = _interopRequireDefault(_intersection);
 
-var _scorer = require("./scorer");
-
-var _scorer2 = _interopRequireDefault(_scorer);
-
 var _boardState = require("./board-state");
 
 var _boardState2 = _interopRequireDefault(_boardState);
+
+var _rulesets = require("./rulesets");
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
@@ -948,6 +1006,7 @@ var Game = function Game(boardElement) {
     postRender: function postRender() {}
   };
   this._deadPoints = [];
+  this._defaultRuleset = "territory";
 };
 
 Game.prototype = {
@@ -958,6 +1017,8 @@ Game.prototype = {
     var boardSize = _ref$boardSize === undefined ? this._defaultBoardSize : _ref$boardSize;
     var _ref$handicapStones = _ref.handicapStones;
     var handicapStones = _ref$handicapStones === undefined ? 0 : _ref$handicapStones;
+    var _ref$ruleset = _ref.ruleset;
+    var ruleset = _ref$ruleset === undefined ? this._defaultRuleset : _ref$ruleset;
 
     if (handicapStones > 0 && boardSize != 9 && boardSize != 13 && boardSize != 19) {
       throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
@@ -969,6 +1030,14 @@ Game.prototype = {
 
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
+    this.ruleset = {
+      "area": _rulesets.AreaRules,
+      "territory": _rulesets.TerritoryRules
+    }[ruleset];
+
+    if (!this.ruleset) {
+      throw new Error("Unknown ruleset: " + ruleset);
+    }
   },
 
   setup: function setup(options) {
@@ -1081,12 +1150,8 @@ Game.prototype = {
     });
   },
 
-  territoryScore: function territoryScore() {
-    return _scorer2.default.territoryResultFor(this);
-  },
-
-  areaScore: function areaScore() {
-    return _scorer2.default.areaResultFor(this);
+  score: function score() {
+    return this.ruleset.score(this);
   },
 
   libertiesAt: function libertiesAt(y, x) {
@@ -1106,7 +1171,7 @@ Game.prototype = {
       return false;
     }
 
-    return this.boardState().isIllegalAt(y, x);
+    return this.ruleset.isIllegal(y, x, this.boardState());
   },
 
   render: function render() {
@@ -1129,7 +1194,7 @@ Game.prototype = {
       return;
     }
 
-    return this.boardState().territory(this);
+    return this.ruleset.territory(this);
   },
 
   undo: function undo() {
@@ -1141,7 +1206,7 @@ Game.prototype = {
 exports.default = Game;
 
 
-},{"./board-state":2,"./dom-renderer":3,"./intersection":5,"./null-renderer":6,"./scorer":7,"./utils":8}],5:[function(require,module,exports){
+},{"./board-state":2,"./dom-renderer":3,"./intersection":6,"./null-renderer":7,"./rulesets":9,"./utils":10}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1184,7 +1249,7 @@ Intersection.prototype = {
 exports.default = Intersection;
 
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1197,14 +1262,473 @@ function NullRenderer() {
 }
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = {
-  territoryResultFor: function territoryResultFor(game) {
+
+var _slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];var _n = true;var _d = false;var _e = undefined;try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;_e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }return _arr;
+  }return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
+
+var _utils = require("./utils");
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _eyePoint = require("./eye-point");
+
+var _eyePoint2 = _interopRequireDefault(_eyePoint);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+var Region = function Region(boardState, intersections) {
+  this.boardState = boardState;
+  this.intersections = intersections;
+
+  Object.freeze(this);
+};
+
+Region._startingAt = function (boardState, y, x) {
+  var startingPoint = boardState.intersectionAt(y, x);
+
+  var _boardState$partition = boardState.partitionTraverse(startingPoint, function (neighbor) {
+    return neighbor.sameColorAs(startingPoint);
+  });
+
+  var _boardState$partition2 = _slicedToArray(_boardState$partition, 2);
+
+  var includedPoints = _boardState$partition2[0];
+  var boundaryPoints = _boardState$partition2[1];
+
+  return [includedPoints, boundaryPoints];
+};
+
+Region.allFor = function (boardState) {
+  var pointsToCheck = boardState.intersections.map(function (i) {
+    return i;
+  });
+  var checkedPoints = [];
+  var regions = [];
+
+  var _loop = function _loop() {
+    var point = pointsToCheck.pop();
+
+    if (checkedPoints.indexOf(point) > -1) {
+      // do nothing
+    } else {
+        (function () {
+          var _boardState$partition3 = boardState.partitionTraverse(point, function (neighbor) {
+            return neighbor.sameColorAs(point);
+          });
+
+          var _boardState$partition4 = _slicedToArray(_boardState$partition3, 2);
+
+          var regionPoints = _boardState$partition4[0];
+          var _ = _boardState$partition4[1];
+
+          regions.push(new Region(boardState, regionPoints));
+          checkedPoints = checkedPoints.concat(regionPoints);
+          pointsToCheck = pointsToCheck.filter(function (i) {
+            return regionPoints.indexOf(i) < 0;
+          });
+        })();
+      }
+  };
+
+  while (pointsToCheck.length > 0) {
+    _loop();
+  }
+
+  return regions;
+};
+
+Region.merge = function (regions, region) {
+  var mergedRegions = [region];
+  var length = -1;
+
+  while (mergedRegions.length != length) {
+    length = mergedRegions.length;
+
+    mergedRegions = regions.filter(function (r) {
+      return r.isEmpty() && r.isTerritory() && r.territoryColor() == region.territoryColor() && r.expandedBoundaryStones().some(function (stone) {
+        return mergedRegions.some(function (latestRegion) {
+          return latestRegion.expandedBoundaryStones().indexOf(stone) > -1;
+        });
+      });
+    });
+  }
+
+  return mergedRegions;
+};
+
+Region.prototype = {
+  isEmpty: function isEmpty() {
+    return this.intersections[0].isEmpty();
+  },
+
+  isTerritory: function isTerritory() {
+    var point = this.intersections[0];
+
+    if (!point.isEmpty()) {
+      return false;
+    }
+
+    var _Region$_startingAt = Region._startingAt(this.boardState, point.y, point.x);
+
+    var _Region$_startingAt2 = _slicedToArray(_Region$_startingAt, 2);
+
+    var includedPoints = _Region$_startingAt2[0];
+    var boundaryPoints = _Region$_startingAt2[1];
+
+    var surroundingColors = _utils2.default.unique(boundaryPoints.map(function (i) {
+      return i.value;
+    }));
+    var isTerritory = surroundingColors.length == 1 && surroundingColors[0] != "empty";
+
+    return isTerritory;
+  },
+
+  territoryColor: function territoryColor() {
+    var point = this.intersections[0];
+
+    var _Region$_startingAt3 = Region._startingAt(this.boardState, point.y, point.x);
+
+    var _Region$_startingAt4 = _slicedToArray(_Region$_startingAt3, 2);
+
+    var includedPoints = _Region$_startingAt4[0];
+    var boundaryPoints = _Region$_startingAt4[1];
+
+    var surroundingColors = _utils2.default.unique(boundaryPoints.map(function (i) {
+      return i.value;
+    }));
+    var isTerritory = surroundingColors.length == 1 && surroundingColors[0] != "empty";
+
+    if (!point.isEmpty() || !isTerritory) {
+      throw new Error("Attempted to obtain territory color for something that isn't territory, region containing " + point.y + "," + point.x);
+    } else {
+      return surroundingColors[0];
+    }
+  },
+
+  isBlack: function isBlack() {
+    return this.territoryColor() == "black";
+  },
+
+  isWhite: function isWhite() {
+    return this.territoryColor() == "white";
+  },
+
+  isNeutral: function isNeutral() {
+    return !this.intersections[0].isBlack() && !this.intersections[0].isWhite() && !this.isTerritory();
+  },
+
+  exterior: function exterior() {
+    var _this = this;
+
+    return this.boardState.intersections.filter(function (i) {
+      return _this.intersections.indexOf(i) < 0 && _this.boardState.neighborsFor(i.y, i.x).some(function (neighbor) {
+        return _this.intersections.indexOf(neighbor) > -1;
+      });
+    });
+  },
+
+  boundaryStones: function boundaryStones() {
+    var _this2 = this;
+
+    if (!this.isEmpty()) {
+      throw new Error("Attempted to obtain boundary stones for non-empty region");
+    }
+
+    return this.exterior().filter(function (i) {
+      return !i.sameColorAs(_this2.intersections[0]);
+    });
+  },
+
+  expandedBoundaryStones: function expandedBoundaryStones() {
+    var boundaryStones = this.boundaryStones();
+    var regions = Region.allFor(this.boardState).filter(function (r) {
+      return r.intersections.some(function (i) {
+        return boundaryStones.indexOf(i) > -1;
+      });
+    });
+
+    return _utils2.default.flatMap(regions, function (r) {
+      return r.intersections;
+    });
+  },
+
+  lengthOfTerritoryBoundary: function lengthOfTerritoryBoundary() {
+    var _this3 = this;
+
+    // count the empty border points to treat the edge of the board itself as points
+    var borderPoints = this.intersections.filter(function (i) {
+      return i.y == 0 || i.y == _this3.boardState.boardSize - 1 || i.x == 0 || i.x == _this3.boardState.boardSize - 1;
+    });
+    var cornerPoints = this.intersections.filter(function (i) {
+      return i.y % (_this3.boardState.boardSize - 1) == 0 && i.x % (_this3.boardState.boardSize - 1) == 0;
+    });
+
+    return this.boundaryStones().length + borderPoints.length + cornerPoints.length;
+  },
+
+  containsSquareFour: function containsSquareFour() {
+    var _this4 = this;
+
+    return this.intersections.some(function (i) {
+      return [[0, 0], [0, 1], [1, 0], [1, 1]].every(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2);
+
+        var y = _ref2[0];
+        var x = _ref2[1];
+
+        var intersection = _this4.boardState.intersectionAt(i.y + y, i.x + x);
+        return typeof intersection != "undefined" && intersection.sameColorAs(i);
+      });
+    });
+  },
+
+  containsCurvedFour: function containsCurvedFour() {
+    var _this5 = this;
+
+    return this.intersections.some(function (i) {
+      return [[[0, 0], [1, 0], [2, 0], [2, 1]], [[-1, 2], [0, 0], [0, 1], [0, 2]], [[0, 0], [0, 1], [1, 1], [2, 1]], [[-1, 0], [-1, 1], [-1, 2], [0, 0]], [[-2, 1], [-1, 1], [0, 0], [0, 1]], [[0, 0], [1, 0], [1, 1], [1, 2]], [[0, -1], [0, 0], [1, -1], [2, -1]], [[-1, -2], [-1, -1], [-1, 0], [0, 0]]].some(function (expectedPoints) {
+        return expectedPoints.every(function (_ref3) {
+          var _ref4 = _slicedToArray(_ref3, 2);
+
+          var y = _ref4[0];
+          var x = _ref4[1];
+
+          var intersection = _this5.boardState.intersectionAt(i.y + y, i.x + x);
+          return typeof intersection != "undefined" && intersection.sameColorAs(i);
+        });
+      });
+    });
+  },
+
+  numberOfEyes: function numberOfEyes() {
+    if (!this.intersections[0].isEmpty()) {
+      throw new Error("Unexpected calculation of number of eyes for a non-empty region containing " + this.intersections[0].y + "," + this.intersections[0].x);
+    }
+
+    var boundaryLength = this.lengthOfTerritoryBoundary();
+
+    if (boundaryLength < 2) {
+      throw new Error("Unexpected boundary length of " + boundaryLength + " for region including " + this.intersections[0].y + "," + this.intersections[0].x);
+    }
+
+    if (boundaryLength >= 10) {
+      return 2;
+    }
+
+    var eyes = void 0;
+
+    switch (boundaryLength) {
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+        eyes = 1;
+        break;
+      case 7:
+        eyes = 1.5;
+        break;
+      case 8:
+        if (this.containsSquareFour()) {
+          eyes = 1;
+        } else if (this.containsCurvedFour()) {
+          eyes = 2;
+        } else {
+          eyes = 1.5;
+        }
+
+        break;
+      case 9:
+        if (this.containsSquareFour()) {
+          eyes = 1.5;
+        } else {
+          eyes = 2;
+        }
+        break;
+
+      default:
+        throw new Error("unhandled boundary length " + boundaryLength);
+    }
+
+    return eyes;
+  }
+};
+
+exports.default = Region;
+
+
+},{"./eye-point":4,"./utils":10}],9:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.AreaRules = exports.TerritoryRules = undefined;
+
+var _utils = require("./utils");
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _boardState = require("./board-state");
+
+var _boardState2 = _interopRequireDefault(_boardState);
+
+var _intersection = require("./intersection");
+
+var _intersection2 = _interopRequireDefault(_intersection);
+
+var _region = require("./region");
+
+var _region2 = _interopRequireDefault(_region);
+
+var _eyePoint = require("./eye-point");
+
+var _eyePoint2 = _interopRequireDefault(_eyePoint);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+var boardStateWithoutDeadPoints = function boardStateWithoutDeadPoints(game) {
+  return game.boardState()._withoutIntersectionsMatching(function (i) {
+    return game.isDeadAt(i.y, i.x);
+  });
+};
+
+var boardStateWithoutNeutralPoints = function boardStateWithoutNeutralPoints(boardState) {
+  var regions = _region2.default.allFor(boardState);
+  var neutralRegions = regions.filter(function (r) {
+    return r.isNeutral();
+  });
+
+  if (regions.length == 0 || neutralRegions.length == 0) {
+    return boardState;
+  }
+
+  var replacements = {};
+
+  neutralRegions.forEach(function (r) {
+    var startingX = null;
+    var startingY = null;
+
+    r.intersections.forEach(function (intersection) {
+      startingX = startingX || intersection.x;
+      startingX = startingX || intersection.y;
+
+      var manhattanDistance = Math.abs(intersection.y - startingY) + Math.abs(intersection.x - startingX);
+      var replacementColor = ["black", "white"][manhattanDistance % 2];
+      var replacement = new _intersection2.default(intersection.y, intersection.x, replacementColor);
+
+      replacements[intersection.y] = replacements[intersection.y] || [];
+      replacements[intersection.y][intersection.x] = replacement;
+    });
+  });
+
+  var newPoints = boardState.intersections.map(function (i) {
+    if (replacements[i.y] && replacements[i.y][i.x]) {
+      return replacements[i.y][i.x];
+    } else {
+      return i;
+    }
+  });
+
+  return boardState._withNewPoints(newPoints);
+};
+
+var boardStateWithClearFalseEyesFilled = function boardStateWithClearFalseEyesFilled(boardState) {
+  var territoryRegions = _region2.default.allFor(boardState).filter(function (r) {
+    return r.isTerritory();
+  });
+  var falseEyePoints = _utils2.default.flatMap(territoryRegions, function (r) {
+    return r.intersections;
+  }).filter(function (i) {
+    return new _eyePoint2.default(boardState, i).isFalse();
+  });
+
+  var pointsNeighboringAtari = falseEyePoints.filter(function (i) {
+    return boardState.neighborsFor(i.y, i.x).some(function (n) {
+      return boardState.inAtari(n.y, n.x);
+    });
+  });
+  var neutralAtariUpdatedState = boardState;
+
+  var _loop = function _loop() {
+    var newPoints = neutralAtariUpdatedState.intersections.map(function (i) {
+      if (pointsNeighboringAtari.indexOf(i) > -1) {
+        return new _intersection2.default(i.y, i.x, new _eyePoint2.default(neutralAtariUpdatedState, i).filledColor());
+      } else {
+        return i;
+      }
+    });
+    neutralAtariUpdatedState = neutralAtariUpdatedState._withNewPoints(newPoints);
+
+    var boardState = boardStateWithoutNeutralPoints(neutralAtariUpdatedState);
+    var territoryRegions = _region2.default.allFor(boardState).filter(function (r) {
+      return r.isTerritory();
+    });
+    var falseEyePoints = _utils2.default.flatMap(territoryRegions, function (r) {
+      return r.intersections;
+    }).filter(function (i) {
+      return new _eyePoint2.default(boardState, i).isFalse();
+    });
+
+    pointsNeighboringAtari = falseEyePoints.filter(function (i) {
+      return neutralAtariUpdatedState.neighborsFor(i.y, i.x).some(function (n) {
+        return neutralAtariUpdatedState.inAtari(n.y, n.x);
+      });
+    });
+  };
+
+  while (pointsNeighboringAtari.length > 0) {
+    _loop();
+  }
+
+  return neutralAtariUpdatedState;
+};
+
+var TerritoryRules = Object.freeze({
+  isIllegal: function isIllegal(y, x, boardState) {
+    var intersection = boardState.intersectionAt(y, x);
+    var isEmpty = intersection.isEmpty();
+    var isSuicide = boardState.wouldBeSuicide(y, x);
+    var koPoint = boardState.koPoint;
+    var isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
+
+    return !isEmpty || isKoViolation || isSuicide;
+  },
+
+  score: function score(game) {
     var blackDeadAsCaptures = game._deadPoints.filter(function (deadPoint) {
       return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack();
     });
@@ -1212,29 +1736,107 @@ exports.default = {
       return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite();
     });
 
+    var territory = game.territory();
+    var boardState = game.boardState();
+
     return {
-      black: game.territory().black.length + game.boardState().whiteStonesCaptured + whiteDeadAsCaptures.length,
-      white: game.territory().white.length + game.boardState().blackStonesCaptured + blackDeadAsCaptures.length
+      black: territory.black.length + boardState.whiteStonesCaptured + whiteDeadAsCaptures.length,
+      white: territory.white.length + boardState.blackStonesCaptured + blackDeadAsCaptures.length
     };
   },
 
-  areaResultFor: function areaResultFor(game) {
+  territory: function territory(game) {
+    var stateWithoutDeadPoints = boardStateWithoutDeadPoints(game);
+    var stateWithoutNeutrals = boardStateWithoutNeutralPoints(stateWithoutDeadPoints);
+    var stateWithClearFalseEyesFilled = boardStateWithClearFalseEyesFilled(stateWithoutNeutrals);
+
+    var territoryRegions = _region2.default.allFor(stateWithClearFalseEyesFilled).filter(function (r) {
+      return r.isTerritory();
+    });
+
+    var territoryRegionsWithoutSeki = territoryRegions.filter(function (r) {
+      var merged = _region2.default.merge(territoryRegions, r);
+      var eyeCounts = merged.map(function (m) {
+        return Math.ceil(m.numberOfEyes());
+      });
+
+      return eyeCounts.length > 0 && eyeCounts.reduce(function (a, b) {
+        return a + b;
+      }) >= 2;
+    });
+
+    var blackRegions = territoryRegionsWithoutSeki.filter(function (r) {
+      return r.isBlack();
+    });
+    var whiteRegions = territoryRegionsWithoutSeki.filter(function (r) {
+      return r.isWhite();
+    });
+
+    return {
+      black: _utils2.default.flatMap(blackRegions, function (r) {
+        return r.intersections;
+      }).map(function (i) {
+        return { y: i.y, x: i.x };
+      }),
+      white: _utils2.default.flatMap(whiteRegions, function (r) {
+        return r.intersections;
+      }).map(function (i) {
+        return { y: i.y, x: i.x };
+      })
+    };
+  }
+});
+
+var AreaRules = Object.freeze({
+  isIllegal: TerritoryRules.isIllegal,
+
+  score: function score(game) {
     var blackStonesOnTheBoard = game.intersections().filter(function (intersection) {
       return intersection.isBlack() && !game.isDeadAt(intersection.y, intersection.x);
     });
     var whiteStonesOnTheBoard = game.intersections().filter(function (intersection) {
       return intersection.isWhite() && !game.isDeadAt(intersection.y, intersection.x);
     });
+    var territory = game.territory();
 
     return {
-      black: game.territory().black.length + blackStonesOnTheBoard.length,
-      white: game.territory().white.length + whiteStonesOnTheBoard.length
+      black: territory.black.length + blackStonesOnTheBoard.length,
+      white: territory.white.length + whiteStonesOnTheBoard.length
+    };
+  },
+
+  territory: function territory(game) {
+    var regions = _region2.default.allFor(boardStateWithoutDeadPoints(game));
+    var territoryRegions = regions.filter(function (r) {
+      return r.isTerritory();
+    });
+    var blackRegions = territoryRegions.filter(function (r) {
+      return r.isBlack();
+    });
+    var whiteRegions = territoryRegions.filter(function (r) {
+      return r.isWhite();
+    });
+
+    return {
+      black: _utils2.default.flatMap(blackRegions, function (r) {
+        return r.intersections;
+      }).map(function (i) {
+        return { y: i.y, x: i.x };
+      }),
+      white: _utils2.default.flatMap(whiteRegions, function (r) {
+        return r.intersections;
+      }).map(function (i) {
+        return { y: i.y, x: i.x };
+      })
     };
   }
-};
+});
+
+exports.TerritoryRules = TerritoryRules;
+exports.AreaRules = AreaRules;
 
 
-},{}],8:[function(require,module,exports){
+},{"./board-state":2,"./eye-point":4,"./intersection":6,"./region":8,"./utils":10}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

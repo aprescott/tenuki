@@ -40,21 +40,46 @@ BoardState.prototype = {
   },
 
   _updateIntersection: function(intersection, intersections, color) {
-    const index = intersections.indexOf(intersection);
-
-    if (index < 0) {
-      throw "unexpected negative index " + index + " when attempting to update " + intersection.y + "," + intersection.x + " to " + color;
-    }
-
-    const prefix = intersections.slice(0, index);
-    const newPoint = new Intersection(intersection.y, intersection.x, color);
-    const suffix = intersections.slice(index + 1);
-
-    return prefix.concat([newPoint], suffix);
+    return intersections.map(i => {
+      if (i.y == intersection.y && i.x == intersection.x) {
+        return new Intersection(i.y, i.x, color);
+      } else {
+        return i;
+      }
+    });
   },
 
   _removeIntersection: function(intersection, intersections) {
     return this._updateIntersection(intersection, intersections, "empty");
+  },
+
+  _withoutIntersectionsMatching: function(condition) {
+    const newPoints = this.intersections.map(i => {
+      if (condition(i)) {
+        return new Intersection(i.y, i.x, "empty");
+      } else {
+        return i;
+      }
+    });
+
+    return this._withNewPoints(newPoints);
+  },
+
+  _withNewPoints: function(newPoints) {
+    const newState = new BoardState({
+      moveNumber: this.moveNumber,
+      playedPoint: this.playedPoint,
+      color: this.color,
+      pass: this.pass,
+      intersections: newPoints,
+      blackStonesCaptured: this.blackStonesCaptured,
+      whiteStonesCaptured: this.whiteStonesCaptured,
+      capturedPositions: this.capturedPositions,
+      koPoint: this.koPoint,
+      boardSize: this.boardSize
+    });
+
+    return newState;
   },
 
   playPass: function() {
@@ -198,16 +223,6 @@ BoardState.prototype = {
     return true;
   },
 
-  isIllegalAt: function(y, x) {
-    const intersection = this.intersectionAt(y, x);
-    const isEmpty = intersection.isEmpty();
-    const isSuicide = this.wouldBeSuicide(y, x);
-    const koPoint = this.koPoint;
-    const isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
-
-    return !isEmpty || isKoViolation || isSuicide;
-  },
-
   // Iterative depth-first search traversal. Start from
   // startingPoint, iteratively follow all neighbors.
   // If inclusionConditionis met for a neighbor, include it
@@ -242,50 +257,7 @@ BoardState.prototype = {
       }
     }
 
-    return [checkedPoints, boundaryPoints];
-  },
-
-  territory: function(game) {
-    const emptyOrDeadPoints = this.intersections.filter(intersection => {
-      return intersection.isEmpty() || game.isDeadAt(intersection.y, intersection.x);
-    });
-
-    if (emptyOrDeadPoints.length == 0) {
-      return;
-    }
-
-    var checkedPoints = [];
-    var territoryPoints = { black: [], white: [] };
-    var pointsToCheck = emptyOrDeadPoints;
-
-    while (pointsToCheck.length > 0) {
-      const nextPoint = pointsToCheck.pop();
-      checkedPoints = checkedPoints.concat(this.checkTerritoryStartingAt(game, nextPoint.y, nextPoint.x, territoryPoints));
-      pointsToCheck = emptyOrDeadPoints.filter(i => checkedPoints.indexOf(i) < 0);
-    }
-
-    return({
-      black: territoryPoints.black.map(i => ({ y: i.y, x: i.x })),
-      white: territoryPoints.white.map(i => ({ y: i.y, x: i.x }))
-    });
-  },
-
-  checkTerritoryStartingAt: function(game, y, x, territoryPoints) {
-    const startingPoint = this.intersectionAt(y, x);
-
-    const [nonOccupiedPoints, occupiedPoints] = this.partitionTraverse(startingPoint, neighbor => {
-      return neighbor.isEmpty() || game.isDeadAt(neighbor.y, neighbor.x);
-    });
-
-    const surroundingColors = utils.unique(occupiedPoints.map(occupiedPoint => occupiedPoint.value));
-
-    if (surroundingColors.length == 1 && surroundingColors[0] != "empty") {
-      const territoryColor = surroundingColors[0];
-
-      territoryPoints[territoryColor] = territoryPoints[territoryColor].concat(nonOccupiedPoints);
-    }
-
-    return nonOccupiedPoints;
+    return [checkedPoints, utils.unique(boundaryPoints)];
   }
 }
 
