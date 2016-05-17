@@ -11,39 +11,37 @@ ExampleGameControls = function(element, game) {
 
   this.updateStats = function() {
     var newGameInfo = "";
-    newGameInfo += "Black stones captured: " + this.game.captures["black"];
+    newGameInfo += "Black stones captured: " + this.game.boardState().blackStonesCaptured;
     newGameInfo += "\n\n";
-    newGameInfo +=  "White stones captured: " + this.game.captures["white"];
-    newGameInfo += "\n\n";
-
-    newGameInfo += "Move " + this.game.moves.length;
+    newGameInfo +=  "White stones captured: " + this.game.boardState().whiteStonesCaptured;
     newGameInfo += "\n\n";
 
-    var currentMove = this.game.currentMove();
+    newGameInfo += "Move " + this.game.boardState().moveNumber;
 
-    if (currentMove) {
-      var player = currentMove.color[0].toUpperCase() + currentMove.color.substr(1);
+    if (this.game.boardState().playedPoint) {
+      newGameInfo += " (" + this.game.coordinatesFor(this.game.boardState().playedPoint.y, this.game.boardState().playedPoint.x) + ")";
+    }
 
-      if (currentMove.pass) {
-        newGameInfo += player + " passed."
-      }
+    newGameInfo += "\n\n";
+
+    var boardState = this.game.boardState();
+
+    if (boardState.pass) {
+      var player = boardState.color[0].toUpperCase() + boardState.color.substr(1);
+      newGameInfo += player + " passed."
     }
 
     this.gameInfo.innerText = newGameInfo;
 
-    if (typeof currentMove != "undefined" && currentMove.pass) {
+    if (boardState.pass) {
       var str = "";
 
       if (this.game.isOver()) {
         str += "Game over.";
         str += "\n\n"
-        str += "Territory scoring: Black has " + this.game.territoryScore().black;
+        str += "Black's score is " + this.game.score().black;
         str += "\n\n";
-        str += "Territory scoring: White has " + this.game.territoryScore().white;
-        str += "\n\n"
-        str += "Area scoring: Black has " + this.game.areaScore().black;
-        str += "\n\n"
-        str += "Area scoring: White has " + this.game.areaScore().white;
+        str += "White's score is " + this.game.score().white;
       }
 
       this.setText(str)
@@ -62,9 +60,7 @@ ExampleGameControls = function(element, game) {
     passButton.addEventListener("click", function(e) {
       e.preventDefault();
 
-      var player = controls.game.currentPlayer;
       controls.game.pass();
-      controls.updateStats();
     });
 
     undoButton.addEventListener("click", function(e) {
