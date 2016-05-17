@@ -19,13 +19,10 @@ Region._startingAt = function(boardState, y, x) {
 };
 
 Region.allFor = function(boardState) {
-  let pointsToCheck = boardState.intersections.map(i => i);
   let checkedPoints = [];
   const regions = [];
 
-  while (pointsToCheck.length > 0) {
-    const point = pointsToCheck.pop();
-
+  boardState.intersections.forEach(point => {
     if (checkedPoints.indexOf(point) > -1) {
       // do nothing
     } else {
@@ -35,9 +32,8 @@ Region.allFor = function(boardState) {
 
       regions.push(new Region(boardState, regionPoints));
       checkedPoints = checkedPoints.concat(regionPoints);
-      pointsToCheck = pointsToCheck.filter(i => regionPoints.indexOf(i) < 0);
     }
-  }
+  });
 
   return regions;
 };

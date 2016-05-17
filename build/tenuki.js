@@ -1330,40 +1330,26 @@ Region._startingAt = function (boardState, y, x) {
 };
 
 Region.allFor = function (boardState) {
-  var pointsToCheck = boardState.intersections.map(function (i) {
-    return i;
-  });
   var checkedPoints = [];
   var regions = [];
 
-  var _loop = function _loop() {
-    var point = pointsToCheck.pop();
-
+  boardState.intersections.forEach(function (point) {
     if (checkedPoints.indexOf(point) > -1) {
       // do nothing
     } else {
-        (function () {
-          var _boardState$partition3 = boardState.partitionTraverse(point, function (neighbor) {
-            return neighbor.sameColorAs(point);
-          });
+        var _boardState$partition3 = boardState.partitionTraverse(point, function (neighbor) {
+          return neighbor.sameColorAs(point);
+        });
 
-          var _boardState$partition4 = _slicedToArray(_boardState$partition3, 2);
+        var _boardState$partition4 = _slicedToArray(_boardState$partition3, 2);
 
-          var regionPoints = _boardState$partition4[0];
-          var _ = _boardState$partition4[1];
+        var regionPoints = _boardState$partition4[0];
+        var _ = _boardState$partition4[1];
 
-          regions.push(new Region(boardState, regionPoints));
-          checkedPoints = checkedPoints.concat(regionPoints);
-          pointsToCheck = pointsToCheck.filter(function (i) {
-            return regionPoints.indexOf(i) < 0;
-          });
-        })();
+        regions.push(new Region(boardState, regionPoints));
+        checkedPoints = checkedPoints.concat(regionPoints);
       }
-  };
-
-  while (pointsToCheck.length > 0) {
-    _loop();
-  }
+  });
 
   return regions;
 };
