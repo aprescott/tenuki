@@ -61,7 +61,6 @@ ExampleGameControls = function(element, game) {
       e.preventDefault();
 
       controls.game.pass();
-      controls.updateStats();
     });
 
     undoButton.addEventListener("click", function(e) {
