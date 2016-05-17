@@ -29,13 +29,13 @@ var boardElementTest = document.querySelector(".tenuki-board");
 var gameTest = window.gameTest = new tenuki.Game(boardElementTest);
 gameTest.setup();
 
-resetTests = window.resetTests = function(handicapStones) {
+resetTests = window.resetTests = function(handicapStones, ruleset, size) {
   boardElementTest.innerHTML = "";
-  var boardSize = gameTest.boardSize;
   gameTest = new tenuki.Game(boardElementTest);
   gameTest.setup({
-    boardSize: boardSize,
-    handicapStones: handicapStones || 0
+    boardSize: size || 19,
+    handicapStones: handicapStones || 0,
+    ruleset: ruleset || "territory"
   });
 };
 
@@ -264,165 +264,171 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][0], "empty")) {
 }
 
 // Scoring, with captures and dead stone marking
-resetTests();
+["area", "territory"].forEach(function(ruleset) {
+  resetTests(0, ruleset);
 
-// divide the board down the middle, black on the right
-gameTest.renderer.grid[0][9].click(); // b
-gameTest.renderer.grid[0][8].click(); // w
-gameTest.renderer.grid[1][9].click(); // b
-gameTest.renderer.grid[1][8].click(); // w
-gameTest.renderer.grid[2][9].click(); // b
-gameTest.renderer.grid[2][8].click(); // w
-gameTest.renderer.grid[3][9].click(); // b
-gameTest.renderer.grid[3][8].click(); // w
-gameTest.renderer.grid[4][9].click(); // b
-gameTest.renderer.grid[4][8].click(); // w
-gameTest.renderer.grid[5][9].click(); // b
-gameTest.renderer.grid[5][8].click(); // w
-gameTest.renderer.grid[6][9].click(); // b
-gameTest.renderer.grid[6][8].click(); // w
-gameTest.renderer.grid[7][9].click(); // b
-gameTest.renderer.grid[7][8].click(); // w
-gameTest.renderer.grid[8][9].click(); // b
-gameTest.renderer.grid[8][8].click(); // w
-gameTest.renderer.grid[9][9].click(); // b
-gameTest.renderer.grid[9][8].click(); // w
-gameTest.renderer.grid[10][9].click(); // b
-gameTest.renderer.grid[10][8].click(); // w
-gameTest.renderer.grid[11][9].click(); // b
-gameTest.renderer.grid[11][8].click(); // w
-gameTest.renderer.grid[12][9].click(); // b
-gameTest.renderer.grid[12][8].click(); // w
-gameTest.renderer.grid[13][9].click(); // b
-gameTest.renderer.grid[13][8].click(); // w
-gameTest.renderer.grid[14][9].click(); // b
-gameTest.renderer.grid[14][8].click(); // w
-gameTest.renderer.grid[15][9].click(); // b
-gameTest.renderer.grid[15][8].click(); // w
-gameTest.renderer.grid[16][9].click(); // b
-gameTest.renderer.grid[16][8].click(); // w
-gameTest.renderer.grid[17][9].click(); // b
-gameTest.renderer.grid[17][8].click(); // w
-gameTest.renderer.grid[18][9].click(); // b
-gameTest.renderer.grid[18][8].click(); // w
-gameTest.pass(); // b
-gameTest.pass(); // w
+  // divide the board down the middle, black on the right
+  gameTest.renderer.grid[0][9].click(); // b
+  gameTest.renderer.grid[0][8].click(); // w
+  gameTest.renderer.grid[1][9].click(); // b
+  gameTest.renderer.grid[1][8].click(); // w
+  gameTest.renderer.grid[2][9].click(); // b
+  gameTest.renderer.grid[2][8].click(); // w
+  gameTest.renderer.grid[3][9].click(); // b
+  gameTest.renderer.grid[3][8].click(); // w
+  gameTest.renderer.grid[4][9].click(); // b
+  gameTest.renderer.grid[4][8].click(); // w
+  gameTest.renderer.grid[5][9].click(); // b
+  gameTest.renderer.grid[5][8].click(); // w
+  gameTest.renderer.grid[6][9].click(); // b
+  gameTest.renderer.grid[6][8].click(); // w
+  gameTest.renderer.grid[7][9].click(); // b
+  gameTest.renderer.grid[7][8].click(); // w
+  gameTest.renderer.grid[8][9].click(); // b
+  gameTest.renderer.grid[8][8].click(); // w
+  gameTest.renderer.grid[9][9].click(); // b
+  gameTest.renderer.grid[9][8].click(); // w
+  gameTest.renderer.grid[10][9].click(); // b
+  gameTest.renderer.grid[10][8].click(); // w
+  gameTest.renderer.grid[11][9].click(); // b
+  gameTest.renderer.grid[11][8].click(); // w
+  gameTest.renderer.grid[12][9].click(); // b
+  gameTest.renderer.grid[12][8].click(); // w
+  gameTest.renderer.grid[13][9].click(); // b
+  gameTest.renderer.grid[13][8].click(); // w
+  gameTest.renderer.grid[14][9].click(); // b
+  gameTest.renderer.grid[14][8].click(); // w
+  gameTest.renderer.grid[15][9].click(); // b
+  gameTest.renderer.grid[15][8].click(); // w
+  gameTest.renderer.grid[16][9].click(); // b
+  gameTest.renderer.grid[16][8].click(); // w
+  gameTest.renderer.grid[17][9].click(); // b
+  gameTest.renderer.grid[17][8].click(); // w
+  gameTest.renderer.grid[18][9].click(); // b
+  gameTest.renderer.grid[18][8].click(); // w
+  gameTest.pass(); // b
+  gameTest.pass(); // w
 
-if (!gameTest.isOver()) {
-  throw "tests failed";
-}
+  if (!gameTest.isOver()) {
+    throw "tests failed";
+  }
 
-// territory
-if (gameTest.territoryScore().black != 9*19) {
-  throw "tests failed";
-}
+  var expectedScore;
+  expectedScore = {
+    territory: { black: 9*19, white: 8*19 },
+    area: { black: 10*19, white: 9*19 }
+  };
 
-if (gameTest.territoryScore().white != 8*19) {
-  throw "tests failed";
-}
+  if (gameTest.score().black != expectedScore[ruleset].black) {
+    throw "tests failed";
+  }
 
-// area
-if (gameTest.areaScore().black != 10*19) {
-  throw "tests failed";
-}
+  if (gameTest.score().white != expectedScore[ruleset].white) {
+    throw "tests failed";
+  }
 
-if (gameTest.areaScore().white != 9*19) {
-  throw "tests failed";
-}
+  gameTest.undo();
 
-gameTest.undo();
+  if (gameTest.isOver()) {
+    throw "tests failed";
+  }
 
-if (gameTest.isOver()) {
-  throw "tests failed";
-}
+  gameTest.undo();
 
-gameTest.undo();
+  if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
+    throw "tests failed";
+  }
 
-if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
-  throw "tests failed";
-}
+  // play in the corner so white captures a stone and leaves 2 black stones dead
+  gameTest.renderer.grid[0][0].click(); // b
+  gameTest.renderer.grid[0][1].click(); // w
+  gameTest.renderer.grid[1][1].click(); // b
 
-// play in the corner so white captures a stone and leaves 2 black stones dead
-gameTest.renderer.grid[0][0].click(); // b
-gameTest.renderer.grid[0][1].click(); // w
-gameTest.renderer.grid[1][1].click(); // b
+  if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
+    throw "tests failed";
+  }
 
-if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
-  throw "tests failed";
-}
+  gameTest.renderer.grid[1][0].click(); // w
 
-gameTest.renderer.grid[1][0].click(); // w
+  if (gameTest.boardState().blackStonesCaptured != 1 || gameTest.boardState().whiteStonesCaptured != 0) {
+    throw "tests failed";
+  }
 
-if (gameTest.boardState().blackStonesCaptured != 1 || gameTest.boardState().whiteStonesCaptured != 0) {
-  throw "tests failed";
-}
+  gameTest.renderer.grid[0][2].click(); // b
+  gameTest.pass(); // w
+  gameTest.pass(); // b
 
-gameTest.renderer.grid[0][2].click(); // b
-gameTest.pass(); // w
-gameTest.pass(); // b
+  expectedScore = {
+    territory: {
+      // territory + captured stones, but with ambiguous territory remaining
+      black: 9*19,
+      // 1 captured stone
+      // note the top-left corner is ignored as part of neutral point filling
+      // for seki calculations
+      white: 1
+    },
+    area: {
+      // territory + stones on the board
+      black: 10*19 + 2,
+      // 1 point of territory + 2 stones played inside
+      white: 1 + 1*19 + 2
+    }
+  };
 
-// territory + captured stones, but with ambiguous territory remaining
-if (gameTest.territoryScore().black != 9*19) {
-  throw "tests failed";
-}
+  if (gameTest.score().black != expectedScore[ruleset].black) {
+    throw "tests failed";
+  }
 
-// 1 "unambiguous point of territory", 1 captured stone
-if (gameTest.territoryScore().white != 1 + 1) {
-  throw "tests failed";
-}
+  if (gameTest.score().white != expectedScore[ruleset].white) {
+    throw "tests failed";
+  }
 
-// territory + stones on the board
-if (gameTest.areaScore().black != 10*19 + 2) {
-  throw "tests failed";
-}
+  // mark dead stones
+  gameTest.renderer.grid[1][1].click();
+  gameTest.renderer.grid[0][2].click();
 
-// 1 point of territory + 2 stones played inside
-if (gameTest.areaScore().white != 1 + 1*19 + 2) {
-  throw "tests failed";
-}
+  if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "dead") || !tenuki.utils.hasClass(gameTest.renderer.grid[0][2], "dead")) {
+    throw "tests failed";
+  }
 
-// mark dead stones
-gameTest.renderer.grid[1][1].click();
-gameTest.renderer.grid[0][2].click();
+  expectedScore = {
+    territory: {
+      black: 9*19,
+      // rectangle territory, 8*19
+      // 2 white stones played inside the territory, -2
+      // 1 captured black stone, +1,
+      // 2 dead stones, +2
+      white: 8*19 - 2 + 1 + 2
+    },
+    area: {
+      // 2 dead stones are now ignored because they're marked dead
+      black: 10*19,
+      // rectangle territory, 8*19
+      // plus 1*19 for the stones on the board
+      // 2 white stones played inside the territory, IGNORED
+      // 1 captured black stone, IGNORED
+      // 2 dead stones, IGNORED
+      white: 9*19
+    }
+  };
 
-if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "dead") || !tenuki.utils.hasClass(gameTest.renderer.grid[0][2], "dead")) {
-  throw "tests failed";
-}
+  if (gameTest.score().black != expectedScore[ruleset].black) {
+    throw "tests failed";
+  }
 
-if (gameTest.territoryScore().black != 9*19) {
-  throw "tests failed";
-}
+  if (gameTest.score().white != expectedScore[ruleset].white) {
+    throw "tests failed";
+  }
 
-// 2 dead stones are now ignored because they're marked dead
-if (gameTest.areaScore().black != 10*19) {
-  throw "tests failed";
-}
+  gameTest.undo();
+  gameTest.undo();
+  gameTest.undo();
+  gameTest.undo();
 
-// rectangle territory, 8*19
-// 2 white stones played inside the territory, -2
-// 1 captured black stone, +1,
-// 2 dead stones, +2
-if (gameTest.territoryScore().white != 8*19 - 2 + 1 + 2) {
-  throw "tests failed";
-}
-
-// rectangle territory, 8*19
-// plus 1*19 for the stones on the board
-// 2 white stones played inside the territory, IGNORED
-// 1 captured black stone, IGNORED
-// 2 dead stones, IGNORED
-if (gameTest.areaScore().white != 9*19) {
-  throw "tests failed";
-}
-
-gameTest.undo();
-gameTest.undo();
-gameTest.undo();
-gameTest.undo();
-
-if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
-  throw "tests failed";
-}
+  if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
+    throw "tests failed";
+  }
+});
 
 // marking multi-stone groups as dead, and then toggling it
 resetTests();
@@ -517,50 +523,739 @@ if (gameTest.currentPlayer() != "white") {
   }
 });
 
+// seki scoring with eyes, with and without dead stones
+resetTests(0, "territory");
+
+gameTest.renderer.grid[0][1].click() // b
+gameTest.renderer.grid[0][2].click() // w
+gameTest.renderer.grid[1][0].click() // b
+gameTest.renderer.grid[1][2].click() // w
+gameTest.renderer.grid[0][5].click() // b
+gameTest.renderer.grid[1][3].click() // w
+gameTest.renderer.grid[1][5].click() // b
+gameTest.renderer.grid[1][4].click() // w
+gameTest.renderer.grid[2][5].click() // b
+gameTest.renderer.grid[0][4].click() // w
+gameTest.renderer.grid[2][4].click() // b
+gameTest.renderer.grid[2][2].click() // w
+gameTest.renderer.grid[2][3].click() // b
+gameTest.renderer.grid[2][1].click() // w
+gameTest.renderer.grid[3][3].click() // b
+gameTest.renderer.grid[2][0].click() // w
+gameTest.renderer.grid[3][2].click() // b
+gameTest.renderer.grid[10][10].click() // w
+gameTest.renderer.grid[3][1].click() // b
+gameTest.renderer.grid[10][11].click() // w
+gameTest.renderer.grid[3][0].click() // b
+
+gameTest.pass();
+gameTest.pass();
+
+if (boardElementTest.querySelectorAll(".territory-black").length + boardElementTest.querySelectorAll(".territory-white").length > 0) {
+  throw "tests failed";
+}
+
+if (gameTest.score().black > 0 || gameTest.score().white > 0) {
+  throw "tests failed";
+}
+
+gameTest.renderer.grid[2][2].click(); // mark seki white group dead
+
+if (gameTest.score().black != 11 + 8 || gameTest.score().white != 0) {
+  throw "tests failed";
+}
+
+gameTest.renderer.grid[10][10].click(); // mark the outer white group dead
+
+if (boardElementTest.querySelectorAll(".territory-white").length + gameTest.score().white > 0) {
+  throw "test failed";
+}
+
+// 8 dead white stones double-counted as territory + 3 empty points
+// + 2 outer dead stones double-counted as territory + all remaining empty points
+if (boardElementTest.querySelectorAll(".territory-black").length != 8 + 3 + 2 + 337) {
+  throw "tests failed";
+}
+
+if (gameTest.score().black != 8*2 + 3 + 2*2 + 337) {
+  throw "tests failed";
+}
+
+// unmark white dead
+gameTest.renderer.grid[2][2].click();
+gameTest.renderer.grid[10][10].click();
+
+if (boardElementTest.querySelectorAll(".territory-black").length + boardElementTest.querySelectorAll(".territory-white").length > 0) {
+  throw "tests failed";
+}
+
+if (gameTest.score().black > 0 || gameTest.score().white > 0) {
+  throw "tests failed";
+}
+
+// mark both black stones dead
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[1][0].click();
+
+if (boardElementTest.querySelectorAll(".territory-black").length + gameTest.score().black > 0) {
+  throw "test failed";
+}
+
+// 2 dead black stones double-counted as territory + 3 empty points
+if (boardElementTest.querySelectorAll(".territory-white").length != 2 + 3) {
+  throw "tests failed";
+}
+
+if (gameTest.score().white != 2*2 + 3) {
+  throw "tests failed";
+}
+
+// seki with a false eye
+resetTests();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[0][4].click();
+gameTest.renderer.grid[0][3].click();
+gameTest.renderer.grid[1][4].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[3][2].click();
+gameTest.renderer.grid[2][2].click();
+gameTest.renderer.grid[4][1].click();
+gameTest.renderer.grid[3][1].click();
+gameTest.renderer.grid[4][0].click();
+gameTest.renderer.grid[3][0].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().black != 342 || gameTest.score().white != 0) {
+  throw "tests failed";
+}
+
+// seki with two false eyes
+resetTests();
+
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[0][4].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[1][4].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[2][4].click();
+gameTest.renderer.grid[0][3].click();
+gameTest.renderer.grid[3][3].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[3][5].click();
+gameTest.renderer.grid[3][2].click();
+gameTest.renderer.grid[4][3].click();
+gameTest.renderer.grid[3][1].click();
+gameTest.renderer.grid[4][2].click();
+gameTest.renderer.grid[3][0].click();
+gameTest.renderer.grid[4][1].click();
+gameTest.pass();
+gameTest.renderer.grid[4][0].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().white != 0) {
+  throw "tests failed";
+}
+
+// seki with two 1-eyed groups
+resetTests(0, "territory", 9);
+
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[2][0].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[2][2].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[0][3].click();
+gameTest.renderer.grid[2][4].click();
+gameTest.renderer.grid[1][4].click();
+gameTest.renderer.grid[2][5].click();
+gameTest.renderer.grid[1][5].click();
+gameTest.renderer.grid[2][6].click();
+gameTest.renderer.grid[0][5].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.pass();
+gameTest.renderer.grid[0][6].click();
+gameTest.renderer.grid[3][2].click();
+gameTest.renderer.grid[1][7].click();
+gameTest.renderer.grid[4][2].click();
+gameTest.renderer.grid[0][8].click();
+gameTest.renderer.grid[4][1].click();
+gameTest.renderer.grid[2][8].click();
+gameTest.renderer.grid[5][1].click();
+gameTest.renderer.grid[3][3].click();
+gameTest.renderer.grid[5][0].click();
+gameTest.renderer.grid[4][3].click();
+gameTest.renderer.grid[3][0].click();
+gameTest.renderer.grid[5][3].click();
+gameTest.pass();
+gameTest.renderer.grid[5][2].click();
+gameTest.pass();
+gameTest.renderer.grid[6][2].click();
+gameTest.pass();
+gameTest.renderer.grid[6][1].click();
+gameTest.pass();
+gameTest.renderer.grid[6][0].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().white != 2 || gameTest.score().black != 42) {
+  throw "tests failed";
+}
+
+// not-a-seki because territories should merge properly across "thick"
+// boundaries.
+resetTests();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[2][0].click();
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[2][2].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[0][2].click();
+gameTest.renderer.grid[2][4].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[2][5].click();
+gameTest.renderer.grid[1][4].click();
+gameTest.renderer.grid[1][5].click();
+gameTest.renderer.grid[0][4].click();
+gameTest.renderer.grid[0][5].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().black != 2 || gameTest.score().white != 343) {
+  throw "tests failed";
+}
+
+// false-looking eyes in groups that are alive after filling those
+// false-looking points, are _not_ ignored
+resetTests();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[2][2].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[0][3].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[2][0].click();
+gameTest.renderer.grid[1][4].click();
+gameTest.renderer.grid[2][4].click();
+gameTest.renderer.grid[1][5].click();
+gameTest.renderer.grid[2][5].click();
+gameTest.renderer.grid[0][5].click();
+gameTest.renderer.grid[2][6].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.renderer.grid[2][7].click();
+gameTest.renderer.grid[1][7].click();
+gameTest.renderer.grid[2][8].click();
+gameTest.renderer.grid[0][7].click();
+gameTest.renderer.grid[1][8].click();
+gameTest.pass()
+gameTest.renderer.grid[0][8].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().black != 4) {
+  throw "tests failed";
+}
+
+// false eyes that should be filled in under correct play
+// are not ignored if the sequence is not sufficiently played out.
+resetTests();
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[2][0].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[2][2].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[0][3].click();
+gameTest.renderer.grid[2][4].click();
+gameTest.renderer.grid[1][4].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[1][5].click();
+gameTest.renderer.grid[2][5].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.renderer.grid[2][6].click();
+gameTest.renderer.grid[0][6].click();
+gameTest.renderer.grid[1][7].click();
+gameTest.pass();
+gameTest.renderer.grid[0][7].click();
+gameTest.pass();
+gameTest.renderer.grid[2][7].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().black != 4) {
+  throw "tests failed";
+}
+
+// false eyes that will disappear due to direct
+// atari after filling neutral points should be
+// ignored, which can affect the status of live groups.
+resetTests();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[0][2].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[1][4].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[0][5].click();
+gameTest.renderer.grid[2][4].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.renderer.grid[2][5].click();
+gameTest.renderer.grid[1][7].click();
+gameTest.renderer.grid[1][5].click();
+gameTest.renderer.grid[0][8].click();
+gameTest.renderer.grid[2][6].click();
+gameTest.renderer.grid[1][9].click();
+gameTest.renderer.grid[2][7].click();
+gameTest.renderer.grid[1][10].click();
+gameTest.renderer.grid[2][8].click();
+gameTest.renderer.grid[0][11].click();
+gameTest.renderer.grid[1][8].click();
+gameTest.renderer.grid[1][12].click();
+gameTest.renderer.grid[2][9].click();
+gameTest.pass();
+gameTest.renderer.grid[2][10].click();
+gameTest.pass();
+gameTest.renderer.grid[2][11].click();
+gameTest.pass();
+gameTest.renderer.grid[1][11].click();
+gameTest.pass();
+gameTest.renderer.grid[2][12].click();
+gameTest.pass();
+gameTest.renderer.grid[2][13].click();
+gameTest.pass();
+gameTest.renderer.grid[1][13].click();
+gameTest.pass();
+gameTest.renderer.grid[0][13].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().black != 0) {
+  throw "tests failed";
+}
+
+// false eyes that are the last remaining points after filling dame:
+// ignored as territory.
+resetTests();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[0][2].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[1][4].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[1][5].click();
+gameTest.renderer.grid[2][4].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.renderer.grid[2][5].click();
+gameTest.renderer.grid[1][7].click();
+gameTest.renderer.grid[2][6].click();
+gameTest.renderer.grid[1][8].click();
+gameTest.renderer.grid[2][7].click();
+gameTest.renderer.grid[1][9].click();
+gameTest.renderer.grid[2][8].click();
+gameTest.renderer.grid[0][9].click();
+gameTest.renderer.grid[2][9].click();
+gameTest.renderer.grid[0][7].click();
+gameTest.renderer.grid[2][10].click();
+gameTest.renderer.grid[0][5].click();
+gameTest.renderer.grid[1][10].click();
+gameTest.pass();
+gameTest.renderer.grid[0][10].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().black != 3) {
+  throw "tests failed";
+}
+
+// false eyes in the corner are also correctly ignored
+resetTests(0, "territory", 9);
+
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[2][0].click();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[2][2].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[1][4].click();
+gameTest.renderer.grid[2][4].click();
+gameTest.renderer.grid[1][5].click();
+gameTest.renderer.grid[2][5].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.renderer.grid[2][6].click();
+gameTest.renderer.grid[1][7].click();
+gameTest.renderer.grid[2][7].click();
+gameTest.renderer.grid[1][8].click();
+gameTest.renderer.grid[2][8].click();
+gameTest.renderer.grid[0][7].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[0][4].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().black != 4) {
+  throw "tests failed";
+}
+
+// eyepoints separated by bamboo-type connections
+resetTests();
+
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[0][0].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[2][0].click();
+gameTest.renderer.grid[3][1].click();
+gameTest.renderer.grid[3][0].click();
+gameTest.renderer.grid[3][2].click();
+gameTest.renderer.grid[4][0].click();
+gameTest.renderer.grid[3][3].click();
+gameTest.renderer.grid[4][1].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[4][2].click();
+gameTest.renderer.grid[1][5].click();
+gameTest.renderer.grid[4][3].click();
+gameTest.renderer.grid[2][5].click();
+gameTest.renderer.grid[4][4].click();
+gameTest.renderer.grid[3][5].click();
+gameTest.renderer.grid[4][5].click();
+gameTest.renderer.grid[3][6].click();
+gameTest.renderer.grid[4][6].click();
+gameTest.renderer.grid[3][7].click();
+gameTest.renderer.grid[4][7].click();
+gameTest.renderer.grid[2][7].click();
+gameTest.renderer.grid[4][8].click();
+gameTest.renderer.grid[1][7].click();
+gameTest.renderer.grid[3][8].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.renderer.grid[2][8].click();
+gameTest.pass();
+gameTest.renderer.grid[1][8].click();
+gameTest.pass();
+gameTest.renderer.grid[0][8].click();
+gameTest.pass();
+gameTest.renderer.grid[0][7].click();
+gameTest.pass();
+gameTest.renderer.grid[0][6].click();
+gameTest.pass();
+gameTest.renderer.grid[0][5].click();
+gameTest.pass();
+gameTest.renderer.grid[0][4].click();
+gameTest.pass();
+gameTest.renderer.grid[0][3].click();
+gameTest.pass();
+gameTest.renderer.grid[0][2].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().black != 2) {
+  throw "tests failed";
+}
+
+resetTests();
+
+gameTest.pass();
+
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[0][1].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[0][0].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[1][0].click();
+gameTest.renderer.grid[1][3].click();
+gameTest.renderer.grid[2][0].click();
+gameTest.renderer.grid[3][1].click();
+gameTest.renderer.grid[3][0].click();
+gameTest.renderer.grid[3][2].click();
+gameTest.renderer.grid[4][0].click();
+gameTest.renderer.grid[3][3].click();
+gameTest.renderer.grid[4][1].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.renderer.grid[4][2].click();
+gameTest.renderer.grid[1][5].click();
+gameTest.renderer.grid[4][3].click();
+gameTest.renderer.grid[2][5].click();
+gameTest.renderer.grid[4][4].click();
+gameTest.renderer.grid[3][5].click();
+gameTest.renderer.grid[4][5].click();
+gameTest.renderer.grid[3][6].click();
+gameTest.renderer.grid[4][6].click();
+gameTest.renderer.grid[3][7].click();
+gameTest.renderer.grid[4][7].click();
+gameTest.renderer.grid[2][7].click();
+gameTest.renderer.grid[4][8].click();
+gameTest.renderer.grid[1][7].click();
+gameTest.renderer.grid[3][8].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.renderer.grid[2][8].click();
+gameTest.pass();
+gameTest.renderer.grid[1][8].click();
+gameTest.pass();
+gameTest.renderer.grid[0][8].click();
+gameTest.pass();
+gameTest.renderer.grid[0][7].click();
+gameTest.pass();
+gameTest.renderer.grid[0][6].click();
+gameTest.pass();
+gameTest.renderer.grid[0][5].click();
+gameTest.pass();
+gameTest.renderer.grid[0][4].click();
+gameTest.pass();
+gameTest.renderer.grid[0][3].click();
+gameTest.pass();
+gameTest.renderer.grid[0][2].click();
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().white != 2) {
+  throw "tests failed";
+}
+
+// seki with two 1-eyed groups that can't connect out
+// to live groups.
+resetTests(0, "territory", 9);
+
+gameTest.renderer.grid[8][0].click();
+gameTest.renderer.grid[8][2].click();
+gameTest.renderer.grid[8][1].click();
+gameTest.renderer.grid[8][3].click();
+gameTest.renderer.grid[7][1].click();
+gameTest.renderer.grid[7][3].click();
+gameTest.renderer.grid[6][1].click();
+gameTest.renderer.grid[6][3].click();
+gameTest.renderer.grid[6][0].click();
+gameTest.renderer.grid[6][4].click();
+gameTest.renderer.grid[6][2].click();
+gameTest.renderer.grid[6][5].click();
+gameTest.renderer.grid[8][6].click();
+gameTest.renderer.grid[7][5].click();
+gameTest.renderer.grid[8][7].click();
+gameTest.renderer.grid[8][5].click();
+gameTest.renderer.grid[6][6].click();
+gameTest.renderer.grid[8][8].click();
+gameTest.renderer.grid[6][7].click();
+gameTest.renderer.grid[7][8].click();
+gameTest.renderer.grid[5][6].click();
+gameTest.renderer.grid[8][4].click();
+gameTest.renderer.grid[5][5].click();
+gameTest.renderer.grid[6][8].click();
+gameTest.renderer.grid[5][4].click();
+gameTest.renderer.grid[5][8].click();
+gameTest.renderer.grid[5][3].click();
+gameTest.renderer.grid[5][2].click();
+gameTest.renderer.grid[4][3].click();
+gameTest.renderer.grid[4][2].click();
+gameTest.renderer.grid[3][3].click();
+gameTest.renderer.grid[5][0].click();
+gameTest.renderer.grid[3][2].click();
+gameTest.renderer.grid[4][0].click();
+gameTest.renderer.grid[3][1].click();
+gameTest.renderer.grid[3][0].click();
+gameTest.pass();
+gameTest.renderer.grid[2][0].click();
+gameTest.pass();
+gameTest.renderer.grid[4][8].click();
+gameTest.pass();
+gameTest.renderer.grid[4][7].click();
+gameTest.pass();
+gameTest.renderer.grid[3][7].click();
+gameTest.pass();
+gameTest.renderer.grid[2][7].click();
+gameTest.pass();
+gameTest.renderer.grid[1][7].click();
+gameTest.pass();
+gameTest.renderer.grid[0][7].click();
+gameTest.pass();
+gameTest.renderer.grid[1][8].click();
+gameTest.renderer.grid[4][6].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[3][6].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[2][6].click();
+gameTest.renderer.grid[0][0].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.renderer.grid[0][2].click();
+gameTest.renderer.grid[0][6].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.pass();
+gameTest.renderer.grid[1][3].click();
+gameTest.pass();
+gameTest.renderer.grid[0][3].click();
+gameTest.renderer.grid[5][7].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().black != 10 || gameTest.score().white != 5) {
+  throw "tests failed";
+}
+
+
+
+resetTests(0, "territory", 9);
+
+gameTest.pass();
+
+gameTest.renderer.grid[8][0].click();
+gameTest.renderer.grid[8][2].click();
+gameTest.renderer.grid[8][1].click();
+gameTest.renderer.grid[8][3].click();
+gameTest.renderer.grid[7][1].click();
+gameTest.renderer.grid[7][3].click();
+gameTest.renderer.grid[6][1].click();
+gameTest.renderer.grid[6][3].click();
+gameTest.renderer.grid[6][0].click();
+gameTest.renderer.grid[6][4].click();
+gameTest.renderer.grid[6][2].click();
+gameTest.renderer.grid[6][5].click();
+gameTest.renderer.grid[8][6].click();
+gameTest.renderer.grid[7][5].click();
+gameTest.renderer.grid[8][7].click();
+gameTest.renderer.grid[8][5].click();
+gameTest.renderer.grid[6][6].click();
+gameTest.renderer.grid[8][8].click();
+gameTest.renderer.grid[6][7].click();
+gameTest.renderer.grid[7][8].click();
+gameTest.renderer.grid[5][6].click();
+gameTest.renderer.grid[8][4].click();
+gameTest.renderer.grid[5][5].click();
+gameTest.renderer.grid[6][8].click();
+gameTest.renderer.grid[5][4].click();
+gameTest.renderer.grid[5][8].click();
+gameTest.renderer.grid[5][3].click();
+gameTest.renderer.grid[5][2].click();
+gameTest.renderer.grid[4][3].click();
+gameTest.renderer.grid[4][2].click();
+gameTest.renderer.grid[3][3].click();
+gameTest.renderer.grid[5][0].click();
+gameTest.renderer.grid[3][2].click();
+gameTest.renderer.grid[4][0].click();
+gameTest.renderer.grid[3][1].click();
+gameTest.renderer.grid[3][0].click();
+gameTest.pass();
+gameTest.renderer.grid[2][0].click();
+gameTest.pass();
+gameTest.renderer.grid[4][8].click();
+gameTest.pass();
+gameTest.renderer.grid[4][7].click();
+gameTest.pass();
+gameTest.renderer.grid[3][7].click();
+gameTest.pass();
+gameTest.renderer.grid[2][7].click();
+gameTest.pass();
+gameTest.renderer.grid[1][7].click();
+gameTest.pass();
+gameTest.renderer.grid[0][7].click();
+gameTest.pass();
+gameTest.renderer.grid[1][8].click();
+gameTest.renderer.grid[4][6].click();
+gameTest.renderer.grid[2][1].click();
+gameTest.renderer.grid[3][6].click();
+gameTest.renderer.grid[1][1].click();
+gameTest.renderer.grid[2][6].click();
+gameTest.renderer.grid[0][0].click();
+gameTest.renderer.grid[1][6].click();
+gameTest.renderer.grid[0][2].click();
+gameTest.renderer.grid[0][6].click();
+gameTest.renderer.grid[1][2].click();
+gameTest.renderer.grid[2][3].click();
+gameTest.pass();
+gameTest.renderer.grid[1][3].click();
+gameTest.pass();
+gameTest.renderer.grid[0][3].click();
+gameTest.renderer.grid[5][7].click();
+
+gameTest.pass();
+gameTest.pass();
+
+if (gameTest.score().white != 10 || gameTest.score().black != 5) {
+  throw "tests failed";
+}
+
 // fancy "pass" print
 resetTests();
-gameTest.renderer.grid[3][2].className += " stone black";
-gameTest.renderer.grid[3][3].className += " stone black";
-gameTest.renderer.grid[3][4].className += " stone black";
-gameTest.renderer.grid[3][6].className += " stone black";
-gameTest.renderer.grid[3][7].className += " stone black";
-gameTest.renderer.grid[3][8].className += " stone black";
-gameTest.renderer.grid[3][10].className += " stone black";
-gameTest.renderer.grid[3][11].className += " stone black";
-gameTest.renderer.grid[3][12].className += " stone black";
-gameTest.renderer.grid[3][14].className += " stone black";
-gameTest.renderer.grid[3][15].className += " stone black";
-gameTest.renderer.grid[3][16].className += " stone black";
-gameTest.renderer.grid[4][2].className += " stone black";
-gameTest.renderer.grid[4][4].className += " stone black";
-gameTest.renderer.grid[4][6].className += " stone black";
-gameTest.renderer.grid[4][8].className += " stone black";
-gameTest.renderer.grid[4][10].className += " stone black";
-gameTest.renderer.grid[4][14].className += " stone black";
-gameTest.renderer.grid[5][2].className += " stone black";
-gameTest.renderer.grid[5][3].className += " stone black";
-gameTest.renderer.grid[5][4].className += " stone black";
-gameTest.renderer.grid[5][6].className += " stone black";
-gameTest.renderer.grid[5][7].className += " stone black";
-gameTest.renderer.grid[5][8].className += " stone black";
-gameTest.renderer.grid[5][10].className += " stone black";
-gameTest.renderer.grid[5][11].className += " stone black";
-gameTest.renderer.grid[5][12].className += " stone black";
-gameTest.renderer.grid[5][14].className += " stone black";
-gameTest.renderer.grid[5][15].className += " stone black";
-gameTest.renderer.grid[5][16].className += " stone black";
-gameTest.renderer.grid[6][2].className += " stone black";
-gameTest.renderer.grid[6][6].className += " stone black";
-gameTest.renderer.grid[6][8].className += " stone black";
-gameTest.renderer.grid[6][12].className += " stone black";
-gameTest.renderer.grid[6][16].className += " stone black";
-gameTest.renderer.grid[7][2].className += " stone black";
-gameTest.renderer.grid[7][6].className += " stone black";
-gameTest.renderer.grid[7][8].className += " stone black";
-gameTest.renderer.grid[7][10].className += " stone black";
-gameTest.renderer.grid[7][11].className += " stone black";
-gameTest.renderer.grid[7][12].className += " stone black";
-gameTest.renderer.grid[7][14].className += " stone black";
-gameTest.renderer.grid[7][15].className += " stone black";
-gameTest.renderer.grid[7][16].className += " stone black";
+gameTest.renderer.grid[3][2].className = "intersection stone black";
+gameTest.renderer.grid[3][3].className = "intersection stone black";
+gameTest.renderer.grid[3][4].className = "intersection stone black";
+gameTest.renderer.grid[3][6].className = "intersection stone black";
+gameTest.renderer.grid[3][7].className = "intersection stone black";
+gameTest.renderer.grid[3][8].className = "intersection stone black";
+gameTest.renderer.grid[3][10].className = "intersection stone black";
+gameTest.renderer.grid[3][11].className = "intersection stone black";
+gameTest.renderer.grid[3][12].className = "intersection stone black";
+gameTest.renderer.grid[3][14].className = "intersection stone black";
+gameTest.renderer.grid[3][15].className = "intersection stone black";
+gameTest.renderer.grid[3][16].className = "intersection stone black";
+gameTest.renderer.grid[4][2].className = "intersection stone black";
+gameTest.renderer.grid[4][4].className = "intersection stone black";
+gameTest.renderer.grid[4][6].className = "intersection stone black";
+gameTest.renderer.grid[4][8].className = "intersection stone black";
+gameTest.renderer.grid[4][10].className = "intersection stone black";
+gameTest.renderer.grid[4][14].className = "intersection stone black";
+gameTest.renderer.grid[5][2].className = "intersection stone black";
+gameTest.renderer.grid[5][3].className = "intersection stone black";
+gameTest.renderer.grid[5][4].className = "intersection stone black";
+gameTest.renderer.grid[5][6].className = "intersection stone black";
+gameTest.renderer.grid[5][7].className = "intersection stone black";
+gameTest.renderer.grid[5][8].className = "intersection stone black";
+gameTest.renderer.grid[5][10].className = "intersection stone black";
+gameTest.renderer.grid[5][11].className = "intersection stone black";
+gameTest.renderer.grid[5][12].className = "intersection stone black";
+gameTest.renderer.grid[5][14].className = "intersection stone black";
+gameTest.renderer.grid[5][15].className = "intersection stone black";
+gameTest.renderer.grid[5][16].className = "intersection stone black";
+gameTest.renderer.grid[6][2].className = "intersection stone black";
+gameTest.renderer.grid[6][6].className = "intersection stone black";
+gameTest.renderer.grid[6][8].className = "intersection stone black";
+gameTest.renderer.grid[6][12].className = "intersection stone black";
+gameTest.renderer.grid[6][16].className = "intersection stone black";
+gameTest.renderer.grid[7][2].className = "intersection stone black";
+gameTest.renderer.grid[7][6].className = "intersection stone black";
+gameTest.renderer.grid[7][8].className = "intersection stone black";
+gameTest.renderer.grid[7][10].className = "intersection stone black";
+gameTest.renderer.grid[7][11].className = "intersection stone black";
+gameTest.renderer.grid[7][12].className = "intersection stone black";
+gameTest.renderer.grid[7][14].className = "intersection stone black";
+gameTest.renderer.grid[7][15].className = "intersection stone black";
+gameTest.renderer.grid[7][16].className = "intersection stone black";
 </script>

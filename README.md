@@ -24,6 +24,7 @@ Features:
   * Optional coordinate markers for points A19 through T1.
   * Built-in mobile support for touch devices and small screens, even with a 19x19 board.
   * End-game functionality: dead stone marking, area/territory scoring.
+  * Seki detection for the territory rules.
 
 # Examples
 
@@ -113,6 +114,21 @@ game.setup({
 });
 ```
 
+# Rulesets
+
+The default ruleset is territory scoring. The ruleset can be given as part of the `setup()` options:
+
+```js
+game.setup({
+  ruleset: "area"
+});
+```
+
+Valid rulesets are:
+
+  * `"area"` — Area scoring.
+  * `"territory"` — Territory scoring.
+
 # Browser support
 
 I've tested this on Chrome, Firefox, Safari and Opera.
@@ -156,7 +172,7 @@ Note that all functions which take two integer coordinates (`y` and `x`) are mea
 * `playAt(y, x)`: attempts to play a stone at `(y, x)` for the current player. If the move is illegal (because of ko, suicide, etc.), then nothing will happen. Returns `true` if the move is successful, otherwise `false`.
 * `isOver()`: returns `true` if the most recent 2 moves were passes, indicating the game is over, otherwise `false`.
 * `toggleDeadAt(y, x)`: sets the group of stones at `(y, x)` to be dead as part of marking territory. Only useful if `isOver()` is `true`.
-* `territoryScore()` and `areaScore()`: return an object containing score information, e.g., `{ black: 150, white: 130 }`. Only useful if `isOver()` is `true`, since proper scoring requires dead stone marking at the end of the game.
+* `score()` returns scoring information, e.g., `{ black: 150, white: 130 }`. Only useful if `isOver()` is `true`, since proper scoring requires dead stone marking at the end of the game. Scoring is dependent on the ruleset in use.
 * `undo()`: undo the most recent move.
 
 # Post-render callbacks

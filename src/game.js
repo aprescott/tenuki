@@ -2,8 +2,8 @@ import utils from "./utils";
 import DOMRenderer from "./dom-renderer";
 import NullRenderer from "./null-renderer";
 import Intersection from "./intersection";
-import Scorer from "./scorer";
 import BoardState from "./board-state";
+import { TerritoryRules, AreaRules } from "./rulesets";
 
 const Game = function(boardElement) {
   this._defaultBoardSize = 19;
@@ -14,10 +14,11 @@ const Game = function(boardElement) {
     postRender: function() {}
   };
   this._deadPoints = [];
+  this._defaultRuleset = "territory";
 };
 
 Game.prototype = {
-  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0 } = {}) {
+  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0, ruleset = this._defaultRuleset } = {}) {
     if (handicapStones > 0 && boardSize != 9 && boardSize != 13 && boardSize != 19) {
       throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
     }
@@ -28,6 +29,14 @@ Game.prototype = {
 
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
+    this.ruleset = {
+      "area": AreaRules,
+      "territory": TerritoryRules
+    }[ruleset];
+
+    if (!this.ruleset) {
+      throw new Error("Unknown ruleset: " + ruleset);
+    }
   },
 
   setup: function(options) {
@@ -134,12 +143,8 @@ Game.prototype = {
     return this._deadPoints.some(dead => dead.y == y && dead.x == x);
   },
 
-  territoryScore: function() {
-    return Scorer.territoryResultFor(this);
-  },
-
-  areaScore: function() {
-    return Scorer.areaResultFor(this);
+  score: function() {
+    return this.ruleset.score(this);
   },
 
   libertiesAt: function(y, x) {
@@ -159,7 +164,7 @@ Game.prototype = {
       return false;
     }
 
-    return this.boardState().isIllegalAt(y, x);
+    return this.ruleset.isIllegal(y, x, this.boardState());
   },
 
   render: function() {
@@ -182,7 +187,7 @@ Game.prototype = {
       return;
     }
 
-    return this.boardState().territory(this);
+    return this.ruleset.territory(this);
   },
 
   undo: function() {

@@ -39,13 +39,9 @@ ExampleGameControls = function(element, game) {
       if (this.game.isOver()) {
         str += "Game over.";
         str += "\n\n"
-        str += "Territory scoring: Black has " + this.game.territoryScore().black;
+        str += "Black's score is " + this.game.score().black;
         str += "\n\n";
-        str += "Territory scoring: White has " + this.game.territoryScore().white;
-        str += "\n\n"
-        str += "Area scoring: Black has " + this.game.areaScore().black;
-        str += "\n\n"
-        str += "Area scoring: White has " + this.game.areaScore().white;
+        str += "White's score is " + this.game.score().white;
       }
 
       this.setText(str)
@@ -65,7 +61,6 @@ ExampleGameControls = function(element, game) {
       e.preventDefault();
 
       controls.game.pass();
-      controls.updateStats();
     });
 
     undoButton.addEventListener("click", function(e) {
