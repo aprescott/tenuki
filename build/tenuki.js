@@ -9,11 +9,7 @@
 exports.Game = require("./lib/game").default;
 exports.utils = require("./lib/utils").default;
 
-exports.Region = require("./lib/region").default;
-exports.EyePoint = require("./lib/eye-point").default;
-exports.Intersection = require("./lib/intersection").default;
-
-},{"./lib/eye-point":4,"./lib/game":5,"./lib/intersection":6,"./lib/region":8,"./lib/utils":10}],2:[function(require,module,exports){
+},{"./lib/game":5,"./lib/utils":10}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
