@@ -154,7 +154,7 @@ export default function DOMRenderer(game, boardElement) {
         const intersectionElement = this;
 
         utils.removeClass(intersectionElement, "hovered");
-        game.renderer.resetTouchedPoint();
+        renderer.resetTouchedPoint();
       });
 
       utils.addEventListener(intersectionEl, "click", function() {
