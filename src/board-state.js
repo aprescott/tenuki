@@ -18,7 +18,7 @@ const BoardState = function({ moveNumber, playedPoint, color, pass, intersection
 
 BoardState.prototype = {
   _nextColor: function() {
-    if (this.color == "white") {
+    if (this.color === "white") {
       return "black";
     } else {
       return "white";
@@ -31,7 +31,7 @@ BoardState.prototype = {
       // we're checking against the move before the stone we just played
       // where this space is not occupied yet. things should possibly be
       // reworked.
-      return !neighbor.isEmpty() && neighbor.value != color && this.libertiesAt(neighbor.y, neighbor.x) == 1;
+      return !neighbor.isEmpty() && neighbor.value !== color && this.libertiesAt(neighbor.y, neighbor.x) === 1;
     });
 
     const capturedStones = utils.flatMap(capturedNeighbors, neighbor => this.groupAt(neighbor.y, neighbor.x));
@@ -41,7 +41,7 @@ BoardState.prototype = {
 
   _updateIntersection: function(intersection, intersections, color) {
     return intersections.map(i => {
-      if (i.y == intersection.y && i.x == intersection.x) {
+      if (i.y === intersection.y && i.x === intersection.x) {
         return new Intersection(i.y, i.x, color);
       } else {
         return i;
@@ -111,8 +111,8 @@ BoardState.prototype = {
 
     newPoints = this._updateIntersection(playedPoint, newPoints, playedColor);
 
-    const newTotalBlackCaptured = this.blackStonesCaptured + (playedColor == "black" ? 0 : capturedPositions.length);
-    const newTotalWhiteCaptured = this.whiteStonesCaptured + (playedColor == "white" ? 0 : capturedPositions.length);
+    const newTotalBlackCaptured = this.blackStonesCaptured + (playedColor === "black" ? 0 : capturedPositions.length);
+    const newTotalWhiteCaptured = this.whiteStonesCaptured + (playedColor === "white" ? 0 : capturedPositions.length);
 
     const boardSize = this.boardSize;
 
@@ -129,7 +129,7 @@ BoardState.prototype = {
     };
 
     const withPlayedPoint = new BoardState(moveInfo);
-    const hasKoPoint = capturedPositions.length == 1 && withPlayedPoint.groupAt(y, x).length == 1 && withPlayedPoint.inAtari(y, x);
+    const hasKoPoint = capturedPositions.length === 1 && withPlayedPoint.groupAt(y, x).length === 1 && withPlayedPoint.inAtari(y, x);
 
     if (hasKoPoint) {
       moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
@@ -165,7 +165,7 @@ BoardState.prototype = {
   },
 
   inAtari: function(y, x) {
-    return this.libertiesAt(y, x) == 1;
+    return this.libertiesAt(y, x) === 1;
   },
 
   neighborsFor: function(y, x) {
@@ -192,7 +192,7 @@ BoardState.prototype = {
 
   wouldBeSuicide: function(y, x) {
     const intersection = this.intersectionAt(y, x);
-    const surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isEmpty()).length == 0;
+    const surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isEmpty()).length === 0;
 
     if (!surroundedEmptyPoint) {
       return false;

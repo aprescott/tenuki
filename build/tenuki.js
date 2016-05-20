@@ -86,7 +86,7 @@ var BoardState = function BoardState(_ref) {
 
 BoardState.prototype = {
   _nextColor: function _nextColor() {
-    if (this.color == "white") {
+    if (this.color === "white") {
       return "black";
     } else {
       return "white";
@@ -101,7 +101,7 @@ BoardState.prototype = {
       // we're checking against the move before the stone we just played
       // where this space is not occupied yet. things should possibly be
       // reworked.
-      return !neighbor.isEmpty() && neighbor.value != color && _this.libertiesAt(neighbor.y, neighbor.x) == 1;
+      return !neighbor.isEmpty() && neighbor.value !== color && _this.libertiesAt(neighbor.y, neighbor.x) === 1;
     });
 
     var capturedStones = _utils2.default.flatMap(capturedNeighbors, function (neighbor) {
@@ -113,7 +113,7 @@ BoardState.prototype = {
 
   _updateIntersection: function _updateIntersection(intersection, intersections, color) {
     return intersections.map(function (i) {
-      if (i.y == intersection.y && i.x == intersection.x) {
+      if (i.y === intersection.y && i.x === intersection.x) {
         return new _intersection2.default(i.y, i.x, color);
       } else {
         return i;
@@ -185,8 +185,8 @@ BoardState.prototype = {
 
     newPoints = this._updateIntersection(playedPoint, newPoints, playedColor);
 
-    var newTotalBlackCaptured = this.blackStonesCaptured + (playedColor == "black" ? 0 : capturedPositions.length);
-    var newTotalWhiteCaptured = this.whiteStonesCaptured + (playedColor == "white" ? 0 : capturedPositions.length);
+    var newTotalBlackCaptured = this.blackStonesCaptured + (playedColor === "black" ? 0 : capturedPositions.length);
+    var newTotalWhiteCaptured = this.whiteStonesCaptured + (playedColor === "white" ? 0 : capturedPositions.length);
 
     var boardSize = this.boardSize;
 
@@ -203,7 +203,7 @@ BoardState.prototype = {
     };
 
     var withPlayedPoint = new BoardState(moveInfo);
-    var hasKoPoint = capturedPositions.length == 1 && withPlayedPoint.groupAt(y, x).length == 1 && withPlayedPoint.inAtari(y, x);
+    var hasKoPoint = capturedPositions.length === 1 && withPlayedPoint.groupAt(y, x).length === 1 && withPlayedPoint.inAtari(y, x);
 
     if (hasKoPoint) {
       moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
@@ -248,7 +248,7 @@ BoardState.prototype = {
   },
 
   inAtari: function inAtari(y, x) {
-    return this.libertiesAt(y, x) == 1;
+    return this.libertiesAt(y, x) === 1;
   },
 
   neighborsFor: function neighborsFor(y, x) {
@@ -279,7 +279,7 @@ BoardState.prototype = {
     var intersection = this.intersectionAt(y, x);
     var surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(function (neighbor) {
       return neighbor.isEmpty();
-    }).length == 0;
+    }).length === 0;
 
     if (!surroundedEmptyPoint) {
       return false;
@@ -452,17 +452,17 @@ function DOMRenderer(game, boardElement) {
 
     renderer.cancelZoomElement = _utils2.default.createElement("div", { class: "cancel-zoom" });
     var cancelZoomBackdrop = _utils2.default.createElement("div", { class: "cancel-zoom-backdrop" });
-    _utils2.default.addEventListener(renderer.cancelZoomElement, "click", function (e) {
+    _utils2.default.addEventListener(renderer.cancelZoomElement, "click", function () {
       renderer.zoomOut();
     });
-    _utils2.default.addEventListener(cancelZoomBackdrop, "click", function (e) {
+    _utils2.default.addEventListener(cancelZoomBackdrop, "click", function () {
       renderer.zoomOut();
     });
     _utils2.default.appendElement(innerContainer, renderer.cancelZoomElement);
     _utils2.default.appendElement(innerContainer, cancelZoomBackdrop);
 
     if (game.boardSize < 7) {
-      if (game.boardSize > 1 && game.boardSize % 2 == 1) {
+      if (game.boardSize > 1 && game.boardSize % 2 === 1) {
         var hoshi = _utils2.default.createElement("div", { class: "hoshi" });
         hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - 1) / 2 + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
         hoshi.style.left = hoshi.style.top;
@@ -476,33 +476,33 @@ function DOMRenderer(game, boardElement) {
 
         for (var hoshiY = 0; hoshiY < 3; hoshiY++) {
           for (var hoshiX = 0; hoshiX < 3; hoshiX++) {
-            if ((game.boardSize == 7 || game.boardSize % 2 == 0) && (hoshiY == 1 || hoshiX == 1)) {
+            if ((game.boardSize === 7 || game.boardSize % 2 === 0) && (hoshiY === 1 || hoshiX === 1)) {
               continue;
             }
 
             var _hoshi = _utils2.default.createElement("div", { class: "hoshi" });
 
-            if (hoshiY == 0) {
+            if (hoshiY === 0) {
               _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
-            if (hoshiY == 1) {
+            if (hoshiY === 1) {
               _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + ((game.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
-            if (hoshiY == 2) {
+            if (hoshiY === 2) {
               _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
-            if (hoshiX == 0) {
+            if (hoshiX === 0) {
               _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
-            if (hoshiX == 1) {
+            if (hoshiX === 1) {
               _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + ((game.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
-            if (hoshiX == 2) {
+            if (hoshiX === 2) {
               _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
             }
 
@@ -534,7 +534,7 @@ function DOMRenderer(game, boardElement) {
 
         _utils2.default.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
 
-        renderer.grid[y] || (renderer.grid[y] = []);
+        renderer.grid[y] = renderer.grid[y] || [];
         renderer.grid[y][x] = intersectionElement;
       }
     }
@@ -547,13 +547,13 @@ function DOMRenderer(game, boardElement) {
       e.preventDefault();
     });
 
-    boardElement.querySelector(".lines.horizontal").style.width = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + "px";
-    boardElement.querySelector(".lines.horizontal").style.height = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + "px";
-    boardElement.querySelector(".lines.vertical").style.width = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + "px";
-    boardElement.querySelector(".lines.vertical").style.height = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + "px";
+    boardElement.querySelector(".lines.horizontal").style.width = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize + "px";
+    boardElement.querySelector(".lines.horizontal").style.height = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize + "px";
+    boardElement.querySelector(".lines.vertical").style.width = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize + "px";
+    boardElement.querySelector(".lines.vertical").style.height = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize + "px";
 
-    var boardWidth = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + renderer.MARGIN * 2;
-    var boardHeight = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize * 1 + renderer.MARGIN * 2;
+    var boardWidth = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize + renderer.MARGIN * 2;
+    var boardHeight = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize + renderer.MARGIN * 2;
 
     innerContainer.style.width = boardWidth + "px";
     innerContainer.style.height = boardHeight + "px";
@@ -602,7 +602,7 @@ function DOMRenderer(game, boardElement) {
         }
 
         if (renderer.touchedPoint) {
-          if (intersectionElement == renderer.touchedPoint) {
+          if (intersectionElement === renderer.touchedPoint) {
             playOrToggleDead();
           } else {
             renderer.showPossibleMoveAt(intersectionElement);
@@ -712,7 +712,6 @@ function DOMRenderer(game, boardElement) {
   this.showPossibleMoveAt = function (intersectionElement) {
     var renderer = this;
     var boardElement = this.boardElement;
-    var innerContainer = this.innerContainer;
     var zoomContainer = this.zoomContainer;
 
     renderer.touchedPoint = intersectionElement;
@@ -771,9 +770,7 @@ function DOMRenderer(game, boardElement) {
 
   this.renderStonesPlayed = function () {
     var renderer = this;
-    var game = renderer.game;
-    var boardState = game.boardState();
-    var points = game.intersections();
+    var points = renderer.game.intersections();
 
     points.forEach(function (intersection) {
       renderer.renderIntersection(intersection);
@@ -782,15 +779,14 @@ function DOMRenderer(game, boardElement) {
 
   this.updateMarkerPoints = function () {
     var renderer = this;
-    var game = this.game;
-    var boardState = game.boardState();
+    var boardState = renderer.game.boardState();
 
     if (!boardState) {
       return;
     }
 
-    game.intersections().forEach(function (intersection) {
-      if (game.wouldBeSuicide(intersection.y, intersection.x)) {
+    renderer.game.intersections().forEach(function (intersection) {
+      if (renderer.game.wouldBeSuicide(intersection.y, intersection.x)) {
         _utils2.default.addClass(renderer.grid[intersection.y][intersection.x], "suicide");
       }
     });
@@ -805,12 +801,11 @@ function DOMRenderer(game, boardElement) {
   };
 
   this.updateCurrentPlayer = function () {
-    var game = this.game;
-    var previousPlayer = game.boardState().color;
+    var previousPlayer = this.game.boardState().color;
     _utils2.default.removeClass(boardElement, previousPlayer + "-to-play");
-    _utils2.default.addClass(boardElement, game.currentPlayer() + "-to-play");
+    _utils2.default.addClass(boardElement, this.game.currentPlayer() + "-to-play");
 
-    if (game.isOver()) {
+    if (this.game.isOver()) {
       _utils2.default.removeClass(boardElement, "black-to-play");
       _utils2.default.removeClass(boardElement, "white-to-play");
     }
@@ -818,7 +813,6 @@ function DOMRenderer(game, boardElement) {
 
   this.renderIntersection = function (intersection) {
     var renderer = this;
-    var game = this.game;
 
     var intersectionEl = renderer.grid[intersection.y][intersection.x];
 
@@ -836,37 +830,36 @@ function DOMRenderer(game, boardElement) {
       }
     }
 
-    if (intersectionEl.className != classes.join(" ")) {
+    if (intersectionEl.className !== classes.join(" ")) {
       intersectionEl.className = classes.join(" ");
     }
   };
 
   this.renderTerritory = function () {
-    var renderer = this;
-    var game = this.game;
+    var _this = this;
 
-    game.intersections().forEach(function (intersection) {
-      _utils2.default.removeClass(renderer.grid[intersection.y][intersection.x], "territory-black");
-      _utils2.default.removeClass(renderer.grid[intersection.y][intersection.x], "territory-white");
+    this.game.intersections().forEach(function (intersection) {
+      _utils2.default.removeClass(_this.grid[intersection.y][intersection.x], "territory-black");
+      _utils2.default.removeClass(_this.grid[intersection.y][intersection.x], "territory-white");
 
-      if (game.isDeadAt(intersection.y, intersection.x)) {
-        _utils2.default.addClass(renderer.grid[intersection.y][intersection.x], "dead");
+      if (_this.game.isDeadAt(intersection.y, intersection.x)) {
+        _utils2.default.addClass(_this.grid[intersection.y][intersection.x], "dead");
       } else {
-        _utils2.default.removeClass(renderer.grid[intersection.y][intersection.x], "dead");
+        _utils2.default.removeClass(_this.grid[intersection.y][intersection.x], "dead");
       }
     });
 
-    var territory = game.territory();
+    var territory = this.game.territory();
 
     territory.black.forEach(function (territoryPoint) {
-      _utils2.default.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-black");
+      _utils2.default.addClass(_this.grid[territoryPoint.y][territoryPoint.x], "territory-black");
     });
 
     territory.white.forEach(function (territoryPoint) {
-      _utils2.default.addClass(renderer.grid[territoryPoint.y][territoryPoint.x], "territory-white");
+      _utils2.default.addClass(_this.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
   };
-};
+}
 
 
 },{"./utils":10}],4:[function(require,module,exports){
@@ -971,10 +964,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _utils = require("./utils");
-
-var _utils2 = _interopRequireDefault(_utils);
-
 var _domRenderer = require("./dom-renderer");
 
 var _domRenderer2 = _interopRequireDefault(_domRenderer);
@@ -982,10 +971,6 @@ var _domRenderer2 = _interopRequireDefault(_domRenderer);
 var _nullRenderer = require("./null-renderer");
 
 var _nullRenderer2 = _interopRequireDefault(_nullRenderer);
-
-var _intersection = require("./intersection");
-
-var _intersection2 = _interopRequireDefault(_intersection);
 
 var _boardState = require("./board-state");
 
@@ -1020,11 +1005,11 @@ Game.prototype = {
     var _ref$ruleset = _ref.ruleset;
     var ruleset = _ref$ruleset === undefined ? this._defaultRuleset : _ref$ruleset;
 
-    if (handicapStones > 0 && boardSize != 9 && boardSize != 13 && boardSize != 19) {
+    if (handicapStones > 0 && boardSize !== 9 && boardSize !== 13 && boardSize !== 19) {
       throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
     }
 
-    if (handicapStones < 0 || handicapStones == 1 || handicapStones > 9) {
+    if (handicapStones < 0 || handicapStones === 1 || handicapStones > 9) {
       throw new Error("Only 2 to 9 handicap stones are supported");
     }
 
@@ -1044,7 +1029,7 @@ Game.prototype = {
     this._configureOptions(options);
 
     if (this.boardSize > 19) {
-      throw "cannot generate a board size greater than 19";
+      throw new Error("cannot generate a board size greater than 19");
     }
 
     this.renderer.setup();
@@ -1093,11 +1078,11 @@ Game.prototype = {
   },
 
   isWhitePlaying: function isWhitePlaying() {
-    return this.currentPlayer() == "white";
+    return this.currentPlayer() === "white";
   },
 
   isBlackPlaying: function isBlackPlaying() {
-    return this.currentPlayer() == "black";
+    return this.currentPlayer() === "black";
   },
 
   inAtari: function inAtari(y, x) {
@@ -1134,7 +1119,7 @@ Game.prototype = {
     this.groupAt(y, x).forEach(function (intersection) {
       if (alreadyDead) {
         _this._deadPoints = _this._deadPoints.filter(function (dead) {
-          return !(dead.y == intersection.y && dead.x == intersection.x);
+          return !(dead.y === intersection.y && dead.x === intersection.x);
         });
       } else {
         _this._deadPoints.push({ y: intersection.y, x: intersection.x });
@@ -1146,7 +1131,7 @@ Game.prototype = {
 
   isDeadAt: function isDeadAt(y, x) {
     return this._deadPoints.some(function (dead) {
-      return dead.y == y && dead.x == x;
+      return dead.y === y && dead.x === x;
     });
   },
 
@@ -1167,7 +1152,7 @@ Game.prototype = {
   },
 
   isIllegalAt: function isIllegalAt(y, x) {
-    if (this._moves.length == 0) {
+    if (this._moves.length === 0) {
       return false;
     }
 
@@ -1175,8 +1160,6 @@ Game.prototype = {
   },
 
   render: function render() {
-    var boardState = this.boardState();
-
     if (!this.isOver()) {
       this.removeScoringState();
     }
@@ -1206,7 +1189,7 @@ Game.prototype = {
 exports.default = Game;
 
 
-},{"./board-state":2,"./dom-renderer":3,"./intersection":6,"./null-renderer":7,"./rulesets":9,"./utils":10}],6:[function(require,module,exports){
+},{"./board-state":2,"./dom-renderer":3,"./null-renderer":7,"./rulesets":9}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1299,10 +1282,6 @@ var _utils = require("./utils");
 
 var _utils2 = _interopRequireDefault(_utils);
 
-var _eyePoint = require("./eye-point");
-
-var _eyePoint2 = _interopRequireDefault(_eyePoint);
-
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
@@ -1358,11 +1337,11 @@ Region.merge = function (regions, region) {
   var mergedRegions = [region];
   var length = -1;
 
-  while (mergedRegions.length != length) {
+  while (mergedRegions.length !== length) {
     length = mergedRegions.length;
 
     mergedRegions = regions.filter(function (r) {
-      return r.isEmpty() && r.isTerritory() && r.territoryColor() == region.territoryColor() && r.expandedBoundaryStones().some(function (stone) {
+      return r.isEmpty() && r.isTerritory() && r.territoryColor() === region.territoryColor() && r.expandedBoundaryStones().some(function (stone) {
         return mergedRegions.some(function (latestRegion) {
           return latestRegion.expandedBoundaryStones().indexOf(stone) > -1;
         });
@@ -1389,13 +1368,13 @@ Region.prototype = {
 
     var _Region$_startingAt2 = _slicedToArray(_Region$_startingAt, 2);
 
-    var includedPoints = _Region$_startingAt2[0];
+    var _ = _Region$_startingAt2[0];
     var boundaryPoints = _Region$_startingAt2[1];
 
     var surroundingColors = _utils2.default.unique(boundaryPoints.map(function (i) {
       return i.value;
     }));
-    var isTerritory = surroundingColors.length == 1 && surroundingColors[0] != "empty";
+    var isTerritory = surroundingColors.length === 1 && surroundingColors[0] !== "empty";
 
     return isTerritory;
   },
@@ -1407,13 +1386,13 @@ Region.prototype = {
 
     var _Region$_startingAt4 = _slicedToArray(_Region$_startingAt3, 2);
 
-    var includedPoints = _Region$_startingAt4[0];
+    var _ = _Region$_startingAt4[0];
     var boundaryPoints = _Region$_startingAt4[1];
 
     var surroundingColors = _utils2.default.unique(boundaryPoints.map(function (i) {
       return i.value;
     }));
-    var isTerritory = surroundingColors.length == 1 && surroundingColors[0] != "empty";
+    var isTerritory = surroundingColors.length === 1 && surroundingColors[0] !== "empty";
 
     if (!point.isEmpty() || !isTerritory) {
       throw new Error("Attempted to obtain territory color for something that isn't territory, region containing " + point.y + "," + point.x);
@@ -1423,11 +1402,11 @@ Region.prototype = {
   },
 
   isBlack: function isBlack() {
-    return this.territoryColor() == "black";
+    return this.territoryColor() === "black";
   },
 
   isWhite: function isWhite() {
-    return this.territoryColor() == "white";
+    return this.territoryColor() === "white";
   },
 
   isNeutral: function isNeutral() {
@@ -1474,10 +1453,10 @@ Region.prototype = {
 
     // count the empty border points to treat the edge of the board itself as points
     var borderPoints = this.intersections.filter(function (i) {
-      return i.y == 0 || i.y == _this3.boardState.boardSize - 1 || i.x == 0 || i.x == _this3.boardState.boardSize - 1;
+      return i.y === 0 || i.y === _this3.boardState.boardSize - 1 || i.x === 0 || i.x === _this3.boardState.boardSize - 1;
     });
     var cornerPoints = this.intersections.filter(function (i) {
-      return i.y % (_this3.boardState.boardSize - 1) == 0 && i.x % (_this3.boardState.boardSize - 1) == 0;
+      return i.y % _this3.boardState.boardSize - 1 === 0 && i.x % _this3.boardState.boardSize - 1 === 0;
     });
 
     return this.boundaryStones().length + borderPoints.length + cornerPoints.length;
@@ -1494,7 +1473,7 @@ Region.prototype = {
         var x = _ref2[1];
 
         var intersection = _this4.boardState.intersectionAt(i.y + y, i.x + x);
-        return typeof intersection != "undefined" && intersection.sameColorAs(i);
+        return typeof intersection !== "undefined" && intersection.sameColorAs(i);
       });
     });
   },
@@ -1511,7 +1490,7 @@ Region.prototype = {
           var x = _ref4[1];
 
           var intersection = _this5.boardState.intersectionAt(i.y + y, i.x + x);
-          return typeof intersection != "undefined" && intersection.sameColorAs(i);
+          return typeof intersection !== "undefined" && intersection.sameColorAs(i);
         });
       });
     });
@@ -1574,7 +1553,7 @@ Region.prototype = {
 exports.default = Region;
 
 
-},{"./eye-point":4,"./utils":10}],9:[function(require,module,exports){
+},{"./utils":10}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1585,10 +1564,6 @@ exports.AreaRules = exports.TerritoryRules = undefined;
 var _utils = require("./utils");
 
 var _utils2 = _interopRequireDefault(_utils);
-
-var _boardState = require("./board-state");
-
-var _boardState2 = _interopRequireDefault(_boardState);
 
 var _intersection = require("./intersection");
 
@@ -1618,7 +1593,7 @@ var boardStateWithoutNeutralPoints = function boardStateWithoutNeutralPoints(boa
     return r.isNeutral();
   });
 
-  if (regions.length == 0 || neutralRegions.length == 0) {
+  if (regions.length === 0 || neutralRegions.length === 0) {
     return boardState;
   }
 
@@ -1709,7 +1684,7 @@ var TerritoryRules = Object.freeze({
     var isEmpty = intersection.isEmpty();
     var isSuicide = boardState.wouldBeSuicide(y, x);
     var koPoint = boardState.koPoint;
-    var isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
+    var isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
 
     return !isEmpty || isKoViolation || isSuicide;
   },
@@ -1822,7 +1797,7 @@ exports.TerritoryRules = TerritoryRules;
 exports.AreaRules = AreaRules;
 
 
-},{"./board-state":2,"./eye-point":4,"./intersection":6,"./region":8,"./utils":10}],10:[function(require,module,exports){
+},{"./eye-point":4,"./intersection":6,"./region":8,"./utils":10}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1842,7 +1817,7 @@ exports.default = {
   createElement: function createElement(elementName, options) {
     var element = document.createElement(elementName);
 
-    if (typeof options != "undefined") {
+    if (typeof options !== "undefined") {
       if (options.class) {
         element.className = options.class;
       }

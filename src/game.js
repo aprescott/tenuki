@@ -1,7 +1,5 @@
-import utils from "./utils";
 import DOMRenderer from "./dom-renderer";
 import NullRenderer from "./null-renderer";
-import Intersection from "./intersection";
 import BoardState from "./board-state";
 import { TerritoryRules, AreaRules } from "./rulesets";
 
@@ -9,7 +7,7 @@ const Game = function(boardElement) {
   this._defaultBoardSize = 19;
   this.boardSize = null;
   this._moves = [];
-  this.renderer = (boardElement ? new DOMRenderer(this, boardElement) : new NullRenderer());
+  this.renderer = boardElement ? new DOMRenderer(this, boardElement) : new NullRenderer();
   this.callbacks = {
     postRender: function() {}
   };
@@ -19,11 +17,11 @@ const Game = function(boardElement) {
 
 Game.prototype = {
   _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0, ruleset = this._defaultRuleset } = {}) {
-    if (handicapStones > 0 && boardSize != 9 && boardSize != 13 && boardSize != 19) {
+    if (handicapStones > 0 && boardSize !== 9 && boardSize !== 13 && boardSize !== 19) {
       throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
     }
 
-    if (handicapStones < 0 || handicapStones == 1 || handicapStones > 9) {
+    if (handicapStones < 0 || handicapStones === 1 || handicapStones > 9) {
       throw new Error("Only 2 to 9 handicap stones are supported");
     }
 
@@ -43,7 +41,7 @@ Game.prototype = {
     this._configureOptions(options);
 
     if (this.boardSize > 19) {
-      throw "cannot generate a board size greater than 19";
+      throw new Error("cannot generate a board size greater than 19");
     }
 
     this.renderer.setup();
@@ -92,11 +90,11 @@ Game.prototype = {
   },
 
   isWhitePlaying: function() {
-    return this.currentPlayer() == "white";
+    return this.currentPlayer() === "white";
   },
 
   isBlackPlaying: function() {
-    return this.currentPlayer() == "black";
+    return this.currentPlayer() === "black";
   },
 
   inAtari: function(y, x) {
@@ -130,7 +128,7 @@ Game.prototype = {
 
     this.groupAt(y, x).forEach(intersection => {
       if (alreadyDead) {
-        this._deadPoints = this._deadPoints.filter(dead => !(dead.y == intersection.y && dead.x == intersection.x));
+        this._deadPoints = this._deadPoints.filter(dead => !(dead.y === intersection.y && dead.x === intersection.x));
       } else {
         this._deadPoints.push({ y: intersection.y, x: intersection.x });
       }
@@ -140,7 +138,7 @@ Game.prototype = {
   },
 
   isDeadAt: function(y, x) {
-    return this._deadPoints.some(dead => dead.y == y && dead.x == x);
+    return this._deadPoints.some(dead => dead.y === y && dead.x === x);
   },
 
   score: function() {
@@ -160,7 +158,7 @@ Game.prototype = {
   },
 
   isIllegalAt: function(y, x) {
-    if (this._moves.length == 0) {
+    if (this._moves.length === 0) {
       return false;
     }
 
@@ -168,8 +166,6 @@ Game.prototype = {
   },
 
   render: function() {
-    const boardState = this.boardState();
-
     if (!this.isOver()) {
       this.removeScoringState();
     }

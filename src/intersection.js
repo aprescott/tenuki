@@ -29,7 +29,7 @@ Intersection.prototype = {
 
   sameColorAs: function(otherIntersection) {
     return this.value === otherIntersection.value;
-  },
+  }
 };
 
 export default Intersection;

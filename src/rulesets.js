@@ -1,5 +1,4 @@
 import utils from "./utils";
-import BoardState from "./board-state";
 import Intersection from "./intersection";
 import Region from "./region";
 import EyePoint from "./eye-point";
@@ -14,7 +13,7 @@ const boardStateWithoutNeutralPoints = function(boardState) {
   const regions = Region.allFor(boardState);
   const neutralRegions = regions.filter(r => r.isNeutral());
 
-  if (regions.length == 0 || neutralRegions.length == 0) {
+  if (regions.length === 0 || neutralRegions.length === 0) {
     return boardState;
   }
 
@@ -85,7 +84,7 @@ const TerritoryRules = Object.freeze({
     const isEmpty = intersection.isEmpty();
     const isSuicide = boardState.wouldBeSuicide(y, x);
     const koPoint = boardState.koPoint;
-    const isKoViolation = koPoint && koPoint.y == y && koPoint.x == x;
+    const isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
 
     return !isEmpty || isKoViolation || isSuicide;
   },
@@ -117,13 +116,13 @@ const TerritoryRules = Object.freeze({
       return eyeCounts.length > 0 && eyeCounts.reduce((a, b) => a + b) >= 2;
     });
 
-    const blackRegions = territoryRegionsWithoutSeki.filter(r => r.isBlack())
+    const blackRegions = territoryRegionsWithoutSeki.filter(r => r.isBlack());
     const whiteRegions = territoryRegionsWithoutSeki.filter(r => r.isWhite());
 
-    return({
+    return {
       black: utils.flatMap(blackRegions, r => r.intersections).map(i => ({ y: i.y, x: i.x })),
       white: utils.flatMap(whiteRegions, r => r.intersections).map(i => ({ y: i.y, x: i.x }))
-    });
+    };
   }
 });
 
@@ -147,10 +146,10 @@ const AreaRules = Object.freeze({
     const blackRegions = territoryRegions.filter(r => r.isBlack());
     const whiteRegions = territoryRegions.filter(r => r.isWhite());
 
-    return({
+    return {
       black: utils.flatMap(blackRegions, r => r.intersections).map(i => ({ y: i.y, x: i.x })),
       white: utils.flatMap(whiteRegions, r => r.intersections).map(i => ({ y: i.y, x: i.x }))
-    });
+    };
   }
 });
 

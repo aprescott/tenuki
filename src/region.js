@@ -1,5 +1,4 @@
 import utils from "./utils";
-import EyePoint from "./eye-point";
 
 const Region = function(boardState, intersections) {
   this.boardState = boardState;
@@ -42,11 +41,11 @@ Region.merge = function(regions, region) {
   let mergedRegions = [region];
   let length = -1;
 
-  while (mergedRegions.length != length) {
+  while (mergedRegions.length !== length) {
     length = mergedRegions.length;
 
     mergedRegions = regions.filter(r => {
-      return r.isEmpty() && r.isTerritory() && r.territoryColor() == region.territoryColor() && r.expandedBoundaryStones().some(stone => {
+      return r.isEmpty() && r.isTerritory() && r.territoryColor() === region.territoryColor() && r.expandedBoundaryStones().some(stone => {
         return mergedRegions.some(latestRegion => {
           return latestRegion.expandedBoundaryStones().indexOf(stone) > -1;
         });
@@ -69,18 +68,18 @@ Region.prototype = {
       return false;
     }
 
-    const [includedPoints, boundaryPoints] = Region._startingAt(this.boardState, point.y, point.x);
+    const [_, boundaryPoints] = Region._startingAt(this.boardState, point.y, point.x);
     const surroundingColors = utils.unique(boundaryPoints.map(i => i.value));
-    const isTerritory = surroundingColors.length == 1 && surroundingColors[0] != "empty";
+    const isTerritory = surroundingColors.length === 1 && surroundingColors[0] !== "empty";
 
     return isTerritory;
   },
 
   territoryColor: function() {
     const point = this.intersections[0];
-    const [includedPoints, boundaryPoints] = Region._startingAt(this.boardState, point.y, point.x);
+    const [_, boundaryPoints] = Region._startingAt(this.boardState, point.y, point.x);
     const surroundingColors = utils.unique(boundaryPoints.map(i => i.value));
-    const isTerritory = surroundingColors.length == 1 && surroundingColors[0] != "empty";
+    const isTerritory = surroundingColors.length === 1 && surroundingColors[0] !== "empty";
 
     if (!point.isEmpty() || !isTerritory) {
       throw new Error("Attempted to obtain territory color for something that isn't territory, region containing " + point.y + "," + point.x);
@@ -90,11 +89,11 @@ Region.prototype = {
   },
 
   isBlack: function() {
-    return this.territoryColor() == "black";
+    return this.territoryColor() === "black";
   },
 
   isWhite: function() {
-    return this.territoryColor() == "white";
+    return this.territoryColor() === "white";
   },
 
   isNeutral: function() {
@@ -127,10 +126,10 @@ Region.prototype = {
   lengthOfTerritoryBoundary: function() {
     // count the empty border points to treat the edge of the board itself as points
     const borderPoints = this.intersections.filter(i => {
-      return i.y == 0 || i.y == (this.boardState.boardSize - 1) || i.x == 0 || i.x == (this.boardState.boardSize - 1);
+      return i.y === 0 || i.y === this.boardState.boardSize - 1 || i.x === 0 || i.x === this.boardState.boardSize - 1;
     });
     const cornerPoints = this.intersections.filter(i => {
-      return (i.y % (this.boardState.boardSize - 1) == 0 && i.x % (this.boardState.boardSize - 1) == 0);
+      return i.y % this.boardState.boardSize - 1 === 0 && i.x % this.boardState.boardSize - 1 === 0;
     });
 
     return this.boundaryStones().length + borderPoints.length + cornerPoints.length;
@@ -143,7 +142,7 @@ Region.prototype = {
         [1, 0], [1, 1]
       ].every(([y, x]) => {
         const intersection = this.boardState.intersectionAt(i.y + y, i.x + x);
-        return(typeof intersection != "undefined" && intersection.sameColorAs(i));
+        return typeof intersection !== "undefined" && intersection.sameColorAs(i);
       });
     });
   },
@@ -190,7 +189,7 @@ Region.prototype = {
       ].some(expectedPoints => {
         return expectedPoints.every(([y, x]) => {
           const intersection = this.boardState.intersectionAt(i.y + y, i.x + x);
-          return(typeof intersection != "undefined" && intersection.sameColorAs(i));
+          return typeof intersection !== "undefined" && intersection.sameColorAs(i);
         });
       });
     });

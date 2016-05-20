@@ -34,7 +34,8 @@
     "clean-css": "*",
     "mocha": "^2.4.5",
     "uglify-js": "*",
-    "source-map-support": "^0.4.0"
+    "source-map-support": "^0.4.0",
+    "eslint": "*"
   },
   "engines": {
     "node": ">=4.0.0"

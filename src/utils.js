@@ -10,7 +10,7 @@ export default {
   createElement: function(elementName, options) {
     const element = document.createElement(elementName);
 
-    if (typeof options != "undefined") {
+    if (typeof options !== "undefined") {
       if (options.class) {
         element.className = options.class;
       }
