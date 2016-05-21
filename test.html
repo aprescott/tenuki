@@ -523,6 +523,44 @@ if (gameTest.currentPlayer() != "white") {
   }
 });
 
+// handicap stones count towards area
+[
+  { rule: "territory", handicap: 5, initialScore: { white: 0, black: 361 - 5 }, expectedScore: { white: 0, black: 0 } },
+  { rule: "area", handicap: 5, initialScore: { white: 0, black: 361 }, expectedScore: { white: 2, black: 1+5 } },
+].forEach(test => {
+  resetTests(test["handicap"], test["rule"]);
+
+  gameTest.pass();
+  gameTest.pass();
+
+  if (gameTest.score().white != test["initialScore"]["white"]) {
+    throw "tests failed";
+  }
+
+  if (gameTest.score().black != test["initialScore"]["black"]) {
+    throw "tests failed";
+  }
+
+  gameTest.undo();
+  gameTest.undo();
+
+  gameTest.renderer.grid[1][1].click(); // w
+  gameTest.pass();
+  gameTest.renderer.grid[1][2].click(); // w
+  gameTest.renderer.grid[1][3].click(); // b
+
+  gameTest.pass();
+  gameTest.pass();
+
+  if (gameTest.score().white != test["expectedScore"]["white"]) {
+    throw "tests failed";
+  }
+
+  if (gameTest.score().black != test["expectedScore"]["black"]) {
+    throw "tests failed";
+  }
+});
+
 // seki scoring with eyes, with and without dead stones
 resetTests(0, "territory");
 
