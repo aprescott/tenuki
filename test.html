@@ -527,7 +527,7 @@ if (gameTest.currentPlayer() != "white") {
 [
   { rule: "territory", handicap: 5, initialScore: { white: 0, black: 361 - 5 }, expectedScore: { white: 0, black: 0 } },
   { rule: "area", handicap: 5, initialScore: { white: 0, black: 361 }, expectedScore: { white: 2, black: 1+5 } }
-].forEach(test => {
+].forEach(function(test) {
   resetTests(test["handicap"], test["rule"]);
 
   gameTest.pass();
