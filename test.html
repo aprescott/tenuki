@@ -526,7 +526,7 @@ if (gameTest.currentPlayer() != "white") {
 // handicap stones count towards area
 [
   { rule: "territory", handicap: 5, initialScore: { white: 0, black: 361 - 5 }, expectedScore: { white: 0, black: 0 } },
-  { rule: "area", handicap: 5, initialScore: { white: 0, black: 361 }, expectedScore: { white: 2, black: 1+5 } },
+  { rule: "area", handicap: 5, initialScore: { white: 0, black: 361 }, expectedScore: { white: 2, black: 1+5 } }
 ].forEach(test => {
   resetTests(test["handicap"], test["rule"]);
 
