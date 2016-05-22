@@ -114,7 +114,7 @@ Game.prototype = {
 
   pass: function() {
     if (!this.isOver()) {
-      this._moves.push(this.boardState().playPass())
+      this._moves.push(this.boardState().playPass());
       this.render();
     }
   },

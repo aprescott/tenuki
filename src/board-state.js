@@ -148,7 +148,7 @@ BoardState.prototype = {
     const startingPoint = this.intersectionAt(y, x);
 
     const [group, _] = this.partitionTraverse(startingPoint, neighbor => {
-      return neighbor.sameColorAs(startingPoint)
+      return neighbor.sameColorAs(startingPoint);
     });
 
     return group;
@@ -259,7 +259,7 @@ BoardState.prototype = {
 
     return [checkedPoints, utils.unique(boundaryPoints)];
   }
-}
+};
 
 BoardState._initialFor = function(boardSize, handicapStones) {
   this._cache = this._cache || {};
@@ -314,6 +314,6 @@ BoardState._initialFor = function(boardSize, handicapStones) {
 
   this._cache[boardSize][handicapStones] = initialState;
   return initialState;
-}
+};
 
 export default BoardState;

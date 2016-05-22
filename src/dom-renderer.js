@@ -95,7 +95,7 @@ export default function DOMRenderer(game, boardElement) {
       utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
 
       const verticalLine = utils.createElement("div", { class: "line vertical" });
-      verticalLine.setAttribute("data-top-gutter", game.xCoordinateFor(y))
+      verticalLine.setAttribute("data-top-gutter", game.xCoordinateFor(y));
       utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
 
       for (let x = 0; x < game.boardSize; x++) {
@@ -285,7 +285,7 @@ export default function DOMRenderer(game, boardElement) {
       renderer.lastTranslateX = translateX;
       renderer.lastTranslateY = translateY;
     });
-  }
+  };
 
   this.showPossibleMoveAt = function(intersectionElement) {
     const renderer = this;
@@ -314,7 +314,7 @@ export default function DOMRenderer(game, boardElement) {
     const renderer = this;
 
     renderer.touchedPoint = null;
-  }
+  };
 
   this.zoomOut = function() {
     const renderer = this;
@@ -344,7 +344,7 @@ export default function DOMRenderer(game, boardElement) {
     if (this.game.isOver()) {
       this.renderTerritory();
     }
-  }
+  };
 
   this.renderStonesPlayed = function() {
     const renderer = this;
