@@ -17,7 +17,7 @@ The HTML go board is intended to be a robust, functional component that can be e
 
 Features:
 
-  * Ko rule.
+  * Simple ko and superko.
   * Pass.
   * Undo.
   * Handicap stones.
@@ -120,7 +120,7 @@ The default scoring is territory scoring. The scoring can be given as part of th
 
 ```js
 game.setup({
-  scoring: "area"
+  scoring: "area" // default is "territory"
 });
 ```
 
@@ -128,6 +128,21 @@ Valid scoring types are:
 
   * `"area"` — Area scoring.
   * `"territory"` — Territory scoring.
+
+# Ko and superko
+
+The default ko rule is the simple variant: immediately recreating the previous board position is not allowed. Superko is also supported with the `koRule` configuration option:
+
+```js
+game.setup({
+  koRule: "superko" // default is "simple"
+})
+```
+
+Valid ko rule values are:
+
+  * `"simple"` — Immediately recreating the previous board position is illegal.
+  * `"superko"` — Recreating any previous position is illegal. (Also known as "positional superko".)
 
 # Browser support
 
