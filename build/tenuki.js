@@ -1983,20 +1983,6 @@ exports.default = {
     });
 
     return h;
-  },
-
-  nextHash: function nextHash(previousHash, boardSize, playedPoint, playedColor, capturedPoints) {
-    var h = previousHash;
-
-    h = h ^ initialBitstringFor(boardSize, playedPoint.y, playedPoint.x, "empty");
-    h = h ^ initialBitstringFor(boardSize, playedPoint.y, playedPoint.x, playedColor);
-
-    capturedPoints.forEach(function (capture) {
-      h = h ^ initialBitstringFor(boardSize, capture.y, capture.x, capture.value);
-      h = h ^ initialBitstringFor(boardSize, capture.y, capture.x, "empty");
-    });
-
-    return h;
   }
 };
 
