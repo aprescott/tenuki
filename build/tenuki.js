@@ -980,7 +980,7 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones"];
+var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule"];
 
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -992,6 +992,7 @@ var Game = function Game(boardElement) {
   };
   this._deadPoints = [];
   this._defaultScoring = "territory";
+  this._defaultKoRule = "simple";
 };
 
 Game.prototype = {
@@ -1004,6 +1005,8 @@ Game.prototype = {
     var handicapStones = _ref$handicapStones === undefined ? 0 : _ref$handicapStones;
     var _ref$scoring = _ref.scoring;
     var scoring = _ref$scoring === undefined ? this._defaultScoring : _ref$scoring;
+    var _ref$koRule = _ref.koRule;
+    var koRule = _ref$koRule === undefined ? this._defaultKoRule : _ref$koRule;
 
     if (handicapStones > 0 && boardSize !== 9 && boardSize !== 13 && boardSize !== 19) {
       throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
@@ -1016,7 +1019,8 @@ Game.prototype = {
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
     this.ruleset = new _ruleset2.default({
-      "scoring": scoring
+      "scoring": scoring,
+      "koRule": koRule
     });
   },
 
@@ -1563,18 +1567,26 @@ Object.defineProperty(exports, "__esModule", {
 
 var _scoring = require("./scoring");
 
+var VALID_KO_OPTIONS = ["simple"];
+
 var Ruleset = function Ruleset() {
   var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
   var scoring = _ref.scoring;
+  var koRule = _ref.koRule;
 
   this.scorer = {
     "area": _scoring.AreaScoring,
     "territory": _scoring.TerritoryScoring
   }[scoring];
+  this.koRule = koRule;
 
   if (!this.scorer) {
     throw new Error("Unknown scoring: " + scoring);
+  }
+
+  if (VALID_KO_OPTIONS.indexOf(this.koRule) < 0) {
+    throw new Error("Unknown ko rule: " + koRule);
   }
 
   Object.freeze(this);

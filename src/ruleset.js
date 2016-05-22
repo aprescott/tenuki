@@ -1,13 +1,22 @@
 import { AreaScoring, TerritoryScoring } from "./scoring";
 
-const Ruleset = function({ scoring } = {}) {
+const VALID_KO_OPTIONS = [
+  "simple"
+];
+
+const Ruleset = function({ scoring, koRule } = {}) {
   this.scorer = {
     "area": AreaScoring,
     "territory": TerritoryScoring
   }[scoring];
+  this.koRule = koRule;
 
   if (!this.scorer) {
     throw new Error("Unknown scoring: " + scoring);
+  }
+
+  if (VALID_KO_OPTIONS.indexOf(this.koRule) < 0) {
+    throw new Error("Unknown ko rule: " + koRule);
   }
 
   Object.freeze(this);

@@ -6,7 +6,8 @@ import Ruleset from "./ruleset";
 const VALID_GAME_OPTIONS = [
   "boardSize",
   "scoring",
-  "handicapStones"
+  "handicapStones",
+  "koRule"
 ];
 
 const Game = function(boardElement) {
@@ -19,10 +20,11 @@ const Game = function(boardElement) {
   };
   this._deadPoints = [];
   this._defaultScoring = "territory";
+  this._defaultKoRule = "simple";
 };
 
 Game.prototype = {
-  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0, scoring = this._defaultScoring } = {}) {
+  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0, scoring = this._defaultScoring, koRule = this._defaultKoRule } = {}) {
     if (handicapStones > 0 && boardSize !== 9 && boardSize !== 13 && boardSize !== 19) {
       throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
     }
@@ -34,7 +36,8 @@ Game.prototype = {
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
     this.ruleset = new Ruleset({
-      "scoring": scoring
+      "scoring": scoring,
+      "koRule": koRule
     });
   },
 

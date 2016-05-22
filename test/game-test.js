@@ -55,6 +55,17 @@ describe("Game", function() {
       expect(function() { game.setup({ boardSize: 19, handicapStones: 2 }); }).to.not.throw(Error);
       expect(function() { game.setup({ boardSize: 17, handicapStones: 2 }); }).to.throw(Error, "Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
     });
+
+    it("does not allow unknown ko rules", function() {
+      var game = new Game();
+
+      expect(function() { game.setup({ boardSize: 19, koRule: "simple" }); }).to.not.throw(Error);
+
+      expect(function() { game.setup({ boardSize: 19, koRule: "Simple" }); }).to.throw(Error, "Unknown ko rule: Simple");
+      expect(function() { game.setup({ boardSize: 19, koRule: "SIMPLE" }); }).to.throw(Error, "Unknown ko rule: SIMPLE");
+      expect(function() { game.setup({ boardSize: 19, koRule: "positional" }); }).to.throw(Error, "Unknown ko rule: positional");
+      expect(function() { game.setup({ boardSize: 19, koRule: "gibberish" }); }).to.throw(Error, "Unknown ko rule: gibberish");
+    });
   });
 
   describe("coordinatesFor", function() {
