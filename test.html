@@ -245,7 +245,7 @@ gameTest.renderer.grid[2][0].click(); // w
 gameTest.renderer.grid[15][15].click(); // b tenuki
 gameTest.renderer.grid[1][1].click(); // w
 
-if (!tenuki.utils.hasClass(gameTest.renderer.grid[0][0], "empty") || !tenuki.utils.hasClass(gameTest.renderer.grid[0][0], "suicide")) {
+if (!tenuki.utils.hasClass(gameTest.renderer.grid[0][0], "empty") || !tenuki.utils.hasClass(gameTest.renderer.grid[0][0], "illegal")) {
   throw "tests failed";
 }
 gameTest.renderer.grid[0][0].click();

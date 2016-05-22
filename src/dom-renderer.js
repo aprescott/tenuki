@@ -364,8 +364,8 @@ export default function DOMRenderer(game, boardElement) {
     }
 
     renderer.game.intersections().forEach(function(intersection) {
-      if (renderer.game.wouldBeSuicide(intersection.y, intersection.x)) {
-        utils.addClass(renderer.grid[intersection.y][intersection.x], "suicide");
+      if (renderer.game.isIllegalAt(intersection.y, intersection.x)) {
+        utils.addClass(renderer.grid[intersection.y][intersection.x], "illegal");
       }
     });
 
