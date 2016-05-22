@@ -1,5 +1,6 @@
 import utils from "./utils";
 import Intersection from "./intersection";
+import Zobrist from "./zobrist";
 
 const BoardState = function({ moveNumber, playedPoint, color, pass, intersections, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
   this.moveNumber = moveNumber;
@@ -12,6 +13,7 @@ const BoardState = function({ moveNumber, playedPoint, color, pass, intersection
   this.capturedPositions = capturedPositions;
   this.koPoint = koPoint;
   this.boardSize = boardSize;
+  this._positionHash = Zobrist.hash(boardSize, intersections);
 
   Object.freeze(this);
 };
@@ -223,8 +225,8 @@ BoardState.prototype = {
     return true;
   },
 
-  samePositionAs: function(otherState) {
-    return this.intersections.every(point => {
+  positionSameAs: function(otherState) {
+    return this._positionHash === otherState._positionHash && this.intersections.every(point => {
       return point.sameColorAs(otherState.intersectionAt(point.y, point.x));
     });
   },

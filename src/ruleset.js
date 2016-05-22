@@ -26,7 +26,6 @@ const Ruleset = function({ scoring, koRule } = {}) {
 Ruleset.prototype = {
   isIllegal: function(y, x, game) {
     const boardState = game.boardState();
-    const boardStates = game._moves;
     const intersection = boardState.intersectionAt(y, x);
     const isEmpty = intersection.isEmpty();
     const isSuicide = boardState.wouldBeSuicide(y, x);
@@ -38,8 +37,10 @@ Ruleset.prototype = {
       isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
     } else {
       const newState = boardState.playAt(y, x);
-      isKoViolation = boardStates.slice().reverse().some(existingState => {
-        return newState.samePositionAs(existingState);
+      const boardStates = game._moves;
+
+      isKoViolation = game._moves.length > 0 && boardStates.some(existingState => {
+        return existingState.positionSameAs(newState);
       });
     }
 
