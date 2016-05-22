@@ -9,7 +9,7 @@
 exports.Game = require("./lib/game").default;
 exports.utils = require("./lib/utils").default;
 
-},{"./lib/game":5,"./lib/utils":10}],2:[function(require,module,exports){
+},{"./lib/game":5,"./lib/utils":11}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -402,7 +402,7 @@ BoardState._initialFor = function (boardSize, handicapStones) {
 exports.default = BoardState;
 
 
-},{"./intersection":6,"./utils":10}],3:[function(require,module,exports){
+},{"./intersection":6,"./utils":11}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -858,7 +858,7 @@ function DOMRenderer(game, boardElement) {
 }
 
 
-},{"./utils":10}],4:[function(require,module,exports){
+},{"./utils":11}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -972,11 +972,15 @@ var _boardState = require("./board-state");
 
 var _boardState2 = _interopRequireDefault(_boardState);
 
-var _rulesets = require("./rulesets");
+var _ruleset = require("./ruleset");
+
+var _ruleset2 = _interopRequireDefault(_ruleset);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
+
+var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones"];
 
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -987,7 +991,7 @@ var Game = function Game(boardElement) {
     postRender: function postRender() {}
   };
   this._deadPoints = [];
-  this._defaultRuleset = "territory";
+  this._defaultScoring = "territory";
 };
 
 Game.prototype = {
@@ -998,8 +1002,8 @@ Game.prototype = {
     var boardSize = _ref$boardSize === undefined ? this._defaultBoardSize : _ref$boardSize;
     var _ref$handicapStones = _ref.handicapStones;
     var handicapStones = _ref$handicapStones === undefined ? 0 : _ref$handicapStones;
-    var _ref$ruleset = _ref.ruleset;
-    var ruleset = _ref$ruleset === undefined ? this._defaultRuleset : _ref$ruleset;
+    var _ref$scoring = _ref.scoring;
+    var scoring = _ref$scoring === undefined ? this._defaultScoring : _ref$scoring;
 
     if (handicapStones > 0 && boardSize !== 9 && boardSize !== 13 && boardSize !== 19) {
       throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
@@ -1011,17 +1015,18 @@ Game.prototype = {
 
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
-    this.ruleset = {
-      "area": _rulesets.AreaRules,
-      "territory": _rulesets.TerritoryRules
-    }[ruleset];
-
-    if (!this.ruleset) {
-      throw new Error("Unknown ruleset: " + ruleset);
-    }
+    this.ruleset = new _ruleset2.default({
+      "scoring": scoring
+    });
   },
 
   setup: function setup(options) {
+    for (var key in options) {
+      if (options.hasOwnProperty(key) && VALID_GAME_OPTIONS.indexOf(key) < 0) {
+        throw new Error("Unrecognized game option: " + key);
+      }
+    }
+
     this._configureOptions(options);
 
     if (this.boardSize > 19) {
@@ -1185,7 +1190,7 @@ Game.prototype = {
 exports.default = Game;
 
 
-},{"./board-state":2,"./dom-renderer":3,"./null-renderer":7,"./rulesets":9}],6:[function(require,module,exports){
+},{"./board-state":2,"./dom-renderer":3,"./null-renderer":7,"./ruleset":9}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1549,13 +1554,62 @@ Region.prototype = {
 exports.default = Region;
 
 
-},{"./utils":10}],9:[function(require,module,exports){
+},{"./utils":11}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.AreaRules = exports.TerritoryRules = undefined;
+
+var _scoring = require("./scoring");
+
+var Ruleset = function Ruleset() {
+  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+  var scoring = _ref.scoring;
+
+  this.scorer = {
+    "area": _scoring.AreaScoring,
+    "territory": _scoring.TerritoryScoring
+  }[scoring];
+
+  if (!this.scorer) {
+    throw new Error("Unknown scoring: " + scoring);
+  }
+
+  Object.freeze(this);
+};
+
+Ruleset.prototype = {
+  isIllegal: function isIllegal(y, x, boardState) {
+    var intersection = boardState.intersectionAt(y, x);
+    var isEmpty = intersection.isEmpty();
+    var isSuicide = boardState.wouldBeSuicide(y, x);
+    var koPoint = boardState.koPoint;
+    var isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
+
+    return !isEmpty || isKoViolation || isSuicide;
+  },
+
+  territory: function territory(game) {
+    return this.scorer.territory(game);
+  },
+
+  score: function score(game) {
+    return this.scorer.score(game);
+  }
+};
+
+exports.default = Ruleset;
+
+
+},{"./scoring":10}],10:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.AreaScoring = exports.TerritoryScoring = undefined;
 
 var _utils = require("./utils");
 
@@ -1674,17 +1728,7 @@ var boardStateWithClearFalseEyesFilled = function boardStateWithClearFalseEyesFi
   return neutralAtariUpdatedState;
 };
 
-var TerritoryRules = Object.freeze({
-  isIllegal: function isIllegal(y, x, boardState) {
-    var intersection = boardState.intersectionAt(y, x);
-    var isEmpty = intersection.isEmpty();
-    var isSuicide = boardState.wouldBeSuicide(y, x);
-    var koPoint = boardState.koPoint;
-    var isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
-
-    return !isEmpty || isKoViolation || isSuicide;
-  },
-
+var TerritoryScoring = Object.freeze({
   score: function score(game) {
     var blackDeadAsCaptures = game._deadPoints.filter(function (deadPoint) {
       return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack();
@@ -1744,9 +1788,7 @@ var TerritoryRules = Object.freeze({
   }
 });
 
-var AreaRules = Object.freeze({
-  isIllegal: TerritoryRules.isIllegal,
-
+var AreaScoring = Object.freeze({
   score: function score(game) {
     var blackStonesOnTheBoard = game.intersections().filter(function (intersection) {
       return intersection.isBlack() && !game.isDeadAt(intersection.y, intersection.x);
@@ -1789,11 +1831,11 @@ var AreaRules = Object.freeze({
   }
 });
 
-exports.TerritoryRules = TerritoryRules;
-exports.AreaRules = AreaRules;
+exports.TerritoryScoring = TerritoryScoring;
+exports.AreaScoring = AreaScoring;
 
 
-},{"./eye-point":4,"./intersection":6,"./region":8,"./utils":10}],10:[function(require,module,exports){
+},{"./eye-point":4,"./intersection":6,"./region":8,"./utils":11}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

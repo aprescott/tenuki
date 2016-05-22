@@ -1,7 +1,13 @@
 import DOMRenderer from "./dom-renderer";
 import NullRenderer from "./null-renderer";
 import BoardState from "./board-state";
-import { TerritoryRules, AreaRules } from "./rulesets";
+import Ruleset from "./ruleset";
+
+const VALID_GAME_OPTIONS = [
+  "boardSize",
+  "scoring",
+  "handicapStones"
+];
 
 const Game = function(boardElement) {
   this._defaultBoardSize = 19;
@@ -12,11 +18,11 @@ const Game = function(boardElement) {
     postRender: function() {}
   };
   this._deadPoints = [];
-  this._defaultRuleset = "territory";
+  this._defaultScoring = "territory";
 };
 
 Game.prototype = {
-  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0, ruleset = this._defaultRuleset } = {}) {
+  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0, scoring = this._defaultScoring } = {}) {
     if (handicapStones > 0 && boardSize !== 9 && boardSize !== 13 && boardSize !== 19) {
       throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
     }
@@ -27,17 +33,18 @@ Game.prototype = {
 
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
-    this.ruleset = {
-      "area": AreaRules,
-      "territory": TerritoryRules
-    }[ruleset];
-
-    if (!this.ruleset) {
-      throw new Error("Unknown ruleset: " + ruleset);
-    }
+    this.ruleset = new Ruleset({
+      "scoring": scoring
+    });
   },
 
   setup: function(options) {
+    for (let key in options) {
+      if (options.hasOwnProperty(key) && VALID_GAME_OPTIONS.indexOf(key) < 0) {
+        throw new Error("Unrecognized game option: " + key);
+      }
+    }
+
     this._configureOptions(options);
 
     if (this.boardSize > 19) {

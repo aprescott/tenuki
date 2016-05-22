@@ -114,17 +114,17 @@ game.setup({
 });
 ```
 
-# Rulesets
+# Configuring scoring
 
-The default ruleset is territory scoring. The ruleset can be given as part of the `setup()` options:
+The default scoring is territory scoring. The scoring can be given as part of the `setup()` options:
 
 ```js
 game.setup({
-  ruleset: "area"
+  scoring: "area"
 });
 ```
 
-Valid rulesets are:
+Valid scoring types are:
 
   * `"area"` — Area scoring.
   * `"territory"` — Territory scoring.
@@ -172,7 +172,7 @@ Note that all functions which take two integer coordinates (`y` and `x`) are mea
 * `playAt(y, x)`: attempts to play a stone at `(y, x)` for the current player. If the move is illegal (because of ko, suicide, etc.), then nothing will happen. Returns `true` if the move is successful, otherwise `false`.
 * `isOver()`: returns `true` if the most recent 2 moves were passes, indicating the game is over, otherwise `false`.
 * `toggleDeadAt(y, x)`: sets the group of stones at `(y, x)` to be dead as part of marking territory. Only useful if `isOver()` is `true`.
-* `score()` returns scoring information, e.g., `{ black: 150, white: 130 }`. Only useful if `isOver()` is `true`, since proper scoring requires dead stone marking at the end of the game. Scoring is dependent on the ruleset in use.
+* `score()` returns scoring information, e.g., `{ black: 150, white: 130 }`. Only useful if `isOver()` is `true`, since proper scoring requires dead stone marking at the end of the game. Scoring is dependent on the scoring rules in use.
 * `undo()`: undo the most recent move.
 
 # Post-render callbacks

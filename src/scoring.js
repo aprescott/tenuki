@@ -78,17 +78,7 @@ const boardStateWithClearFalseEyesFilled = function(boardState) {
   return neutralAtariUpdatedState;
 };
 
-const TerritoryRules = Object.freeze({
-  isIllegal: function(y, x, boardState) {
-    const intersection = boardState.intersectionAt(y, x);
-    const isEmpty = intersection.isEmpty();
-    const isSuicide = boardState.wouldBeSuicide(y, x);
-    const koPoint = boardState.koPoint;
-    const isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
-
-    return !isEmpty || isKoViolation || isSuicide;
-  },
-
+const TerritoryScoring = Object.freeze({
   score: function(game) {
     const blackDeadAsCaptures = game._deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
     const whiteDeadAsCaptures = game._deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
@@ -126,9 +116,7 @@ const TerritoryRules = Object.freeze({
   }
 });
 
-const AreaRules = Object.freeze({
-  isIllegal: TerritoryRules.isIllegal,
-
+const AreaScoring = Object.freeze({
   score: function(game) {
     const blackStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isBlack() && !game.isDeadAt(intersection.y, intersection.x); });
     const whiteStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isWhite() && !game.isDeadAt(intersection.y, intersection.x); });
@@ -153,4 +141,4 @@ const AreaRules = Object.freeze({
   }
 });
 
-export { TerritoryRules, AreaRules };
+export { TerritoryScoring, AreaScoring };

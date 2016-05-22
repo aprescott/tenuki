@@ -29,13 +29,13 @@ var boardElementTest = document.querySelector(".tenuki-board");
 var gameTest = window.gameTest = new tenuki.Game(boardElementTest);
 gameTest.setup();
 
-resetTests = window.resetTests = function(handicapStones, ruleset, size) {
+resetTests = window.resetTests = function(handicapStones, scoring, size) {
   boardElementTest.innerHTML = "";
   gameTest = new tenuki.Game(boardElementTest);
   gameTest.setup({
     boardSize: size || 19,
     handicapStones: handicapStones || 0,
-    ruleset: ruleset || "territory"
+    scoring: scoring || "territory"
   });
 };
 
