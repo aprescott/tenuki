@@ -577,12 +577,20 @@ function DOMRenderer(game, boardElement) {
         var intersectionElement = this;
 
         _utils2.default.addClass(intersectionElement, "hovered");
+
+        var hoveredYPosition = Number(intersectionElement.getAttribute("data-position-y"));
+        var hoveredXPosition = Number(intersectionElement.getAttribute("data-position-x"));
+
+        if (game.isIllegalAt(hoveredYPosition, hoveredXPosition)) {
+          _utils2.default.addClass(intersectionElement, "illegal");
+        }
       });
 
       _utils2.default.addEventListener(intersectionEl, "mouseleave", function () {
         var intersectionElement = this;
 
         _utils2.default.removeClass(intersectionElement, "hovered");
+        _utils2.default.removeClass(intersectionElement, "illegal");
         renderer.resetTouchedPoint();
       });
 
@@ -791,12 +799,6 @@ function DOMRenderer(game, boardElement) {
     if (!boardState) {
       return;
     }
-
-    renderer.game.intersections().forEach(function (intersection) {
-      if (renderer.game.isIllegalAt(intersection.y, intersection.x)) {
-        _utils2.default.addClass(renderer.grid[intersection.y][intersection.x], "illegal");
-      }
-    });
 
     if (boardState.koPoint) {
       _utils2.default.addClass(renderer.grid[boardState.koPoint.y][boardState.koPoint.x], "ko");
