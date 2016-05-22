@@ -5,4 +5,5 @@
 * Correctly handle capturing stones whose last liberty was shared. (#8)
 * Support for handicap stones on 9x9, 13x13 and 19x19. (#10)
 * `currentPlayer` is now a function, not a property.
-* `territoryScore()` and `areaScore()` are replaced with `score()`. A new `setup()` option allows defining the ruleset in use for a game.
+* `territoryScore()` and `areaScore()` are replaced with `score()`. A new `setup()` option allows defining the scoring in use for a game.
+* Superko support with a configurable `koRule` option.

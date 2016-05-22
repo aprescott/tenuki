@@ -1,5 +1,6 @@
 import utils from "./utils";
 import Intersection from "./intersection";
+import Zobrist from "./zobrist";
 
 const BoardState = function({ moveNumber, playedPoint, color, pass, intersections, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
   this.moveNumber = moveNumber;
@@ -12,6 +13,7 @@ const BoardState = function({ moveNumber, playedPoint, color, pass, intersection
   this.capturedPositions = capturedPositions;
   this.koPoint = koPoint;
   this.boardSize = boardSize;
+  this._positionHash = Zobrist.hash(boardSize, intersections);
 
   Object.freeze(this);
 };
@@ -148,7 +150,7 @@ BoardState.prototype = {
     const startingPoint = this.intersectionAt(y, x);
 
     const [group, _] = this.partitionTraverse(startingPoint, neighbor => {
-      return neighbor.sameColorAs(startingPoint)
+      return neighbor.sameColorAs(startingPoint);
     });
 
     return group;
@@ -223,6 +225,12 @@ BoardState.prototype = {
     return true;
   },
 
+  positionSameAs: function(otherState) {
+    return this._positionHash === otherState._positionHash && this.intersections.every(point => {
+      return point.sameColorAs(otherState.intersectionAt(point.y, point.x));
+    });
+  },
+
   // Iterative depth-first search traversal. Start from
   // startingPoint, iteratively follow all neighbors.
   // If inclusionConditionis met for a neighbor, include it
@@ -259,7 +267,7 @@ BoardState.prototype = {
 
     return [checkedPoints, utils.unique(boundaryPoints)];
   }
-}
+};
 
 BoardState._initialFor = function(boardSize, handicapStones) {
   this._cache = this._cache || {};
@@ -314,6 +322,6 @@ BoardState._initialFor = function(boardSize, handicapStones) {
 
   this._cache[boardSize][handicapStones] = initialState;
   return initialState;
-}
+};
 
 export default BoardState;

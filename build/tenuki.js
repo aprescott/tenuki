@@ -9,7 +9,7 @@
 exports.Game = require("./lib/game").default;
 exports.utils = require("./lib/utils").default;
 
-},{"./lib/game":5,"./lib/utils":10}],2:[function(require,module,exports){
+},{"./lib/game":5,"./lib/utils":11}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -50,6 +50,10 @@ var _intersection = require("./intersection");
 
 var _intersection2 = _interopRequireDefault(_intersection);
 
+var _zobrist = require("./zobrist");
+
+var _zobrist2 = _interopRequireDefault(_zobrist);
+
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
@@ -76,6 +80,7 @@ var BoardState = function BoardState(_ref) {
   this.capturedPositions = capturedPositions;
   this.koPoint = koPoint;
   this.boardSize = boardSize;
+  this._positionHash = _zobrist2.default.hash(boardSize, intersections);
 
   Object.freeze(this);
 };
@@ -306,6 +311,12 @@ BoardState.prototype = {
     return true;
   },
 
+  positionSameAs: function positionSameAs(otherState) {
+    return this._positionHash === otherState._positionHash && this.intersections.every(function (point) {
+      return point.sameColorAs(otherState.intersectionAt(point.y, point.x));
+    });
+  },
+
   // Iterative depth-first search traversal. Start from
   // startingPoint, iteratively follow all neighbors.
   // If inclusionConditionis met for a neighbor, include it
@@ -402,7 +413,7 @@ BoardState._initialFor = function (boardSize, handicapStones) {
 exports.default = BoardState;
 
 
-},{"./intersection":6,"./utils":10}],3:[function(require,module,exports){
+},{"./intersection":6,"./utils":11,"./zobrist":12}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -566,12 +577,20 @@ function DOMRenderer(game, boardElement) {
         var intersectionElement = this;
 
         _utils2.default.addClass(intersectionElement, "hovered");
+
+        var hoveredYPosition = Number(intersectionElement.getAttribute("data-position-y"));
+        var hoveredXPosition = Number(intersectionElement.getAttribute("data-position-x"));
+
+        if (game.isIllegalAt(hoveredYPosition, hoveredXPosition)) {
+          _utils2.default.addClass(intersectionElement, "illegal");
+        }
       });
 
       _utils2.default.addEventListener(intersectionEl, "mouseleave", function () {
         var intersectionElement = this;
 
         _utils2.default.removeClass(intersectionElement, "hovered");
+        _utils2.default.removeClass(intersectionElement, "illegal");
         renderer.resetTouchedPoint();
       });
 
@@ -781,12 +800,6 @@ function DOMRenderer(game, boardElement) {
       return;
     }
 
-    renderer.game.intersections().forEach(function (intersection) {
-      if (renderer.game.wouldBeSuicide(intersection.y, intersection.x)) {
-        _utils2.default.addClass(renderer.grid[intersection.y][intersection.x], "suicide");
-      }
-    });
-
     if (boardState.koPoint) {
       _utils2.default.addClass(renderer.grid[boardState.koPoint.y][boardState.koPoint.x], "ko");
     }
@@ -858,7 +871,7 @@ function DOMRenderer(game, boardElement) {
 }
 
 
-},{"./utils":10}],4:[function(require,module,exports){
+},{"./utils":11}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -972,11 +985,15 @@ var _boardState = require("./board-state");
 
 var _boardState2 = _interopRequireDefault(_boardState);
 
-var _rulesets = require("./rulesets");
+var _ruleset = require("./ruleset");
+
+var _ruleset2 = _interopRequireDefault(_ruleset);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
+
+var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule"];
 
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -987,7 +1004,8 @@ var Game = function Game(boardElement) {
     postRender: function postRender() {}
   };
   this._deadPoints = [];
-  this._defaultRuleset = "territory";
+  this._defaultScoring = "territory";
+  this._defaultKoRule = "simple";
 };
 
 Game.prototype = {
@@ -998,8 +1016,10 @@ Game.prototype = {
     var boardSize = _ref$boardSize === undefined ? this._defaultBoardSize : _ref$boardSize;
     var _ref$handicapStones = _ref.handicapStones;
     var handicapStones = _ref$handicapStones === undefined ? 0 : _ref$handicapStones;
-    var _ref$ruleset = _ref.ruleset;
-    var ruleset = _ref$ruleset === undefined ? this._defaultRuleset : _ref$ruleset;
+    var _ref$scoring = _ref.scoring;
+    var scoring = _ref$scoring === undefined ? this._defaultScoring : _ref$scoring;
+    var _ref$koRule = _ref.koRule;
+    var koRule = _ref$koRule === undefined ? this._defaultKoRule : _ref$koRule;
 
     if (handicapStones > 0 && boardSize !== 9 && boardSize !== 13 && boardSize !== 19) {
       throw new Error("Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
@@ -1011,17 +1031,19 @@ Game.prototype = {
 
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
-    this.ruleset = {
-      "area": _rulesets.AreaRules,
-      "territory": _rulesets.TerritoryRules
-    }[ruleset];
-
-    if (!this.ruleset) {
-      throw new Error("Unknown ruleset: " + ruleset);
-    }
+    this.ruleset = new _ruleset2.default({
+      "scoring": scoring,
+      "koRule": koRule
+    });
   },
 
   setup: function setup(options) {
+    for (var key in options) {
+      if (options.hasOwnProperty(key) && VALID_GAME_OPTIONS.indexOf(key) < 0) {
+        throw new Error("Unrecognized game option: " + key);
+      }
+    }
+
     this._configureOptions(options);
 
     if (this.boardSize > 19) {
@@ -1152,7 +1174,7 @@ Game.prototype = {
       return false;
     }
 
-    return this.ruleset.isIllegal(y, x, this.boardState());
+    return this.ruleset.isIllegal(y, x, this);
   },
 
   render: function render() {
@@ -1185,7 +1207,7 @@ Game.prototype = {
 exports.default = Game;
 
 
-},{"./board-state":2,"./dom-renderer":3,"./null-renderer":7,"./rulesets":9}],6:[function(require,module,exports){
+},{"./board-state":2,"./dom-renderer":3,"./null-renderer":7,"./ruleset":9}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1549,13 +1571,85 @@ Region.prototype = {
 exports.default = Region;
 
 
-},{"./utils":10}],9:[function(require,module,exports){
+},{"./utils":11}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.AreaRules = exports.TerritoryRules = undefined;
+
+var _scoring = require("./scoring");
+
+var VALID_KO_OPTIONS = ["simple", "superko"];
+
+var Ruleset = function Ruleset() {
+  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+  var scoring = _ref.scoring;
+  var koRule = _ref.koRule;
+
+  this.scorer = {
+    "area": _scoring.AreaScoring,
+    "territory": _scoring.TerritoryScoring
+  }[scoring];
+  this.koRule = koRule;
+
+  if (!this.scorer) {
+    throw new Error("Unknown scoring: " + scoring);
+  }
+
+  if (VALID_KO_OPTIONS.indexOf(this.koRule) < 0) {
+    throw new Error("Unknown ko rule: " + koRule);
+  }
+
+  Object.freeze(this);
+};
+
+Ruleset.prototype = {
+  isIllegal: function isIllegal(y, x, game) {
+    var boardState = game.boardState();
+    var intersection = boardState.intersectionAt(y, x);
+    var isEmpty = intersection.isEmpty();
+    var isSuicide = boardState.wouldBeSuicide(y, x);
+
+    var isKoViolation = false;
+
+    if (this.koRule === "simple") {
+      var koPoint = boardState.koPoint;
+      isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
+    } else {
+      (function () {
+        var newState = boardState.playAt(y, x);
+        var boardStates = game._moves;
+
+        isKoViolation = game._moves.length > 0 && boardStates.some(function (existingState) {
+          return existingState.positionSameAs(newState);
+        });
+      })();
+    }
+
+    return !isEmpty || isKoViolation || isSuicide;
+  },
+
+  territory: function territory(game) {
+    return this.scorer.territory(game);
+  },
+
+  score: function score(game) {
+    return this.scorer.score(game);
+  }
+};
+
+exports.default = Ruleset;
+
+
+},{"./scoring":10}],10:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.AreaScoring = exports.TerritoryScoring = undefined;
 
 var _utils = require("./utils");
 
@@ -1674,17 +1768,7 @@ var boardStateWithClearFalseEyesFilled = function boardStateWithClearFalseEyesFi
   return neutralAtariUpdatedState;
 };
 
-var TerritoryRules = Object.freeze({
-  isIllegal: function isIllegal(y, x, boardState) {
-    var intersection = boardState.intersectionAt(y, x);
-    var isEmpty = intersection.isEmpty();
-    var isSuicide = boardState.wouldBeSuicide(y, x);
-    var koPoint = boardState.koPoint;
-    var isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
-
-    return !isEmpty || isKoViolation || isSuicide;
-  },
-
+var TerritoryScoring = Object.freeze({
   score: function score(game) {
     var blackDeadAsCaptures = game._deadPoints.filter(function (deadPoint) {
       return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack();
@@ -1744,9 +1828,7 @@ var TerritoryRules = Object.freeze({
   }
 });
 
-var AreaRules = Object.freeze({
-  isIllegal: TerritoryRules.isIllegal,
-
+var AreaScoring = Object.freeze({
   score: function score(game) {
     var blackStonesOnTheBoard = game.intersections().filter(function (intersection) {
       return intersection.isBlack() && !game.isDeadAt(intersection.y, intersection.x);
@@ -1789,11 +1871,11 @@ var AreaRules = Object.freeze({
   }
 });
 
-exports.TerritoryRules = TerritoryRules;
-exports.AreaRules = AreaRules;
+exports.TerritoryScoring = TerritoryScoring;
+exports.AreaScoring = AreaScoring;
 
 
-},{"./eye-point":4,"./intersection":6,"./region":8,"./utils":10}],10:[function(require,module,exports){
+},{"./eye-point":4,"./intersection":6,"./region":8,"./utils":11}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1858,6 +1940,49 @@ exports.default = {
       }
     });
     return unique;
+  }
+};
+
+
+},{}],12:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var cache = {};
+
+function initialBitstringFor(size, y, x, value) {
+  cache[size] = cache[size] || {};
+  cache[size][y] = cache[size][y] || {};
+  cache[size][y][x] = cache[size][y][x] || {};
+
+  if (cache[size][y][x][value]) {
+    return cache[size][y][x][value];
+  }
+
+  // The number of legal 19x19 go moves is on the order of 10^170 ≈ 2^565, so
+  // a hash output on the order of 2^31 is woefully insufficient for arbitrary
+  // positions, but it should be good enough for human play, since we're not
+  // searching the entire space. This should be good enough for ~300-move games.
+  var randomValue = Math.floor(Math.random() * (Math.pow(2, 31) - 1));
+  cache[size][y][x][value] = randomValue;
+
+  return randomValue;
+}
+
+exports.default = {
+  hash: function hash(boardSize, intersections) {
+    var h = 0;
+
+    intersections.forEach(function (i) {
+      if (!i.isEmpty()) {
+        var initial = initialBitstringFor(boardSize, i.y, i.x, i.value);
+        h = h ^ initial;
+      }
+    });
+
+    return h;
   }
 };
 

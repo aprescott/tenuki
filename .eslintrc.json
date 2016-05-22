@@ -9,6 +9,8 @@
     },
     "extends": "eslint:recommended",
     "rules": {
+      "semi": ["error", "always"],
+
       "no-unused-vars": ["error", { "varsIgnorePattern": "^_$" }],
 
       "no-extra-parens": ["error", "all", { "nestedBinaryExpressions": false }],
