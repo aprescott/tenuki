@@ -144,10 +144,6 @@ Valid ko rule values are:
   * `"simple"` — Immediately recreating the previous board position is illegal.
   * `"superko"` — Recreating any previous position is illegal. (Also known as "positional superko".)
 
-# Browser support
-
-I've tested this on Chrome, Firefox, Safari and Opera.
-
 # Known problems
 
 On a desktop, because the browser is rendered with pure CSS and no images, there are some pixel rounding issues when the browser's zoom level is not 100% after zooming with `Ctrl-+` (or `Cmd-+`). This can create positioning/alignment problems, for instance, at 110%, because widths and lines on the board are not consistent with each other.
