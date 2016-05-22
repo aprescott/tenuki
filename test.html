@@ -1309,6 +1309,68 @@ if (gameTest.boardState().playedPoint.y != 0 || gameTest.boardState().playedPoin
   throw "tests failed";
 }
 
+// superko with a triple ko
+resetTests({ koRule: "superko" });
+
+// ko A
+gameTest.renderer.grid[3][5].click(); // b
+gameTest.renderer.grid[3][4].click(); // w
+gameTest.renderer.grid[4][4].click(); // b
+gameTest.renderer.grid[4][3].click(); // w
+gameTest.renderer.grid[5][5].click(); // b
+gameTest.renderer.grid[5][4].click(); // w
+gameTest.renderer.grid[4][6].click(); // b
+gameTest.renderer.grid[4][5].click(); // w
+
+// ko B
+gameTest.renderer.grid[3][10].click(); // b
+gameTest.renderer.grid[3][9].click(); // w
+gameTest.renderer.grid[4][9].click(); // b
+gameTest.renderer.grid[4][8].click(); // w
+gameTest.renderer.grid[5][10].click(); // b
+gameTest.renderer.grid[5][9].click(); // w
+gameTest.renderer.grid[4][11].click(); // b
+gameTest.renderer.grid[4][10].click(); // w
+
+// ko C
+gameTest.renderer.grid[6][7].click(); // b
+gameTest.renderer.grid[6][6].click(); // w
+gameTest.renderer.grid[7][6].click(); // b
+gameTest.renderer.grid[7][5].click(); // w
+gameTest.renderer.grid[8][7].click(); // b
+gameTest.renderer.grid[8][6].click(); // w
+gameTest.renderer.grid[7][8].click(); // b
+gameTest.renderer.grid[7][7].click(); // w (*)
+
+// black capture ko A
+gameTest.renderer.grid[4][4].click(); // b
+// white tenuki
+gameTest.renderer.grid[2][7].click(); // w
+
+// 3 kos, clockwise: (A) black, (B) white, (C) white
+
+gameTest.renderer.grid[4][9].click(); // b: ko B -> black
+gameTest.renderer.grid[4][5].click(); // w: ko A -> white
+gameTest.renderer.grid[7][6].click(); // b: ko C -> black
+gameTest.renderer.grid[4][10].click(); // w: ko B -> white
+gameTest.renderer.grid[4][4].click(); // b: ko A -> black
+
+// kos are now: (A) black, (B) white, (C) black
+
+gameTest.renderer.grid[7][7].click(); // not allowed, since it would change ko C to white, leading to a repetition of (*)
+
+if (!tenuki.utils.hasClass(gameTest.renderer.grid[7][7], "empty")) {
+  throw "tests failed";
+}
+
+if (gameTest.currentPlayer() != "white") {
+  throw "tests failed";
+}
+
+if (gameTest.boardState().playedPoint.y != 4 || gameTest.boardState().playedPoint.x != 4) {
+  throw "tests failed";
+}
+
 // fancy "pass" print
 resetTests();
 gameTest.renderer.grid[3][2].className = "intersection stone black";
