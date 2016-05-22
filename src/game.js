@@ -172,7 +172,7 @@ Game.prototype = {
       return false;
     }
 
-    return this.ruleset.isIllegal(y, x, this.boardState());
+    return this.ruleset.isIllegal(y, x, this);
   },
 
   render: function() {

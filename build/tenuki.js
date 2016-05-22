@@ -306,6 +306,12 @@ BoardState.prototype = {
     return true;
   },
 
+  samePositionAs: function samePositionAs(otherState) {
+    return this.intersections.every(function (point) {
+      return point.sameColorAs(otherState.intersectionAt(point.y, point.x));
+    });
+  },
+
   // Iterative depth-first search traversal. Start from
   // startingPoint, iteratively follow all neighbors.
   // If inclusionConditionis met for a neighbor, include it
@@ -1161,7 +1167,7 @@ Game.prototype = {
       return false;
     }
 
-    return this.ruleset.isIllegal(y, x, this.boardState());
+    return this.ruleset.isIllegal(y, x, this);
   },
 
   render: function render() {
@@ -1567,7 +1573,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _scoring = require("./scoring");
 
-var VALID_KO_OPTIONS = ["simple"];
+var VALID_KO_OPTIONS = ["simple", "superko"];
 
 var Ruleset = function Ruleset() {
   var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -1593,12 +1599,26 @@ var Ruleset = function Ruleset() {
 };
 
 Ruleset.prototype = {
-  isIllegal: function isIllegal(y, x, boardState) {
+  isIllegal: function isIllegal(y, x, game) {
+    var boardState = game.boardState();
+    var boardStates = game._moves;
     var intersection = boardState.intersectionAt(y, x);
     var isEmpty = intersection.isEmpty();
     var isSuicide = boardState.wouldBeSuicide(y, x);
-    var koPoint = boardState.koPoint;
-    var isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
+
+    var isKoViolation = false;
+
+    if (this.koRule === "simple") {
+      var koPoint = boardState.koPoint;
+      isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
+    } else {
+      (function () {
+        var newState = boardState.playAt(y, x);
+        isKoViolation = boardStates.slice().reverse().some(function (existingState) {
+          return newState.samePositionAs(existingState);
+        });
+      })();
+    }
 
     return !isEmpty || isKoViolation || isSuicide;
   },

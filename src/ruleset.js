@@ -1,7 +1,8 @@
 import { AreaScoring, TerritoryScoring } from "./scoring";
 
 const VALID_KO_OPTIONS = [
-  "simple"
+  "simple",
+  "superko"
 ];
 
 const Ruleset = function({ scoring, koRule } = {}) {
@@ -23,12 +24,24 @@ const Ruleset = function({ scoring, koRule } = {}) {
 };
 
 Ruleset.prototype = {
-  isIllegal: function(y, x, boardState) {
+  isIllegal: function(y, x, game) {
+    const boardState = game.boardState();
+    const boardStates = game._moves;
     const intersection = boardState.intersectionAt(y, x);
     const isEmpty = intersection.isEmpty();
     const isSuicide = boardState.wouldBeSuicide(y, x);
-    const koPoint = boardState.koPoint;
-    const isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
+
+    let isKoViolation = false;
+
+    if (this.koRule === "simple") {
+      const koPoint = boardState.koPoint;
+      isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
+    } else {
+      const newState = boardState.playAt(y, x);
+      isKoViolation = boardStates.slice().reverse().some(existingState => {
+        return newState.samePositionAs(existingState);
+      });
+    }
 
     return !isEmpty || isKoViolation || isSuicide;
   },

@@ -223,6 +223,12 @@ BoardState.prototype = {
     return true;
   },
 
+  samePositionAs: function(otherState) {
+    return this.intersections.every(point => {
+      return point.sameColorAs(otherState.intersectionAt(point.y, point.x));
+    });
+  },
+
   // Iterative depth-first search traversal. Start from
   // startingPoint, iteratively follow all neighbors.
   // If inclusionConditionis met for a neighbor, include it
