@@ -21,11 +21,13 @@ Features:
   * Pass.
   * Undo.
   * Handicap stones.
-  * Optional coordinate markers for points A19 through T1.
-  * Built-in mobile support for touch devices and small screens, even with a 19x19 board.
   * End-game functionality: dead stone marking and scoring.
   * Different scoring rules: territory, area, equivalence (with pass stones).
   * Seki detection for the territory rules.
+  * For the HTML renderer:
+    - Built-in mobile support for touch devices and small screens, even with a 19x19 board.
+    - Automatic shrinking to fit given board (pixel) dimensions.
+    - Optional coordinate markers for points A19 through T1.
 
 # Examples
 
@@ -85,6 +87,22 @@ For a textured board, add the class `tenuki-board-textured`:
 
 <img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board-textured.png" width="151" height="150">
 
+# Auto-shrinking to fit dimensions
+
+If the container element (e.g., `<div class="tenuki-board">`) is given smaller dimensions than the board would occupy, the board is rendered at a smaller scale.
+
+```html
+<style>
+  .my-class {
+    max-width: 200px;
+  }
+</style>
+
+<div class="my-class tenuki-board"></div>
+```
+
+A full 19x19 board is usually larger than 200px, but here, because of the `.my-class` styling, the entire board will automatically scale down to fit.
+
 # Coordinate markers
 
 For coordinate markers, indicating positions A19 through T1, add `data-include-coordinates=true` to the HTML element for the board:
@@ -93,7 +111,7 @@ For coordinate markers, indicating positions A19 through T1, add `data-include-c
 <div class="tenuki-board" data-include-coordinates="true"></div>
 ```
 
-# Other board sizes
+# Board sizes other than 19x19
 
 You can pass a second argument to `new tenuki.Game` to specify the board size. If no size is given, the default of 19 is used. All sizes between 1x1 and 19x19 should work. Sizes above 19x19 will error and won't render.
 
