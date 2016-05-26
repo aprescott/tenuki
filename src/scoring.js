@@ -141,4 +141,19 @@ const AreaScoring = Object.freeze({
   }
 });
 
-export { TerritoryScoring, AreaScoring };
+const EquivalenceScoring = Object.freeze({
+  score: function(game) {
+    const areaScore = AreaScoring.score(game);
+
+    return {
+      black: areaScore.black + game.boardState().whitePassStones,
+      white: areaScore.white + game.boardState().blackPassStones
+    };
+  },
+
+  territory: function(game) {
+    return AreaScoring.territory(game);
+  }
+});
+
+export { TerritoryScoring, AreaScoring, EquivalenceScoring };

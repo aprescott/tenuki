@@ -63,6 +63,8 @@ var BoardState = function BoardState(_ref) {
   var playedPoint = _ref.playedPoint;
   var color = _ref.color;
   var pass = _ref.pass;
+  var blackPassStones = _ref.blackPassStones;
+  var whitePassStones = _ref.whitePassStones;
   var intersections = _ref.intersections;
   var blackStonesCaptured = _ref.blackStonesCaptured;
   var whiteStonesCaptured = _ref.whiteStonesCaptured;
@@ -74,6 +76,8 @@ var BoardState = function BoardState(_ref) {
   this.playedPoint = playedPoint;
   this.color = color;
   this.pass = pass;
+  this.blackPassStones = blackPassStones;
+  this.whitePassStones = whitePassStones;
   this.intersections = intersections;
   this.blackStonesCaptured = blackStonesCaptured;
   this.whiteStonesCaptured = whiteStonesCaptured;
@@ -144,6 +148,8 @@ BoardState.prototype = {
       playedPoint: this.playedPoint,
       color: this.color,
       pass: this.pass,
+      blackPassStones: this.blackPassStones,
+      whitePassStones: this.whitePassStones,
       intersections: newPoints,
       blackStonesCaptured: this.blackStonesCaptured,
       whiteStonesCaptured: this.whiteStonesCaptured,
@@ -156,18 +162,24 @@ BoardState.prototype = {
   },
 
   playPass: function playPass() {
-    var newState = new BoardState({
+    var stateInfo = {
       moveNumber: this.moveNumber + 1,
       playedPoint: null,
       color: this._nextColor(),
       pass: true,
+      blackPassStones: this.blackPassStones,
+      whitePassStones: this.whitePassStones,
       intersections: this.intersections,
       blackStonesCaptured: this.blackStonesCaptured,
       whiteStonesCaptured: this.whiteStonesCaptured,
       capturedPositions: [],
       koPoint: null,
       boardSize: this.boardSize
-    });
+    };
+
+    stateInfo[this._nextColor() + "PassStones"] += 1;
+
+    var newState = new BoardState(stateInfo);
 
     return newState;
   },
@@ -196,6 +208,8 @@ BoardState.prototype = {
       playedPoint: playedPoint,
       color: playedColor,
       pass: false,
+      blackPassStones: this.blackPassStones,
+      whitePassStones: this.whitePassStones,
       intersections: newPoints,
       blackStonesCaptured: newTotalBlackCaptured,
       whiteStonesCaptured: newTotalWhiteCaptured,
@@ -403,6 +417,8 @@ BoardState._initialFor = function (boardSize, handicapStones) {
     intersections: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
     whiteStonesCaptured: 0,
+    whitePassStones: 0,
+    blackPassStones: 0,
     boardSize: boardSize
   });
 
@@ -1119,14 +1135,7 @@ Game.prototype = {
   },
 
   isOver: function isOver() {
-    if (this._moves.length < 2) {
-      return false;
-    }
-
-    var boardState = this.boardState();
-    var previousMove = this._moves[this._moves.length - 2];
-
-    return boardState.pass && previousMove.pass;
+    return this.ruleset.isOver(this);
   },
 
   toggleDeadAt: function toggleDeadAt(y, x) {
@@ -1590,8 +1599,10 @@ var Ruleset = function Ruleset() {
 
   this.scorer = {
     "area": _scoring.AreaScoring,
-    "territory": _scoring.TerritoryScoring
+    "territory": _scoring.TerritoryScoring,
+    "equivalence": _scoring.EquivalenceScoring
   }[scoring];
+  this.scoring = scoring;
   this.koRule = koRule;
 
   if (!this.scorer) {
@@ -1631,6 +1642,24 @@ Ruleset.prototype = {
     return !isEmpty || isKoViolation || isSuicide;
   },
 
+  isOver: function isOver(game) {
+    if (game._moves.length < 2) {
+      return false;
+    }
+
+    if (this.scoring === "equivalence") {
+      var finalMove = game._moves[game._moves.length - 1];
+      var previousMove = game._moves[game._moves.length - 2];
+
+      return finalMove.pass && previousMove.pass && finalMove.color === "white";
+    } else {
+      var _finalMove = game._moves[game._moves.length - 1];
+      var _previousMove = game._moves[game._moves.length - 2];
+
+      return _finalMove.pass && _previousMove.pass;
+    }
+  },
+
   territory: function territory(game) {
     return this.scorer.territory(game);
   },
@@ -1649,7 +1678,7 @@ exports.default = Ruleset;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.AreaScoring = exports.TerritoryScoring = undefined;
+exports.EquivalenceScoring = exports.AreaScoring = exports.TerritoryScoring = undefined;
 
 var _utils = require("./utils");
 
@@ -1871,8 +1900,24 @@ var AreaScoring = Object.freeze({
   }
 });
 
+var EquivalenceScoring = Object.freeze({
+  score: function score(game) {
+    var areaScore = AreaScoring.score(game);
+
+    return {
+      black: areaScore.black + game.boardState().whitePassStones,
+      white: areaScore.white + game.boardState().blackPassStones
+    };
+  },
+
+  territory: function territory(game) {
+    return AreaScoring.territory(game);
+  }
+});
+
 exports.TerritoryScoring = TerritoryScoring;
 exports.AreaScoring = AreaScoring;
+exports.EquivalenceScoring = EquivalenceScoring;
 
 
 },{"./eye-point":4,"./intersection":6,"./region":8,"./utils":11}],11:[function(require,module,exports){

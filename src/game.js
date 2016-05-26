@@ -123,14 +123,7 @@ Game.prototype = {
   },
 
   isOver: function() {
-    if (this._moves.length < 2) {
-      return false;
-    }
-
-    const boardState = this.boardState();
-    const previousMove = this._moves[this._moves.length - 2];
-
-    return boardState.pass && previousMove.pass;
+    return this.ruleset.isOver(this);
   },
 
   toggleDeadAt: function(y, x) {
