@@ -2,11 +2,13 @@ import utils from "./utils";
 import Intersection from "./intersection";
 import Zobrist from "./zobrist";
 
-const BoardState = function({ moveNumber, playedPoint, color, pass, intersections, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
+const BoardState = function({ moveNumber, playedPoint, color, pass, blackPassStones, whitePassStones, intersections, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) {
   this.moveNumber = moveNumber;
   this.playedPoint = playedPoint;
   this.color = color;
   this.pass = pass;
+  this.blackPassStones = blackPassStones;
+  this.whitePassStones = whitePassStones;
   this.intersections = intersections;
   this.blackStonesCaptured = blackStonesCaptured;
   this.whiteStonesCaptured = whiteStonesCaptured;
@@ -73,6 +75,8 @@ BoardState.prototype = {
       playedPoint: this.playedPoint,
       color: this.color,
       pass: this.pass,
+      blackPassStones: this.blackPassStones,
+      whitePassStones: this.whitePassStones,
       intersections: newPoints,
       blackStonesCaptured: this.blackStonesCaptured,
       whiteStonesCaptured: this.whiteStonesCaptured,
@@ -85,18 +89,24 @@ BoardState.prototype = {
   },
 
   playPass: function() {
-    const newState = new BoardState({
+    const stateInfo = {
       moveNumber: this.moveNumber + 1,
       playedPoint: null,
       color: this._nextColor(),
       pass: true,
+      blackPassStones: this.blackPassStones,
+      whitePassStones: this.whitePassStones,
       intersections: this.intersections,
       blackStonesCaptured: this.blackStonesCaptured,
       whiteStonesCaptured: this.whiteStonesCaptured,
       capturedPositions: [],
       koPoint: null,
       boardSize: this.boardSize
-    });
+    };
+
+    stateInfo[this._nextColor() + "PassStones"] += 1;
+
+    const newState = new BoardState(stateInfo);
 
     return newState;
   },
@@ -123,6 +133,8 @@ BoardState.prototype = {
       playedPoint: playedPoint,
       color: playedColor,
       pass: false,
+      blackPassStones: this.blackPassStones,
+      whitePassStones: this.whitePassStones,
       intersections: newPoints,
       blackStonesCaptured: newTotalBlackCaptured,
       whiteStonesCaptured: newTotalWhiteCaptured,
@@ -317,6 +329,8 @@ BoardState._initialFor = function(boardSize, handicapStones) {
     intersections: Object.freeze(emptyPoints),
     blackStonesCaptured: 0,
     whiteStonesCaptured: 0,
+    whitePassStones: 0,
+    blackPassStones: 0,
     boardSize: boardSize
   });
 

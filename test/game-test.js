@@ -56,6 +56,17 @@ describe("Game", function() {
       expect(function() { game.setup({ boardSize: 17, handicapStones: 2 }); }).to.throw(Error, "Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
     });
 
+    it("does not allow unknown scoring types", function() {
+      var game = new Game();
+      expect(function() { game.setup({ boardSize: 19, scoring: "area" }); }).to.not.throw(Error);
+      expect(function() { game.setup({ boardSize: 19, scoring: "territory" }); }).to.not.throw(Error);
+      expect(function() { game.setup({ boardSize: 19, scoring: "equivalence" }); }).to.not.throw(Error);
+
+      expect(function() { game.setup({ boardSize: 19, scoring: "Area" }); }).to.throw(Error,  "Unknown scoring: Area");
+      expect(function() { game.setup({ boardSize: 19, scoring: "terRitory" }); }).to.throw(Error,  "Unknown scoring: terRitory");
+      expect(function() { game.setup({ boardSize: 19, scoring: "gibberish" }); }).to.throw(Error,  "Unknown scoring: gibberish");
+    });
+
     it("does not allow unknown ko rules", function() {
       var game = new Game();
 

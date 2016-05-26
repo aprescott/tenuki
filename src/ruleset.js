@@ -1,4 +1,4 @@
-import { AreaScoring, TerritoryScoring } from "./scoring";
+import { AreaScoring, TerritoryScoring, EquivalenceScoring } from "./scoring";
 
 const VALID_KO_OPTIONS = [
   "simple",
@@ -8,8 +8,10 @@ const VALID_KO_OPTIONS = [
 const Ruleset = function({ scoring, koRule } = {}) {
   this.scorer = {
     "area": AreaScoring,
-    "territory": TerritoryScoring
+    "territory": TerritoryScoring,
+    "equivalence": EquivalenceScoring
   }[scoring];
+  this.scoring = scoring;
   this.koRule = koRule;
 
   if (!this.scorer) {
@@ -45,6 +47,24 @@ Ruleset.prototype = {
     }
 
     return !isEmpty || isKoViolation || isSuicide;
+  },
+
+  isOver: function(game) {
+    if (game._moves.length < 2) {
+      return false;
+    }
+
+    if (this.scoring === "equivalence") {
+      const finalMove = game._moves[game._moves.length - 1];
+      const previousMove = game._moves[game._moves.length - 2];
+
+      return finalMove.pass && previousMove.pass && finalMove.color === "white";
+    } else {
+      const finalMove = game._moves[game._moves.length - 1];
+      const previousMove = game._moves[game._moves.length - 2];
+
+      return finalMove.pass && previousMove.pass;
+    }
   },
 
   territory: function(game) {

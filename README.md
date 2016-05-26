@@ -23,7 +23,8 @@ Features:
   * Handicap stones.
   * Optional coordinate markers for points A19 through T1.
   * Built-in mobile support for touch devices and small screens, even with a 19x19 board.
-  * End-game functionality: dead stone marking, area/territory scoring.
+  * End-game functionality: dead stone marking and scoring.
+  * Different scoring rules: territory, area, equivalence (with pass stones).
   * Seki detection for the territory rules.
 
 # Examples
