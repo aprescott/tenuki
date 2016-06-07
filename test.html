@@ -29,13 +29,21 @@ var boardElementTest = document.querySelector(".tenuki-board");
 var gameTest = window.gameTest = new tenuki.Game(boardElementTest);
 gameTest.setup();
 
-resetTests = window.resetTests = function(handicapStones, ruleset, size) {
+resetTests = window.resetTests = function() {
+  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+  var boardSize = _ref.boardSize;
+  var handicapStones = _ref.handicapStones;
+  var scoring = _ref.scoring;
+  var koRule = _ref.koRule;
+
   boardElementTest.innerHTML = "";
   gameTest = new tenuki.Game(boardElementTest);
   gameTest.setup({
-    boardSize: size || 19,
+    boardSize: boardSize || 19,
     handicapStones: handicapStones || 0,
-    ruleset: ruleset || "territory"
+    scoring: scoring || "territory",
+    koRule: koRule || "simple"
   });
 };
 
@@ -237,7 +245,7 @@ gameTest.renderer.grid[2][0].click(); // w
 gameTest.renderer.grid[15][15].click(); // b tenuki
 gameTest.renderer.grid[1][1].click(); // w
 
-if (!tenuki.utils.hasClass(gameTest.renderer.grid[0][0], "empty") || !tenuki.utils.hasClass(gameTest.renderer.grid[0][0], "suicide")) {
+if (!tenuki.utils.hasClass(gameTest.renderer.grid[0][0], "empty")) {
   throw "tests failed";
 }
 gameTest.renderer.grid[0][0].click();
@@ -263,9 +271,36 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][0], "empty")) {
   throw "tests failed";
 }
 
+// equivalence scoring white-passes-last rule
+resetTests({ scoring: "equivalence" });
+
+gameTest.pass(); // b
+gameTest.pass(); // w
+
+if (!gameTest.isOver()) {
+  throw "tests failed";
+}
+
+gameTest.undo();
+gameTest.undo();
+
+gameTest.renderer.grid[1][1].click(); // b
+gameTest.pass(); // w
+gameTest.pass(); // b
+
+if (gameTest.isOver()) {
+  throw "tests failed";
+}
+
+gameTest.pass();
+
+if (!gameTest.isOver()) {
+  throw "tests failed";
+}
+
 // Scoring, with captures and dead stone marking
-["area", "territory"].forEach(function(ruleset) {
-  resetTests(0, ruleset);
+["area", "territory", "equivalence"].forEach(function(scoring) {
+  resetTests({ handicapStones: 0, scoring: scoring });
 
   // divide the board down the middle, black on the right
   gameTest.renderer.grid[0][9].click(); // b
@@ -316,14 +351,15 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][0], "empty")) {
   var expectedScore;
   expectedScore = {
     territory: { black: 9*19, white: 8*19 },
-    area: { black: 10*19, white: 9*19 }
+    area: { black: 10*19, white: 9*19 },
+    equivalence: { black: 10*19 + 1, white: 9*19 + 1 }
   };
 
-  if (gameTest.score().black != expectedScore[ruleset].black) {
+  if (gameTest.score().black != expectedScore[scoring].black) {
     throw "tests failed";
   }
 
-  if (gameTest.score().white != expectedScore[ruleset].white) {
+  if (gameTest.score().white != expectedScore[scoring].white) {
     throw "tests failed";
   }
 
@@ -358,6 +394,10 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][0], "empty")) {
   gameTest.pass(); // w
   gameTest.pass(); // b
 
+  if (scoring === "equivalence") {
+    gameTest.pass();
+  }
+
   expectedScore = {
     territory: {
       // territory + captured stones, but with ambiguous territory remaining
@@ -372,14 +412,20 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][0], "empty")) {
       black: 10*19 + 2,
       // 1 point of territory + 2 stones played inside
       white: 1 + 1*19 + 2
+    },
+    equivalence: {
+      // territory + stones on the board + 2 pass stones
+      black: 10*19 + 2 + 2,
+      // 1 point of territory + 2 stones played inside + 1 pass stone
+      white: 1 + 1*19 + 2 + 1
     }
   };
 
-  if (gameTest.score().black != expectedScore[ruleset].black) {
+  if (gameTest.score().black != expectedScore[scoring].black) {
     throw "tests failed";
   }
 
-  if (gameTest.score().white != expectedScore[ruleset].white) {
+  if (gameTest.score().white != expectedScore[scoring].white) {
     throw "tests failed";
   }
 
@@ -409,14 +455,26 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][0], "empty")) {
       // 1 captured black stone, IGNORED
       // 2 dead stones, IGNORED
       white: 9*19
+    },
+    equivalence: {
+      // 2 dead stones are now ignored because they're marked dead
+      // plus 2 pass stones
+      black: 10*19 + 2,
+      // rectangle territory, 8*19
+      // plus 1*19 for the stones on the board
+      // 2 white stones played inside the territory, IGNORED
+      // 1 captured black stone, IGNORED
+      // 2 dead stones, IGNORED
+      // 1 pass stone
+      white: 9*19 + 1
     }
   };
 
-  if (gameTest.score().black != expectedScore[ruleset].black) {
+  if (gameTest.score().black != expectedScore[scoring].black) {
     throw "tests failed";
   }
 
-  if (gameTest.score().white != expectedScore[ruleset].white) {
+  if (gameTest.score().white != expectedScore[scoring].white) {
     throw "tests failed";
   }
 
@@ -424,6 +482,10 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[1][0], "empty")) {
   gameTest.undo();
   gameTest.undo();
   gameTest.undo();
+
+  if (scoring === "equivalence") {
+    gameTest.undo();
+  }
 
   if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
     throw "tests failed";
@@ -482,7 +544,7 @@ if (gameTest.boardState().blackStonesCaptured != 3 || gameTest.boardState().whit
 }
 
 // handicap placement
-resetTests(6);
+resetTests({ handicapStones: 6 });
 
 if (gameTest.currentPlayer() != "white") {
   throw "tests failed";
@@ -501,7 +563,7 @@ if (gameTest.currentPlayer() != "white") {
   }
 });
 
-resetTests(9);
+resetTests({ handicapStones: 9 });
 
 if (gameTest.currentPlayer() != "white") {
   throw "tests failed";
@@ -523,8 +585,59 @@ if (gameTest.currentPlayer() != "white") {
   }
 });
 
+// handicap stones count towards area
+[
+  { scoring: "territory", handicap: 5, initialScore: { white: 0, black: 361 - 5 }, expectedScore: { white: 0, black: 0 } },
+  { scoring: "area", handicap: 5, initialScore: { white: 0, black: 361 }, expectedScore: { white: 2, black: 1+5 } },
+  { scoring: "equivalence", handicap: 5, initialScore: { white: 1, black: 361+2 }, expectedScore: { white: 2+2, black: 1+5+2 } }
+].forEach(function(test) {
+  resetTests({ handicapStones: test["handicap"], scoring: test["scoring"] });
+
+  gameTest.pass(); // w
+  gameTest.pass(); // b
+
+  if (test["scoring"] === "equivalence") {
+    gameTest.pass(); // w
+  }
+
+  if (gameTest.score().white != test["initialScore"]["white"]) {
+    throw "tests failed";
+  }
+
+  if (gameTest.score().black != test["initialScore"]["black"]) {
+    throw "tests failed";
+  }
+
+  gameTest.undo();
+  gameTest.undo();
+
+  if (test["scoring"] === "equivalence") {
+    gameTest.undo();
+  }
+
+  gameTest.renderer.grid[1][1].click(); // w
+  gameTest.pass(); // b
+  gameTest.renderer.grid[1][2].click(); // w
+  gameTest.renderer.grid[1][3].click(); // b
+
+  gameTest.pass(); // w
+  gameTest.pass(); // b
+
+  if (test["scoring"] === "equivalence") {
+    gameTest.pass(); // w
+  }
+
+  if (gameTest.score().white != test["expectedScore"]["white"]) {
+    throw "tests failed";
+  }
+
+  if (gameTest.score().black != test["expectedScore"]["black"]) {
+    throw "tests failed";
+  }
+});
+
 // seki scoring with eyes, with and without dead stones
-resetTests(0, "territory");
+resetTests({ handicapStones: 0, scoring: "territory" });
 
 gameTest.renderer.grid[0][1].click() // b
 gameTest.renderer.grid[0][2].click() // w
@@ -669,7 +782,7 @@ if (gameTest.score().white != 0) {
 }
 
 // seki with two 1-eyed groups
-resetTests(0, "territory", 9);
+resetTests({ handicapStones: 0, scoring: "territory", boardSize: 9 });
 
 gameTest.renderer.grid[1][0].click();
 gameTest.renderer.grid[2][0].click();
@@ -901,7 +1014,7 @@ if (gameTest.score().black != 3) {
 }
 
 // false eyes in the corner are also correctly ignored
-resetTests(0, "territory", 9);
+resetTests({ handicapStones: 0, scoring: "territory", boardSize: 9 });
 
 gameTest.renderer.grid[1][0].click();
 gameTest.renderer.grid[2][0].click();
@@ -1052,7 +1165,7 @@ if (gameTest.score().white != 2) {
 
 // seki with two 1-eyed groups that can't connect out
 // to live groups.
-resetTests(0, "territory", 9);
+resetTests({ handicapStones: 0, scoring: "territory", boardSize: 9 });
 
 gameTest.renderer.grid[8][0].click();
 gameTest.renderer.grid[8][2].click();
@@ -1132,7 +1245,7 @@ if (gameTest.score().black != 10 || gameTest.score().white != 5) {
 
 
 
-resetTests(0, "territory", 9);
+resetTests({ handicapStones: 0, scoring: "territory", boardSize: 9 });
 
 gameTest.pass();
 
@@ -1209,6 +1322,119 @@ gameTest.pass();
 gameTest.pass();
 
 if (gameTest.score().white != 10 || gameTest.score().black != 5) {
+  throw "tests failed";
+}
+
+// superko
+resetTests({ koRule: "superko" });
+
+// cycle for ● repeatedly losing 2 stones
+// ┌─●─┬─○─●
+// ●─○─○─○─●
+// ●─┼─○─●─●
+// ○─○─○─●─┼
+// ●─●─●─●─┼
+
+gameTest.renderer.grid[0][3].click(); // b
+gameTest.renderer.grid[0][4].click(); // w
+gameTest.renderer.grid[1][3].click(); // b
+gameTest.renderer.grid[1][4].click(); // w
+gameTest.renderer.grid[1][2].click(); // b
+gameTest.renderer.grid[2][4].click(); // w
+gameTest.renderer.grid[1][1].click(); // b
+gameTest.renderer.grid[2][3].click(); // w
+gameTest.renderer.grid[2][2].click(); // b
+gameTest.renderer.grid[3][3].click(); // w
+gameTest.renderer.grid[3][2].click(); // b
+gameTest.renderer.grid[4][3].click(); // w
+gameTest.renderer.grid[3][1].click(); // b
+gameTest.renderer.grid[4][2].click(); // w
+gameTest.renderer.grid[3][0].click(); // b
+gameTest.renderer.grid[4][1].click(); // w
+gameTest.renderer.grid[0][8].click(); // b
+gameTest.renderer.grid[4][0].click(); // w
+gameTest.renderer.grid[1][8].click(); // b
+gameTest.renderer.grid[0][1].click(); // w
+gameTest.renderer.grid[2][8].click(); // b
+gameTest.renderer.grid[1][0].click(); // w
+gameTest.renderer.grid[3][8].click(); // b
+gameTest.renderer.grid[2][0].click(); // w
+gameTest.renderer.grid[4][8].click(); // b -- (*)
+gameTest.renderer.grid[0][2].click(); // w
+gameTest.renderer.grid[0][0].click(); // b
+gameTest.renderer.grid[0][1].click(); // w -- this move is not allowed with superko since it repeats (*)
+
+if (!tenuki.utils.hasClass(gameTest.renderer.grid[0][1], "empty")) {
+  throw "tests failed";
+}
+
+if (gameTest.currentPlayer() != "white") {
+  throw "tests failed";
+}
+
+if (gameTest.boardState().playedPoint.y != 0 || gameTest.boardState().playedPoint.x != 0) {
+  throw "tests failed";
+}
+
+// superko with a triple ko
+resetTests({ koRule: "superko" });
+
+// ko A
+gameTest.renderer.grid[3][5].click(); // b
+gameTest.renderer.grid[3][4].click(); // w
+gameTest.renderer.grid[4][4].click(); // b
+gameTest.renderer.grid[4][3].click(); // w
+gameTest.renderer.grid[5][5].click(); // b
+gameTest.renderer.grid[5][4].click(); // w
+gameTest.renderer.grid[4][6].click(); // b
+gameTest.renderer.grid[4][5].click(); // w
+
+// ko B
+gameTest.renderer.grid[3][10].click(); // b
+gameTest.renderer.grid[3][9].click(); // w
+gameTest.renderer.grid[4][9].click(); // b
+gameTest.renderer.grid[4][8].click(); // w
+gameTest.renderer.grid[5][10].click(); // b
+gameTest.renderer.grid[5][9].click(); // w
+gameTest.renderer.grid[4][11].click(); // b
+gameTest.renderer.grid[4][10].click(); // w
+
+// ko C
+gameTest.renderer.grid[6][7].click(); // b
+gameTest.renderer.grid[6][6].click(); // w
+gameTest.renderer.grid[7][6].click(); // b
+gameTest.renderer.grid[7][5].click(); // w
+gameTest.renderer.grid[8][7].click(); // b
+gameTest.renderer.grid[8][6].click(); // w
+gameTest.renderer.grid[7][8].click(); // b
+gameTest.renderer.grid[7][7].click(); // w (*)
+
+// black capture ko A
+gameTest.renderer.grid[4][4].click(); // b
+// white tenuki
+gameTest.renderer.grid[2][7].click(); // w
+
+// 3 kos, clockwise: (A) black, (B) white, (C) white
+
+gameTest.renderer.grid[4][9].click(); // b: ko B -> black
+gameTest.renderer.grid[4][5].click(); // w: ko A -> white
+gameTest.renderer.grid[7][6].click(); // b: ko C -> black
+gameTest.renderer.grid[4][10].click(); // w: ko B -> white
+gameTest.renderer.grid[4][4].click(); // b: ko A -> black
+
+// kos are now: (A) black, (B) white, (C) black
+
+gameTest.renderer.grid[7][7].click(); // not allowed, since it would change ko C to white, leading to a repetition of (*)
+
+if (!tenuki.utils.hasClass(gameTest.renderer.grid[7][7], "empty")) {
+  throw "tests failed";
+}
+
+if (gameTest.currentPlayer() != "white") {
+  throw "tests failed";
+}
+
+if (gameTest.boardState().playedPoint.y != 4 || gameTest.boardState().playedPoint.x != 4) {
   throw "tests failed";
 }
 

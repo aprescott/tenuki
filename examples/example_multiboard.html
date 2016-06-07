@@ -26,10 +26,10 @@
 
 <script>
   boardElement_1 = document.querySelector("#board-1");
-  window.board_1 = new tenuki.Game(boardElement_1, 9);
-  window.board_1.setup();
+  window.board_1 = new tenuki.Game(boardElement_1);
+  window.board_1.setup({ boardSize: 9 });
 
   boardElement_2 = document.querySelector("#board-2");
-  window.board_2 = new tenuki.Game(boardElement_2, 9);
-  window.board_2.setup();
+  window.board_2 = new tenuki.Game(boardElement_2);
+  window.board_2.setup({ boardSize: 9 });
 </script>
