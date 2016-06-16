@@ -4,8 +4,8 @@ import Region from "./region";
 import EyePoint from "./eye-point";
 
 const boardStateWithoutDeadPoints = function(game) {
-  return game.boardState()._withoutIntersectionsMatching(i => {
-    return game.isDeadAt(i.y, i.x);
+  return game.currentState()._withoutIntersectionsMatching(i => {
+    return game._isDeadAt(i.y, i.x);
   });
 };
 
@@ -80,11 +80,11 @@ const boardStateWithClearFalseEyesFilled = function(boardState) {
 
 const TerritoryScoring = Object.freeze({
   score: function(game) {
-    const blackDeadAsCaptures = game._deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
-    const whiteDeadAsCaptures = game._deadPoints.filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
+    const blackDeadAsCaptures = game.deadStones().filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isBlack(); });
+    const whiteDeadAsCaptures = game.deadStones().filter(function(deadPoint) { return game.intersectionAt(deadPoint.y, deadPoint.x).isWhite(); });
 
     const territory = game.territory();
-    const boardState = game.boardState();
+    const boardState = game.currentState();
 
     return {
       black: territory.black.length + boardState.whiteStonesCaptured + whiteDeadAsCaptures.length,
@@ -118,8 +118,8 @@ const TerritoryScoring = Object.freeze({
 
 const AreaScoring = Object.freeze({
   score: function(game) {
-    const blackStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isBlack() && !game.isDeadAt(intersection.y, intersection.x); });
-    const whiteStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isWhite() && !game.isDeadAt(intersection.y, intersection.x); });
+    const blackStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isBlack() && !game._isDeadAt(intersection.y, intersection.x); });
+    const whiteStonesOnTheBoard = game.intersections().filter(function(intersection) { return intersection.isWhite() && !game._isDeadAt(intersection.y, intersection.x); });
     const territory = game.territory();
 
     return {
@@ -141,19 +141,44 @@ const AreaScoring = Object.freeze({
   }
 });
 
-const EquivalenceScoring = Object.freeze({
-  score: function(game) {
-    const areaScore = AreaScoring.score(game);
+const Scorer = function({ scoreBy } = {}) {
+  this._strategy = {
+    "area": AreaScoring,
+    "territory": TerritoryScoring,
+    "equivalence": AreaScoring
+  }[scoreBy];
 
-    return {
-      black: areaScore.black + game.boardState().whitePassStones,
-      white: areaScore.white + game.boardState().blackPassStones
-    };
+  if (!this._strategy) {
+    throw new Error("Unknown scoring type: " + scoreBy);
+  }
+
+  this._usePassStones = scoreBy === "equivalence";
+
+  Object.freeze(this);
+};
+
+
+Scorer.prototype = {
+  score: function(game) {
+    const result = this._strategy.score(game);
+
+    if (this._usePassStones) {
+      return {
+        black: result.black + game.currentState().whitePassStones,
+        white: result.white + game.currentState().blackPassStones
+      };
+    } else {
+      return result;
+    }
   },
 
   territory: function(game) {
-    return AreaScoring.territory(game);
-  }
-});
+    return this._strategy.territory(game);
+  },
 
-export { TerritoryScoring, AreaScoring, EquivalenceScoring };
+  usingPassStones: function() {
+    return this._usePassStones;
+  }
+};
+
+export default Scorer;

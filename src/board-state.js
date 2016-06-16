@@ -21,14 +21,6 @@ const BoardState = function({ moveNumber, playedPoint, color, pass, blackPassSto
 };
 
 BoardState.prototype = {
-  _nextColor: function() {
-    if (this.color === "white") {
-      return "black";
-    } else {
-      return "white";
-    }
-  },
-
   _capturesFrom: function(y, x, color) {
     const capturedNeighbors = this.neighborsFor(y, x).filter(neighbor => {
       // TODO: this value of 1 is potentially weird.
@@ -88,11 +80,21 @@ BoardState.prototype = {
     return newState;
   },
 
-  playPass: function() {
+  yCoordinateFor: function(y) {
+    return this.boardSize - y;
+  },
+
+  xCoordinateFor: function(x) {
+    const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"];
+
+    return letters[x];
+  },
+
+  playPass: function(color) {
     const stateInfo = {
       moveNumber: this.moveNumber + 1,
       playedPoint: null,
-      color: this._nextColor(),
+      color: color,
       pass: true,
       blackPassStones: this.blackPassStones,
       whitePassStones: this.whitePassStones,
@@ -104,15 +106,14 @@ BoardState.prototype = {
       boardSize: this.boardSize
     };
 
-    stateInfo[this._nextColor() + "PassStones"] += 1;
+    stateInfo[color + "PassStones"] += 1;
 
     const newState = new BoardState(stateInfo);
 
     return newState;
   },
 
-  playAt: function(y, x) {
-    const playedColor = this._nextColor();
+  playAt: function(y, x, playedColor) {
     const capturedPositions = this._capturesFrom(y, x, playedColor);
     let playedPoint = this.intersectionAt(y, x);
     let newPoints = this.intersections;
@@ -202,39 +203,6 @@ BoardState.prototype = {
     }
 
     return neighbors;
-  },
-
-  wouldBeSuicide: function(y, x) {
-    const intersection = this.intersectionAt(y, x);
-    const surroundedEmptyPoint = intersection.isEmpty() && this.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isEmpty()).length === 0;
-
-    if (!surroundedEmptyPoint) {
-      return false;
-    }
-
-    const someFriendlyNotInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
-      const inAtari = this.inAtari(neighbor.y, neighbor.x);
-      const friendly = neighbor.isOccupiedWith(this._nextColor());
-
-      return friendly && !inAtari;
-    });
-
-    if (someFriendlyNotInAtari) {
-      return false;
-    }
-
-    const someEnemyInAtari = this.neighborsFor(intersection.y, intersection.x).some(neighbor => {
-      const inAtari = this.inAtari(neighbor.y, neighbor.x);
-      const enemy = !neighbor.isOccupiedWith(this._nextColor());
-
-      return enemy && inAtari;
-    });
-
-    if (someEnemyInAtari) {
-      return false;
-    }
-
-    return true;
   },
 
   positionSameAs: function(otherState) {

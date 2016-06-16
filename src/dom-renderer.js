@@ -1,18 +1,18 @@
 import utils from "./utils";
 
-export default function DOMRenderer(game, boardElement) {
+export default function DOMRenderer(boardElement, hooks = {}) {
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
   this.BASE_MARGIN = this.INTERSECTION_GAP_SIZE - 10;
   this.MARGIN = boardElement.hasAttribute("data-include-coordinates") ? this.BASE_MARGIN + this.GUTTER_MARGIN : this.BASE_MARGIN;
-  this.game = game;
   this.boardElement = boardElement;
   this.grid = [];
+  this.hooks = hooks;
   this._touchEventFired = false;
+  this._initialized = false;
 
-  this.setup = function() {
+  this._setup = function(boardState) {
     const renderer = this;
-    const game = renderer.game;
     const boardElement = this.boardElement;
 
     const innerContainer = utils.createElement("div", { class: "tenuki-inner-container" });
@@ -39,10 +39,10 @@ export default function DOMRenderer(game, boardElement) {
     utils.appendElement(innerContainer, renderer.cancelZoomElement);
     utils.appendElement(innerContainer, cancelZoomBackdrop);
 
-    if (game.boardSize < 7) {
-      if (game.boardSize > 1 && game.boardSize % 2 === 1) {
+    if (boardState.boardSize < 7) {
+      if (boardState.boardSize > 1 && boardState.boardSize % 2 === 1) {
         const hoshi = utils.createElement("div", { class: "hoshi" });
-        hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (game.boardSize - 1)/2 + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+        hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (boardState.boardSize - 1)/2 + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
         hoshi.style.left = hoshi.style.top;
 
         utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
@@ -50,11 +50,11 @@ export default function DOMRenderer(game, boardElement) {
         // no hoshi
       }
     } else {
-      const hoshiOffset = game.boardSize > 11 ? 3 : 2;
+      const hoshiOffset = boardState.boardSize > 11 ? 3 : 2;
 
       for (let hoshiY = 0; hoshiY < 3; hoshiY++) {
         for (let hoshiX = 0; hoshiX < 3; hoshiX++) {
-          if ((game.boardSize === 7 || game.boardSize % 2 === 0) && (hoshiY === 1 || hoshiX === 1)) {
+          if ((boardState.boardSize === 7 || boardState.boardSize % 2 === 0) && (hoshiY === 1 || hoshiX === 1)) {
             continue;
           }
 
@@ -65,11 +65,11 @@ export default function DOMRenderer(game, boardElement) {
           }
 
           if (hoshiY === 1) {
-            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + ((game.boardSize + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + ((boardState.boardSize + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
           }
 
           if (hoshiY === 2) {
-            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (boardState.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
           }
 
           if (hoshiX === 0) {
@@ -77,11 +77,11 @@ export default function DOMRenderer(game, boardElement) {
           }
 
           if (hoshiX === 1) {
-            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + ((game.boardSize + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + ((boardState.boardSize + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
           }
 
           if (hoshiX === 2) {
-            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + (game.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + (boardState.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
           }
 
           utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
@@ -89,23 +89,22 @@ export default function DOMRenderer(game, boardElement) {
       }
     }
 
-    for (let y = 0; y < game.boardSize; y++) {
+    for (let y = 0; y < boardState.boardSize; y++) {
       const horizontalLine = utils.createElement("div", { class: "line horizontal" });
-      horizontalLine.setAttribute("data-left-gutter", game.yCoordinateFor(y));
+      horizontalLine.setAttribute("data-left-gutter", boardState.yCoordinateFor(y));
       utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
 
       const verticalLine = utils.createElement("div", { class: "line vertical" });
-      verticalLine.setAttribute("data-top-gutter", game.xCoordinateFor(y));
+      verticalLine.setAttribute("data-top-gutter", boardState.xCoordinateFor(y));
       utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
 
-      for (let x = 0; x < game.boardSize; x++) {
+      for (let x = 0; x < boardState.boardSize; x++) {
         const intersectionElement = utils.createElement("div", { class: "intersection empty" });
         const highlightElement = utils.createElement("div", { class: "highlight" });
         utils.appendElement(intersectionElement, highlightElement);
 
         intersectionElement.setAttribute("data-position-x", x);
         intersectionElement.setAttribute("data-position-y", y);
-        intersectionElement.game = game;
 
         intersectionElement.style.left = (x * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
         intersectionElement.style.top = (y * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
@@ -125,13 +124,13 @@ export default function DOMRenderer(game, boardElement) {
       e.preventDefault();
     });
 
-    boardElement.querySelector(".lines.horizontal").style.width = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + game.boardSize) + "px";
-    boardElement.querySelector(".lines.horizontal").style.height = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + game.boardSize) + "px";
-    boardElement.querySelector(".lines.vertical").style.width = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + game.boardSize) + "px";
-    boardElement.querySelector(".lines.vertical").style.height = ((renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1)) + game.boardSize) + "px";
+    boardElement.querySelector(".lines.horizontal").style.width = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+    boardElement.querySelector(".lines.horizontal").style.height = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+    boardElement.querySelector(".lines.vertical").style.width = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+    boardElement.querySelector(".lines.vertical").style.height = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
 
-    const boardWidth = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize + renderer.MARGIN*2;
-    const boardHeight = renderer.INTERSECTION_GAP_SIZE * (game.boardSize - 1) + game.boardSize + renderer.MARGIN*2;
+    const boardWidth = renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1) + boardState.boardSize + renderer.MARGIN*2;
+    const boardHeight = renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1) + boardState.boardSize + renderer.MARGIN*2;
 
     innerContainer.style.width = boardWidth + "px";
     innerContainer.style.height = boardHeight + "px";
@@ -146,22 +145,25 @@ export default function DOMRenderer(game, boardElement) {
 
       utils.addEventListener(intersectionEl, "mouseenter", function() {
         const intersectionElement = this;
-
-        utils.addClass(intersectionElement, "hovered");
-
         const hoveredYPosition = Number(intersectionElement.getAttribute("data-position-y"));
         const hoveredXPosition = Number(intersectionElement.getAttribute("data-position-x"));
+        const hoverValue = renderer.hooks.hoverValue(hoveredYPosition, hoveredXPosition);
 
-        if (game.isIllegalAt(hoveredYPosition, hoveredXPosition)) {
-          utils.addClass(intersectionElement, "illegal");
+        if (hoverValue) {
+          utils.addClass(intersectionElement, "hovered");
+          utils.addClass(intersectionElement, hoverValue);
         }
       });
 
       utils.addEventListener(intersectionEl, "mouseleave", function() {
         const intersectionElement = this;
 
-        utils.removeClass(intersectionElement, "hovered");
-        utils.removeClass(intersectionElement, "illegal");
+        if (utils.hasClass(this, "hovered")) {
+          utils.removeClass(intersectionElement, "hovered");
+          utils.removeClass(intersectionElement, "black");
+          utils.removeClass(intersectionElement, "white");
+        }
+
         renderer.resetTouchedPoint();
       });
 
@@ -170,26 +172,18 @@ export default function DOMRenderer(game, boardElement) {
         const playedYPosition = Number(intersectionElement.getAttribute("data-position-y"));
         const playedXPosition = Number(intersectionElement.getAttribute("data-position-x"));
 
-        const playOrToggleDead = function() {
-          if (game.isOver()) {
-            game.toggleDeadAt(playedYPosition, playedXPosition);
-          } else {
-            game.playAt(playedYPosition, playedXPosition);
-          }
-        };
-
         // if this isn't part of a touch,
         // or it is and the user is zoomed in,
         // or it's game over and we're marking stones dead,
         // then don't use the zoom/double-select system.
-        if (!renderer._touchEventFired || (document.body.clientWidth / window.innerWidth > 1) || game.isOver()) {
-          playOrToggleDead();
+        if (!renderer._touchEventFired || (document.body.clientWidth / window.innerWidth > 1) || renderer.hooks.gameIsOver()) {
+          renderer.hooks.handleClick(playedYPosition, playedXPosition);
           return;
         }
 
         if (renderer.touchedPoint) {
           if (intersectionElement === renderer.touchedPoint) {
-            playOrToggleDead();
+            renderer.hooks.handleClick(playedYPosition, playedXPosition);
           } else {
             renderer.showPossibleMoveAt(intersectionElement);
           }
@@ -342,52 +336,37 @@ export default function DOMRenderer(game, boardElement) {
     utils.removeClass(renderer.boardElement, "tenuki-zoomed");
   };
 
-  this.render = function() {
+  this.render = function(boardState, { territory, deadStones } = {}) {
+    if (!this._initialized) {
+      this._setup(boardState);
+      this._initialized = true;
+    }
+
     this.resetTouchedPoint();
 
-    this.renderStonesPlayed();
-    this.updateMarkerPoints();
-    this.updateCurrentPlayer();
+    this.renderStonesPlayed(boardState.intersections);
+    this.updateMarkerPoints({ playedPoint: boardState.playedPoint, koPoint: boardState.koPoint });
 
-    if (this.game.isOver()) {
-      this.renderTerritory();
+    if (territory) {
+      this.renderTerritory(territory, deadStones);
     }
   };
 
-  this.renderStonesPlayed = function() {
-    const renderer = this;
-    const points = renderer.game.intersections();
-
-    points.forEach(function(intersection) {
-      renderer.renderIntersection(intersection);
+  this.renderStonesPlayed = function(intersections) {
+    intersections.forEach(intersection => {
+      this.renderIntersection(intersection);
     });
   };
 
-  this.updateMarkerPoints = function() {
+  this.updateMarkerPoints = function({ playedPoint, koPoint }) {
     const renderer = this;
-    const boardState = renderer.game.boardState();
 
-    if (!boardState) {
-      return;
+    if (koPoint) {
+      utils.addClass(renderer.grid[koPoint.y][koPoint.x], "ko");
     }
 
-    if (boardState.koPoint) {
-      utils.addClass(renderer.grid[boardState.koPoint.y][boardState.koPoint.x], "ko");
-    }
-
-    if (boardState.playedPoint) {
-      utils.addClass(renderer.grid[boardState.playedPoint.y][boardState.playedPoint.x], "marker");
-    }
-  };
-
-  this.updateCurrentPlayer = function() {
-    const previousPlayer = this.game.boardState().color;
-    utils.removeClass(boardElement, previousPlayer + "-to-play");
-    utils.addClass(boardElement, this.game.currentPlayer() + "-to-play");
-
-    if (this.game.isOver()) {
-      utils.removeClass(boardElement, "black-to-play");
-      utils.removeClass(boardElement, "white-to-play");
+    if (playedPoint) {
+      utils.addClass(renderer.grid[playedPoint.y][playedPoint.x], "marker");
     }
   };
 
@@ -415,19 +394,16 @@ export default function DOMRenderer(game, boardElement) {
     }
   };
 
-  this.renderTerritory = function() {
-    this.game.intersections().forEach(intersection => {
-      utils.removeClass(this.grid[intersection.y][intersection.x], "territory-black");
-      utils.removeClass(this.grid[intersection.y][intersection.x], "territory-white");
-
-      if (this.game.isDeadAt(intersection.y, intersection.x)) {
-        utils.addClass(this.grid[intersection.y][intersection.x], "dead");
-      } else {
-        utils.removeClass(this.grid[intersection.y][intersection.x], "dead");
-      }
+  this.renderTerritory = function(territory, deadStones) {
+    utils.flatten(this.grid).forEach(element => {
+      utils.removeClass(element, "territory-black");
+      utils.removeClass(element, "territory-white");
+      utils.removeClass(element, "dead");
     });
 
-    const territory = this.game.territory();
+    deadStones.forEach(point => {
+      utils.addClass(this.grid[point.y][point.x], "dead");
+    });
 
     territory.black.forEach(territoryPoint => {
       utils.addClass(this.grid[territoryPoint.y][territoryPoint.x], "territory-black");

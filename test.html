@@ -371,7 +371,7 @@ if (!gameTest.isOver()) {
 
   gameTest.undo();
 
-  if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
+  if (gameTest.currentState().blackStonesCaptured != 0 || gameTest.currentState().whiteStonesCaptured != 0) {
     throw "tests failed";
   }
 
@@ -380,13 +380,13 @@ if (!gameTest.isOver()) {
   gameTest.renderer.grid[0][1].click(); // w
   gameTest.renderer.grid[1][1].click(); // b
 
-  if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
+  if (gameTest.currentState().blackStonesCaptured != 0 || gameTest.currentState().whiteStonesCaptured != 0) {
     throw "tests failed";
   }
 
   gameTest.renderer.grid[1][0].click(); // w
 
-  if (gameTest.boardState().blackStonesCaptured != 1 || gameTest.boardState().whiteStonesCaptured != 0) {
+  if (gameTest.currentState().blackStonesCaptured != 1 || gameTest.currentState().whiteStonesCaptured != 0) {
     throw "tests failed";
   }
 
@@ -487,7 +487,7 @@ if (!gameTest.isOver()) {
     gameTest.undo();
   }
 
-  if (gameTest.boardState().blackStonesCaptured != 0 || gameTest.boardState().whiteStonesCaptured != 0) {
+  if (gameTest.currentState().blackStonesCaptured != 0 || gameTest.currentState().whiteStonesCaptured != 0) {
     throw "tests failed";
   }
 });
@@ -539,7 +539,7 @@ gameTest.renderer.grid[2][0].click(); // w
 gameTest.renderer.grid[3][3].click(); // b
 gameTest.renderer.grid[0][0].click(); // w
 
-if (gameTest.boardState().blackStonesCaptured != 3 || gameTest.boardState().whiteStonesCaptured != 0) {
+if (gameTest.currentState().blackStonesCaptured != 3 || gameTest.currentState().whiteStonesCaptured != 0) {
   throw "tests failed";
 }
 
@@ -1372,7 +1372,7 @@ if (gameTest.currentPlayer() != "white") {
   throw "tests failed";
 }
 
-if (gameTest.boardState().playedPoint.y != 0 || gameTest.boardState().playedPoint.x != 0) {
+if (gameTest.currentState().playedPoint.y != 0 || gameTest.currentState().playedPoint.x != 0) {
   throw "tests failed";
 }
 
@@ -1434,7 +1434,7 @@ if (gameTest.currentPlayer() != "white") {
   throw "tests failed";
 }
 
-if (gameTest.boardState().playedPoint.y != 4 || gameTest.boardState().playedPoint.x != 4) {
+if (gameTest.currentState().playedPoint.y != 4 || gameTest.currentState().playedPoint.x != 4) {
   throw "tests failed";
 }
 

@@ -8,3 +8,4 @@
 * `territoryScore()` and `areaScore()` are replaced with `score()`. A new `setup()` option allows defining the scoring in use for a game.
 * Superko support with a configurable `koRule` option.
 * Support for equivalence scoring (with pass stones) as a scoring option.
+* `game.boardState()` is now `game.currentState()`.

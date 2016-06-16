@@ -251,19 +251,14 @@
   opacity: 0.5;
 }
 
-.tenuki-board.white-to-play .intersection.empty.hovered .highlight,
-.tenuki-board.black-to-play .intersection.empty.hovered .highlight {
+.tenuki-board .intersection.empty.hovered.white .highlight,
+.tenuki-board .intersection.empty.hovered.black .highlight {
   background: black;
   border: 1px solid black;
 }
 
-.tenuki-board.white-to-play .intersection.empty.hovered .highlight {
+.tenuki-board .intersection.empty.hovered.white .highlight {
   background: white;
-}
-
-.tenuki-board .intersection.illegal .highlight {
-  background: none !important;
-  border: none !important;
 }
 
 .tenuki-board .intersection.ko .highlight {
@@ -322,13 +317,13 @@
 }
 
 .tenuki-board-textured .stone.black,
-.tenuki-board-textured.black-to-play .intersection.empty.hovered .highlight {
+.tenuki-board-textured .intersection.empty.hovered.black .highlight {
   border-color: #565656;
   background: radial-gradient(circle at 50% 120%, #000000, #484848 10%, #101010 80%, #FFFFFF 100%);
 }
 
 .tenuki-board-textured .stone.white,
-.tenuki-board-textured.white-to-play .intersection.empty.hovered .highlight {
+.tenuki-board-textured .intersection.empty.hovered.white .highlight {
   border-color: #DEDEDE;
   background: radial-gradient(circle at 50% 120%, #ECEAEA, #D6D6D6 10%, #EAEAEA 80%, #FFFFFF 100%);
 }

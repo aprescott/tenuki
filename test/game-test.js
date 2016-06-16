@@ -16,7 +16,7 @@ describe("Game", function() {
       game.setup();
 
       expect(game.handicapStones).to.equal(0);
-      var nonEmptyPoints = game.boardState().intersections.filter(i => !i.isEmpty());
+      var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
       expect(nonEmptyPoints.length).to.equal(0);
     });
 
@@ -26,7 +26,7 @@ describe("Game", function() {
         game.setup({ handicapStones: h });
 
         expect(game.handicapStones).to.equal(h);
-        var nonEmptyPoints = game.boardState().intersections.filter(i => !i.isEmpty());
+        var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
         expect(nonEmptyPoints.length).to.equal(h);
         expect(game.currentPlayer()).to.equal("white");
       });
@@ -34,7 +34,7 @@ describe("Game", function() {
       var game = new Game();
       game.setup({ handicapStones: 2 });
       expect(game.handicapStones).to.equal(2);
-      var nonEmptyPoints = game.boardState().intersections.filter(i => !i.isEmpty());
+      var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
       expect(nonEmptyPoints.length).to.equal(2);
       expect(nonEmptyPoints[0].value).to.equal("black");
       expect(nonEmptyPoints[0].y).to.equal(3);
@@ -62,9 +62,9 @@ describe("Game", function() {
       expect(function() { game.setup({ boardSize: 19, scoring: "territory" }); }).to.not.throw(Error);
       expect(function() { game.setup({ boardSize: 19, scoring: "equivalence" }); }).to.not.throw(Error);
 
-      expect(function() { game.setup({ boardSize: 19, scoring: "Area" }); }).to.throw(Error,  "Unknown scoring: Area");
-      expect(function() { game.setup({ boardSize: 19, scoring: "terRitory" }); }).to.throw(Error,  "Unknown scoring: terRitory");
-      expect(function() { game.setup({ boardSize: 19, scoring: "gibberish" }); }).to.throw(Error,  "Unknown scoring: gibberish");
+      expect(function() { game.setup({ boardSize: 19, scoring: "Area" }); }).to.throw(Error,  "Unknown scoring type: Area");
+      expect(function() { game.setup({ boardSize: 19, scoring: "terRitory" }); }).to.throw(Error,  "Unknown scoring type: terRitory");
+      expect(function() { game.setup({ boardSize: 19, scoring: "gibberish" }); }).to.throw(Error,  "Unknown scoring type: gibberish");
     });
 
     it("does not allow unknown ko rules", function() {
@@ -103,9 +103,9 @@ describe("Game", function() {
       game.setup();
       game.playAt(2, 3);
 
-      expect(game.boardState().playedPoint.y).to.equal(2);
-      game.boardState().playedPoint.y = 10;
-      expect(game.boardState().playedPoint.y).to.equal(2);
+      expect(game.currentState().playedPoint.y).to.equal(2);
+      game.currentState().playedPoint.y = 10;
+      expect(game.currentState().playedPoint.y).to.equal(2);
     });
   });
 });

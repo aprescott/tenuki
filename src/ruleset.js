@@ -1,22 +1,10 @@
-import { AreaScoring, TerritoryScoring, EquivalenceScoring } from "./scoring";
-
 const VALID_KO_OPTIONS = [
   "simple",
   "superko"
 ];
 
-const Ruleset = function({ scoring, koRule } = {}) {
-  this.scorer = {
-    "area": AreaScoring,
-    "territory": TerritoryScoring,
-    "equivalence": EquivalenceScoring
-  }[scoring];
-  this.scoring = scoring;
+const Ruleset = function({ koRule }) {
   this.koRule = koRule;
-
-  if (!this.scorer) {
-    throw new Error("Unknown scoring: " + scoring);
-  }
 
   if (VALID_KO_OPTIONS.indexOf(this.koRule) < 0) {
     throw new Error("Unknown ko rule: " + koRule);
@@ -27,52 +15,66 @@ const Ruleset = function({ scoring, koRule } = {}) {
 
 Ruleset.prototype = {
   isIllegal: function(y, x, game) {
-    const boardState = game.boardState();
+    const boardState = game.currentState();
+    const nextColor = game.currentPlayer();
     const intersection = boardState.intersectionAt(y, x);
-    const isEmpty = intersection.isEmpty();
-    const isSuicide = boardState.wouldBeSuicide(y, x);
 
+    const result = !intersection.isEmpty() ||
+      this._wouldBeSuicide(y, x, nextColor, boardState) ||
+      this._isKoViolation(y, x, nextColor, boardState, game._moves);
+
+    return result;
+  },
+
+  _isKoViolation: function(y, x, color, boardState, existingStates) {
     let isKoViolation = false;
 
     if (this.koRule === "simple") {
       const koPoint = boardState.koPoint;
       isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
     } else {
-      const newState = boardState.playAt(y, x);
-      const boardStates = game._moves;
+      const newState = boardState.playAt(y, x, color);
+      const boardStates = existingStates;
 
-      isKoViolation = game._moves.length > 0 && boardStates.some(existingState => {
+      isKoViolation = existingStates.length > 0 && boardStates.some(existingState => {
         return existingState.positionSameAs(newState);
       });
     }
 
-    return !isEmpty || isKoViolation || isSuicide;
+    return isKoViolation;
   },
 
-  isOver: function(game) {
-    if (game._moves.length < 2) {
+  _wouldBeSuicide: function(y, x, color, boardState) {
+    const intersection = boardState.intersectionAt(y, x);
+    const surroundedEmptyPoint = intersection.isEmpty() && boardState.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isEmpty()).length === 0;
+
+    if (!surroundedEmptyPoint) {
       return false;
     }
 
-    if (this.scoring === "equivalence") {
-      const finalMove = game._moves[game._moves.length - 1];
-      const previousMove = game._moves[game._moves.length - 2];
+    const someFriendlyNotInAtari = boardState.neighborsFor(intersection.y, intersection.x).some(neighbor => {
+      const inAtari = boardState.inAtari(neighbor.y, neighbor.x);
+      const friendly = neighbor.isOccupiedWith(color);
 
-      return finalMove.pass && previousMove.pass && finalMove.color === "white";
-    } else {
-      const finalMove = game._moves[game._moves.length - 1];
-      const previousMove = game._moves[game._moves.length - 2];
+      return friendly && !inAtari;
+    });
 
-      return finalMove.pass && previousMove.pass;
+    if (someFriendlyNotInAtari) {
+      return false;
     }
-  },
 
-  territory: function(game) {
-    return this.scorer.territory(game);
-  },
+    const someEnemyInAtari = boardState.neighborsFor(intersection.y, intersection.x).some(neighbor => {
+      const inAtari = boardState.inAtari(neighbor.y, neighbor.x);
+      const enemy = !neighbor.isOccupiedWith(color);
 
-  score: function(game) {
-    return this.scorer.score(game);
+      return enemy && inAtari;
+    });
+
+    if (someEnemyInAtari) {
+      return false;
+    }
+
+    return true;
   }
 };
 
