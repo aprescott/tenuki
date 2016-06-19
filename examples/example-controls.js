@@ -11,29 +11,29 @@ ExampleGameControls = function(element, game) {
 
   this.updateStats = function() {
     var newGameInfo = "";
-    newGameInfo += "Black stones captured: " + this.game.boardState().blackStonesCaptured;
+    newGameInfo += "Black stones captured: " + this.game.currentState().blackStonesCaptured;
     newGameInfo += "\n\n";
-    newGameInfo +=  "White stones captured: " + this.game.boardState().whiteStonesCaptured;
+    newGameInfo +=  "White stones captured: " + this.game.currentState().whiteStonesCaptured;
     newGameInfo += "\n\n";
 
-    newGameInfo += "Move " + this.game.boardState().moveNumber;
+    newGameInfo += "Move " + this.game.currentState().moveNumber;
 
-    if (this.game.boardState().playedPoint) {
-      newGameInfo += " (" + this.game.coordinatesFor(this.game.boardState().playedPoint.y, this.game.boardState().playedPoint.x) + ")";
+    if (this.game.currentState().playedPoint) {
+      newGameInfo += " (" + this.game.coordinatesFor(this.game.currentState().playedPoint.y, this.game.currentState().playedPoint.x) + ")";
     }
 
     newGameInfo += "\n\n";
 
-    var boardState = this.game.boardState();
+    var currentState = this.game.currentState();
 
-    if (boardState.pass) {
-      var player = boardState.color[0].toUpperCase() + boardState.color.substr(1);
+    if (currentState.pass) {
+      var player = currentState.color[0].toUpperCase() + currentState.color.substr(1);
       newGameInfo += player + " passed."
     }
 
     this.gameInfo.innerText = newGameInfo;
 
-    if (boardState.pass) {
+    if (currentState.pass) {
       var str = "";
 
       if (this.game.isOver()) {
