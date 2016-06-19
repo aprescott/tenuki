@@ -1,7 +1,7 @@
 {
   "name": "tenuki",
   "version": "0.1.0",
-  "description": "A JavaScript implementation of the game of go/baduk/weiqi with full support for HTML rendering out of the box.",
+  "description": "Tenuki is a web-based board and JavaScript library for the game of go/baduk/weiqi.",
   "main": "index.js",
   "scripts": {
     "test": "mocha --require source-map-support/register"

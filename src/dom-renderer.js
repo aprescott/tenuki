@@ -219,8 +219,8 @@ export default function DOMRenderer(boardElement, hooks = {}) {
       const xCursor = event.changedTouches[0].clientX;
       const yCursor = event.changedTouches[0].clientY;
 
-      renderer.dragStartX = xCursor - this.offsetLeft;
-      renderer.dragStartY = yCursor - this.offsetTop;
+      renderer.dragStartX = xCursor;
+      renderer.dragStartY = yCursor;
       zoomContainer.style.transition = "none";
     });
 

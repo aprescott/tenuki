@@ -790,8 +790,8 @@ function DOMRenderer(boardElement) {
       var xCursor = event.changedTouches[0].clientX;
       var yCursor = event.changedTouches[0].clientY;
 
-      renderer.dragStartX = xCursor - this.offsetLeft;
-      renderer.dragStartY = yCursor - this.offsetTop;
+      renderer.dragStartX = xCursor;
+      renderer.dragStartY = yCursor;
       zoomContainer.style.transition = "none";
     });
 
