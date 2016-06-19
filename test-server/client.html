@@ -1,0 +1,111 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+
+<head>
+  <link rel="stylesheet" href="../build/tenuki.css"></link>
+  <script src="../build/tenuki.js"></script>
+
+  <link rel="stylesheet" href="../examples/example.css"></link>
+  <script src="../examples/example-controls.js"></script>
+  <script src="jquery-2.2.4.min.js"></script>
+</head>
+
+<div class="tenuki-board black"></div>
+<div class="controls">
+  <div class="buttons">
+    <a class="pass" href="#">Pass</a>
+  </div>
+</div>
+
+<div style="clear: both;"></div>
+<br>
+
+<div class="tenuki-board white"></div>
+<div class="controls">
+  <div class="buttons">
+    <a class="pass" href="#">Pass</a>
+  </div>
+</div>
+
+<script>
+window.clients = [];
+
+["black", "white"].forEach(function(player) {
+  $(function() {
+    // In a real-world setting, you would more likely listen for events instead
+    // of polling. This exists mostly to show how `receivePass`, `receivePlay`
+    // and `setDeadStones` can be used to receive state changes.
+    function poll(client) {
+      setTimeout(function() {
+        $.get("http://localhost:3000/game-info").done(function(data) {
+          if ($.isEmptyObject(data)) {
+            return;
+          }
+
+          if (data["moveNumber"] === client.moveNumber() + 1) {
+            if (data["pass"]) {
+              client.receivePass();
+            } else {
+              client.receivePlay(data["y"], data["x"]);
+            }
+          }
+
+          if (data["phase"] === "scoring") {
+            client.setDeadStones(data["deadStones"]);
+          }
+        }).always(function() {
+          poll(client);
+        });
+      }, 1000);
+    }
+
+    var boardElement = document.querySelector(".tenuki-board." + player);
+    var client = new tenuki.Client(boardElement);
+
+    window.clients[player] = client;
+
+    client.setup({
+      player: player,
+      gameOptions: {
+        boardSize: 9
+      },
+      hooks: {
+        submitPlay: function(playedY, playedX, result) {
+          $.post("http://localhost:3000/play-at", { y: playedY, x: playedX }).done(function(data) {
+            result(data["result"]);
+          }).fail(function() {
+            result(false);
+          });
+        },
+
+        submitMarkDeadAt: function(y, x, stones, result) {
+          $.post("http://localhost:3000/mark-dead-at", { y: y, x: x }).done(function(data) {
+            result(data["result"]);
+          }).fail(function() {
+            result(false);
+          });
+        },
+
+        submitPass: function(result) {
+          $.post("http://localhost:3000/pass").done(function(data) {
+            result(data["result"]);
+          }).fail(function() {
+            result(false);
+          });
+        }
+      }
+    });;
+
+    var passButton = document.querySelector(".tenuki-board." + player + " + .controls .pass");
+
+    passButton.addEventListener("click", function(e) {
+      e.preventDefault();
+
+      client.pass();
+    });
+
+    poll(client);
+  });
+});
+</script>

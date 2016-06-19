@@ -9,3 +9,4 @@
 * Superko support with a configurable `koRule` option.
 * Support for equivalence scoring (with pass stones) as a scoring option.
 * `game.boardState()` is now `game.currentState()`.
+* A new `Client` interface for playing against a remote server.

@@ -29,13 +29,16 @@
     "babel-cli": "^6.7.7",
     "babel-preset-es2015": "*",
     "babelify": "*",
+    "body-parser": "^1.15.1",
     "browserify": "*",
     "chai": "^3.5.0",
     "clean-css": "*",
+    "eslint": "*",
+    "express": "^4.13.4",
+    "jsdom": "*",
     "mocha": "^2.4.5",
-    "uglify-js": "*",
     "source-map-support": "^0.4.0",
-    "eslint": "*"
+    "uglify-js": "*"
   },
   "engines": {
     "node": ">=4.0.0"

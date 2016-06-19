@@ -24,6 +24,7 @@ Features:
   * End-game functionality: dead stone marking and scoring.
   * Different scoring rules: territory, area, equivalence (with pass stones).
   * Seki detection for the territory rules.
+  * A client interface for playing against a server.
   * For the HTML renderer:
     - Built-in mobile support for touch devices and small screens, even with a 19x19 board.
     - Automatic shrinking to fit given board (pixel) dimensions.
@@ -225,6 +226,17 @@ game.callbacks.postRender = function(game) {
   }
 };
 ```
+
+# Using `Client` to play against a server
+
+The `Game` interface is only useful for local play. For play against a remote server, there is the `Client` interface.
+
+For an example of how to use `Client`, the `test-server/` directory contains a demo client and server setup.
+
+  * `cd test-server/` and run `node server.js`.
+  * Open `test-server/client.html` in a browser.
+
+The game is set to run on a fixed 9x9 board.
 
 # Running tests
 
