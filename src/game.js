@@ -92,7 +92,7 @@ Game.prototype = {
         }
       };
 
-      this.renderer = new DOMRenderer(this._boardElement, options["hooks"] || defaultRendererHooks);
+      this.renderer = new DOMRenderer(this._boardElement, options["_hooks"] || defaultRendererHooks);
     } else {
       this.renderer = new NullRenderer();
     }
@@ -140,6 +140,10 @@ Game.prototype = {
 
   currentState: function() {
     return this._moves[this._moves.length - 1] || this._initialState;
+  },
+
+  moveNumber: function() {
+    return this.currentState().moveNumber;
   },
 
   playAt: function(y, x) {
@@ -193,7 +197,7 @@ Game.prototype = {
       if (alreadyDead) {
         this._deadPoints = this._deadPoints.filter(dead => !(dead.y === intersection.y && dead.x === intersection.x));
       } else {
-        this._deadPoints.push({ y: intersection.y, x: intersection.x, color: intersection.value });
+        this._deadPoints.push({ y: intersection.y, x: intersection.x });
       }
     });
 

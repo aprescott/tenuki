@@ -7,9 +7,10 @@
 "use strict";
 
 exports.Game = require("./lib/game").default;
+exports.Client = require("./lib/client").default;
 exports.utils = require("./lib/utils").default;
 
-},{"./lib/game":5,"./lib/utils":11}],2:[function(require,module,exports){
+},{"./lib/client":3,"./lib/game":6,"./lib/utils":12}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -393,7 +394,166 @@ BoardState._initialFor = function (boardSize, handicapStones) {
 exports.default = BoardState;
 
 
-},{"./intersection":6,"./utils":11,"./zobrist":12}],3:[function(require,module,exports){
+},{"./intersection":7,"./utils":12,"./zobrist":13}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _game = require("./game");
+
+var _game2 = _interopRequireDefault(_game);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+var Client = function Client(boardElement) {
+  this._boardElement = boardElement;
+};
+
+Client.prototype = {
+  setup: function setup(_ref) {
+    var _this = this;
+
+    var player = _ref.player;
+    var gameOptions = _ref.gameOptions;
+    var hooks = _ref.hooks;
+
+    this._player = player;
+    this._hooks = hooks;
+
+    if (this._player !== "black" && this._player !== "white") {
+      throw new Error("Player must be either black or white, but was given: " + this._player);
+    }
+
+    gameOptions["_hooks"] = {
+      handleClick: function handleClick(y, x) {
+        if (_this._busy) {
+          return;
+        }
+
+        _this._busy = true;
+
+        if (_this.isOver()) {
+          var stonesToBeMarkedDead = _this._game.currentState().groupAt(y, x).map(function (i) {
+            return {
+              y: i.y,
+              x: i.x,
+              color: i.color
+            };
+          });
+
+          _this._hooks.submitMarkDeadAt(y, x, stonesToBeMarkedDead, function (result) {
+            if (result) {
+              _this._game.toggleDeadAt(y, x);
+            }
+
+            _this._busy = false;
+          });
+        } else {
+          if (_this._player !== _this.currentPlayer()) {
+            _this._busy = false;
+
+            return;
+          }
+
+          _this._hooks.submitPlay(y, x, function (result) {
+            if (result) {
+              _this._game.playAt(y, x, _this._player);
+            }
+
+            _this._busy = false;
+          });
+        }
+      },
+
+      hoverValue: function hoverValue(y, x) {
+        if (!_this._busy && _this._player === _this.currentPlayer() && !_this.isOver() && !_this._game.isIllegalAt(y, x)) {
+          return _this._player;
+        }
+      },
+
+      gameIsOver: function gameIsOver() {
+        return _this.isOver();
+      }
+    };
+
+    this._game = new _game2.default(this._boardElement);
+    this._game.setup(gameOptions);
+  },
+
+  isOver: function isOver() {
+    return this._game.isOver();
+  },
+
+  currentPlayer: function currentPlayer() {
+    return this._game.currentPlayer();
+  },
+
+  receivePlay: function receivePlay(y, x) {
+    if (this._player === this.currentPlayer()) {
+      return;
+    }
+
+    this._game.playAt(y, x);
+  },
+
+  moveNumber: function moveNumber() {
+    return this._game.moveNumber();
+  },
+
+  receivePass: function receivePass() {
+    if (this._player === this.currentPlayer()) {
+      return;
+    }
+
+    this._game.pass();
+  },
+
+  receiveMarkDeadAt: function receiveMarkDeadAt(y, x) {
+    this._game.toggleDeadAt(y, x);
+  },
+
+  deadStones: function deadStones() {
+    return this._game.deadStones();
+  },
+
+  setDeadStones: function setDeadStones(points) {
+    this._game._deadPoints = points.map(function (i) {
+      return {
+        y: i.y,
+        x: i.x
+      };
+    });
+
+    this._game.render();
+  },
+
+  pass: function pass() {
+    var _this2 = this;
+
+    if (this._busy || this._player !== this.currentPlayer()) {
+      return;
+    }
+
+    this._busy = true;
+
+    this._hooks.submitPass(function (result) {
+      if (result) {
+        _this2._game.pass();
+      }
+
+      _this2._busy = false;
+    });
+  }
+};
+
+exports.default = Client;
+
+
+},{"./game":6}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -839,7 +999,7 @@ function DOMRenderer(boardElement) {
 }
 
 
-},{"./utils":11}],4:[function(require,module,exports){
+},{"./utils":12}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -934,7 +1094,7 @@ EyePoint.prototype = {
 exports.default = EyePoint;
 
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -1070,7 +1230,7 @@ Game.prototype = {
         }
       };
 
-      this.renderer = new _domRenderer2.default(this._boardElement, options["hooks"] || defaultRendererHooks);
+      this.renderer = new _domRenderer2.default(this._boardElement, options["_hooks"] || defaultRendererHooks);
     } else {
       this.renderer = new _nullRenderer2.default();
     }
@@ -1118,6 +1278,10 @@ Game.prototype = {
 
   currentState: function currentState() {
     return this._moves[this._moves.length - 1] || this._initialState;
+  },
+
+  moveNumber: function moveNumber() {
+    return this.currentState().moveNumber;
   },
 
   playAt: function playAt(y, x) {
@@ -1175,7 +1339,7 @@ Game.prototype = {
           return !(dead.y === intersection.y && dead.x === intersection.x);
         });
       } else {
-        _this2._deadPoints.push({ y: intersection.y, x: intersection.x, color: intersection.value });
+        _this2._deadPoints.push({ y: intersection.y, x: intersection.x });
       }
     });
 
@@ -1231,7 +1395,7 @@ Game.prototype = {
 exports.default = Game;
 
 
-},{"./board-state":2,"./dom-renderer":3,"./null-renderer":7,"./ruleset":9,"./scorer":10}],6:[function(require,module,exports){
+},{"./board-state":2,"./dom-renderer":4,"./null-renderer":8,"./ruleset":10,"./scorer":11}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1274,7 +1438,7 @@ Intersection.prototype = {
 exports.default = Intersection;
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1288,7 +1452,7 @@ function NullRenderer() {
 }
 
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1596,7 +1760,7 @@ Region.prototype = {
 exports.default = Region;
 
 
-},{"./utils":11}],9:[function(require,module,exports){
+},{"./utils":12}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1686,7 +1850,7 @@ Ruleset.prototype = {
 exports.default = Ruleset;
 
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1959,7 +2123,7 @@ Scorer.prototype = {
 exports.default = Scorer;
 
 
-},{"./eye-point":4,"./intersection":6,"./region":8,"./utils":11}],11:[function(require,module,exports){
+},{"./eye-point":5,"./intersection":7,"./region":9,"./utils":12}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2028,7 +2192,7 @@ exports.default = {
 };
 
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
