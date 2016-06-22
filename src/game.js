@@ -191,6 +191,10 @@ Game.prototype = {
   },
 
   toggleDeadAt: function(y, x) {
+    if (this.intersectionAt(y, x).isEmpty()) {
+      return;
+    }
+
     const alreadyDead = this._isDeadAt(y, x);
 
     this.currentState().groupAt(y, x).forEach(intersection => {
