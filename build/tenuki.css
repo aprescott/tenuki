@@ -6,6 +6,7 @@
 .tenuki-board {
   position: relative;
   -webkit-user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 .tenuki-board .tenuki-inner-container {

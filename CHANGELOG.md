@@ -10,3 +10,4 @@
 * Support for equivalence scoring (with pass stones) as a scoring option.
 * `game.boardState()` is now `game.currentState()`.
 * A new `Client` interface for playing against a remote server.
+* Prevent Safari/WebKit from showing a grey box on an empty intersection on tap.
