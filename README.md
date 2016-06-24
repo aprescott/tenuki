@@ -46,7 +46,6 @@ These examples are also set up to **work on mobile/touch displays**.
 Here are some screenshots and GIFs:
 
 * [Top-right corner of the board, with some stones](https://i.imgur.com/w6D33pf.png)
-* [Same as above, but with textured stones](https://i.imgur.com/zuuTWu8.png)
 * [GIF: Desktop gameplay on a full-sized board](https://i.imgur.com/7cQkoaf.gif)
 * [GIF: Desktop gameplay with a smaller board](https://i.imgur.com/N0YgjJD.gif)
 * [GIF: Touch-screen gameplay on a mobile device (zooming)](https://i.imgur.com/7UDNTJM.gif)
