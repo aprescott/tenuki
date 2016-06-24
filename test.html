@@ -22,6 +22,14 @@ if (!HTMLElement.prototype.click) {
     this.dispatchEvent(ev);
   };
 }
+
+// phantomjs pre-2.0 has no Function.bind. simple polyfill courtesy of https://github.com/ariya/phantomjs/issues/10522#issuecomment-66449127
+Function.prototype.bind = Function.prototype.bind || function (thisp) {
+    var fn = this;
+    return function () {
+        return fn.apply(thisp, arguments);
+    };
+};
 </script>
 
 <script>
