@@ -39,11 +39,17 @@ DOMRenderer.prototype = {
 
     renderer.cancelZoomElement = utils.createElement("div", { class: "cancel-zoom" });
     const cancelZoomBackdrop = utils.createElement("div", { class: "cancel-zoom-backdrop" });
-    utils.addEventListener(renderer.cancelZoomElement, "click", function() {
+    utils.addEventListener(renderer.cancelZoomElement, "click", function(event) {
+      event.preventDefault();
       renderer.zoomOut();
+
+      return false;
     });
-    utils.addEventListener(cancelZoomBackdrop, "click", function() {
+    utils.addEventListener(cancelZoomBackdrop, "click", function(event) {
+      event.preventDefault();
       renderer.zoomOut();
+
+      return false;
     });
     utils.appendElement(innerContainer, renderer.cancelZoomElement);
     utils.appendElement(innerContainer, cancelZoomBackdrop);
@@ -148,10 +154,6 @@ DOMRenderer.prototype = {
     zoomContainer.style.height = boardHeight + "px";
 
     utils.flatten(renderer.grid).forEach(function(intersectionEl) {
-      utils.addEventListener(intersectionEl, "touchstart", function() {
-        renderer._touchEventFired = true;
-      });
-
       utils.addEventListener(intersectionEl, "mouseenter", function() {
         const intersectionElement = this;
         const hoveredYPosition = Number(intersectionElement.getAttribute("data-position-y"));
@@ -211,91 +213,127 @@ DOMRenderer.prototype = {
       innerContainer.style["transform-origin"] = "top left";
       innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
 
+      // we'll potentially be zooming on touch devices
+      zoomContainer.style.willChange = "transform";
+
       // reset the outer element's height to match, ensuring that we free up any lingering whitespace
       boardElement.style.width = innerContainer.getBoundingClientRect().width + "px";
       boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
     }
 
-    utils.addEventListener(boardElement, "touchstart", function(event) {
-      if (event.touches.length > 1) {
-        return;
-      }
+    renderer.touchmoveChangedTouch = null;
+    renderer.touchstartEventHandler = renderer.handleTouchStart.bind(renderer);
+    renderer.touchmoveEventHandler = renderer.handleTouchMove.bind(renderer);
+    renderer.touchendEventHandler = renderer.handleTouchEnd.bind(renderer);
 
-      if (!utils.hasClass(boardElement, "tenuki-zoomed")) {
-        return;
-      }
+    utils.addEventListener(boardElement, "touchstart", renderer.touchstartEventHandler);
+    utils.addEventListener(boardElement, "touchend", renderer.touchendEventHandler);
+    utils.addEventListener(boardElement, "touchmove", renderer.touchmoveEventHandler);
+  },
 
-      const xCursor = event.changedTouches[0].clientX;
-      const yCursor = event.changedTouches[0].clientY;
+  handleTouchStart: function(event) {
+    const renderer = this;
+    renderer._touchEventFired = true;
 
-      renderer.dragStartX = xCursor;
-      renderer.dragStartY = yCursor;
-      zoomContainer.style.transition = "none";
-    });
+    if (event.touches.length > 1) {
+      return;
+    }
 
-    utils.addEventListener(innerContainer, "touchend", function(event) {
-      if (event.touches.length > 1) {
-        return;
-      }
+    if (!utils.hasClass(renderer.boardElement, "tenuki-zoomed")) {
+      return;
+    }
 
-      if (!utils.hasClass(boardElement, "tenuki-zoomed")) {
-        return;
-      }
+    const xCursor = event.changedTouches[0].clientX;
+    const yCursor = event.changedTouches[0].clientY;
 
-      zoomContainer.style.transition = "";
+    renderer.dragStartX = xCursor;
+    renderer.dragStartY = yCursor;
+    renderer.zoomContainer.style.transition = "none";
+  },
 
-      if (!renderer.moveInProgress) {
-        return;
-      }
-      renderer.translateY = renderer.lastTranslateY;
-      renderer.translateX = renderer.lastTranslateX;
-      renderer.moveInProgress = false;
-    });
+  handleTouchMove: function(event) {
+    const renderer = this;
 
-    utils.addEventListener(innerContainer, "touchmove", function(event) {
-      if (event.touches.length > 1) {
-        return;
-      }
+    if (event.touches.length > 1) {
+      return;
+    }
 
-      if (!utils.hasClass(boardElement, "tenuki-zoomed")) {
-        return true;
-      }
+    if (!utils.hasClass(renderer.boardElement, "tenuki-zoomed")) {
+      return true;
+    }
 
-      // prevent pull-to-refresh
-      event.preventDefault();
+    // prevent pull-to-refresh
+    event.preventDefault();
 
-      renderer.moveInProgress = true;
+    renderer.touchmoveChangedTouch = event.changedTouches[0];
 
-      const xCursor = event.changedTouches[0].clientX;
-      const yCursor = event.changedTouches[0].clientY;
+    renderer.moveInProgress = true;
+  },
 
-      const deltaX = xCursor - renderer.dragStartX;
-      const deltaY = yCursor - renderer.dragStartY;
+  handleTouchEnd: function(event) {
+    const renderer = this;
 
-      let translateY = renderer.translateY + deltaY/2.5;
-      let translateX = renderer.translateX + deltaX/2.5;
+    if (event.touches.length > 1) {
+      return;
+    }
 
-      if (translateY > 0.5*innerContainer.clientHeight - renderer.MARGIN) {
-        translateY = 0.5*innerContainer.clientHeight - renderer.MARGIN;
-      }
+    if (!utils.hasClass(renderer.boardElement, "tenuki-zoomed")) {
+      return;
+    }
 
-      if (translateX > 0.5*innerContainer.clientWidth - renderer.MARGIN) {
-        translateX = 0.5*innerContainer.clientWidth - renderer.MARGIN;
-      }
+    renderer.zoomContainer.style.transition = "";
 
-      if (translateY < -0.5*innerContainer.clientHeight + renderer.MARGIN) {
-        translateY = -0.5*innerContainer.clientHeight + renderer.MARGIN;
-      }
+    if (!renderer.moveInProgress) {
+      return;
+    }
+    renderer.translateY = renderer.lastTranslateY;
+    renderer.translateX = renderer.lastTranslateX;
+    renderer.moveInProgress = false;
+    renderer.touchmoveChangedTouch = null;
+  },
 
-      if (translateX < -0.5*innerContainer.clientWidth + renderer.MARGIN) {
-        translateX = -0.5*innerContainer.clientWidth + renderer.MARGIN;
-      }
+  processDragDelta: function() {
+    const renderer = this;
 
-      zoomContainer.style.transform = "translate3d(" + 2.5*translateX + "px, " + 2.5*translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+    if (!renderer.touchmoveChangedTouch) {
+      renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
+      return;
+    }
 
-      renderer.lastTranslateX = translateX;
-      renderer.lastTranslateY = translateY;
-    });
+    const innerContainer = renderer.innerContainer;
+    const zoomContainer = renderer.zoomContainer;
+
+    const xCursor = renderer.touchmoveChangedTouch.clientX;
+    const yCursor = renderer.touchmoveChangedTouch.clientY;
+
+    const deltaX = xCursor - renderer.dragStartX;
+    const deltaY = yCursor - renderer.dragStartY;
+
+    let translateY = renderer.translateY + deltaY/2.5;
+    let translateX = renderer.translateX + deltaX/2.5;
+
+    if (translateY > 0.5*innerContainer.clientHeight - renderer.MARGIN) {
+      translateY = 0.5*innerContainer.clientHeight - renderer.MARGIN;
+    }
+
+    if (translateX > 0.5*innerContainer.clientWidth - renderer.MARGIN) {
+      translateX = 0.5*innerContainer.clientWidth - renderer.MARGIN;
+    }
+
+    if (translateY < -0.5*innerContainer.clientHeight + renderer.MARGIN) {
+      translateY = -0.5*innerContainer.clientHeight + renderer.MARGIN;
+    }
+
+    if (translateX < -0.5*innerContainer.clientWidth + renderer.MARGIN) {
+      translateX = -0.5*innerContainer.clientWidth + renderer.MARGIN;
+    }
+
+    zoomContainer.style.transform = "translate3d(" + 2.5*translateX + "px, " + 2.5*translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+
+    renderer.lastTranslateX = translateX;
+    renderer.lastTranslateY = translateY;
+
+    renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
   },
 
   showPossibleMoveAt: function(intersectionElement) {
@@ -303,14 +341,17 @@ DOMRenderer.prototype = {
     const boardElement = this.boardElement;
     const zoomContainer = this.zoomContainer;
 
+    renderer.zoomContainerHeight = renderer.zoomContainerHeight || zoomContainer.clientHeight;
+    renderer.zoomContainerWidth = renderer.zoomContainerWidth || zoomContainer.clientWidth;
+
     renderer.touchedPoint = intersectionElement;
 
     if (utils.hasClass(boardElement, "tenuki-scaled")) {
       const top = intersectionElement.offsetTop;
       const left = intersectionElement.offsetLeft;
 
-      const translateY = 0.5 * zoomContainer.clientHeight - top - renderer.MARGIN;
-      const translateX = 0.5 * zoomContainer.clientWidth - left - renderer.MARGIN;
+      const translateY = 0.5 * renderer.zoomContainerHeight - top - renderer.MARGIN;
+      const translateX = 0.5 * renderer.zoomContainerWidth - left - renderer.MARGIN;
 
       zoomContainer.style.transform = "translate3d(" + 2.5*translateX + "px, " + 2.5*translateY + "px, 0) scale3d(2.5, 2.5, 1)";
       renderer.translateY = translateY;
@@ -318,6 +359,7 @@ DOMRenderer.prototype = {
 
       utils.addClass(renderer.cancelZoomElement, "visible");
       utils.addClass(renderer.boardElement, "tenuki-zoomed");
+      renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
     }
   },
 
@@ -340,6 +382,7 @@ DOMRenderer.prototype = {
     renderer.translateX = null;
     renderer.lastTranslateX = null;
     renderer.lastTranslateY = null;
+    window.cancelAnimationFrame(renderer.animationFrameRequestID);
 
     utils.removeClass(renderer.cancelZoomElement, "visible");
     utils.removeClass(renderer.boardElement, "tenuki-zoomed");

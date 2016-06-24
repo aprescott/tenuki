@@ -636,11 +636,17 @@ DOMRenderer.prototype = {
 
     renderer.cancelZoomElement = _utils2.default.createElement("div", { class: "cancel-zoom" });
     var cancelZoomBackdrop = _utils2.default.createElement("div", { class: "cancel-zoom-backdrop" });
-    _utils2.default.addEventListener(renderer.cancelZoomElement, "click", function () {
+    _utils2.default.addEventListener(renderer.cancelZoomElement, "click", function (event) {
+      event.preventDefault();
       renderer.zoomOut();
+
+      return false;
     });
-    _utils2.default.addEventListener(cancelZoomBackdrop, "click", function () {
+    _utils2.default.addEventListener(cancelZoomBackdrop, "click", function (event) {
+      event.preventDefault();
       renderer.zoomOut();
+
+      return false;
     });
     _utils2.default.appendElement(innerContainer, renderer.cancelZoomElement);
     _utils2.default.appendElement(innerContainer, cancelZoomBackdrop);
@@ -745,10 +751,6 @@ DOMRenderer.prototype = {
     zoomContainer.style.height = boardHeight + "px";
 
     _utils2.default.flatten(renderer.grid).forEach(function (intersectionEl) {
-      _utils2.default.addEventListener(intersectionEl, "touchstart", function () {
-        renderer._touchEventFired = true;
-      });
-
       _utils2.default.addEventListener(intersectionEl, "mouseenter", function () {
         var intersectionElement = this;
         var hoveredYPosition = Number(intersectionElement.getAttribute("data-position-y"));
@@ -808,91 +810,127 @@ DOMRenderer.prototype = {
       innerContainer.style["transform-origin"] = "top left";
       innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
 
+      // we'll potentially be zooming on touch devices
+      zoomContainer.style.willChange = "transform";
+
       // reset the outer element's height to match, ensuring that we free up any lingering whitespace
       boardElement.style.width = innerContainer.getBoundingClientRect().width + "px";
       boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
     }
 
-    _utils2.default.addEventListener(boardElement, "touchstart", function (event) {
-      if (event.touches.length > 1) {
-        return;
-      }
+    renderer.touchmoveChangedTouch = null;
+    renderer.touchstartEventHandler = renderer.handleTouchStart.bind(renderer);
+    renderer.touchmoveEventHandler = renderer.handleTouchMove.bind(renderer);
+    renderer.touchendEventHandler = renderer.handleTouchEnd.bind(renderer);
 
-      if (!_utils2.default.hasClass(boardElement, "tenuki-zoomed")) {
-        return;
-      }
+    _utils2.default.addEventListener(boardElement, "touchstart", renderer.touchstartEventHandler);
+    _utils2.default.addEventListener(boardElement, "touchend", renderer.touchendEventHandler);
+    _utils2.default.addEventListener(boardElement, "touchmove", renderer.touchmoveEventHandler);
+  },
 
-      var xCursor = event.changedTouches[0].clientX;
-      var yCursor = event.changedTouches[0].clientY;
+  handleTouchStart: function handleTouchStart(event) {
+    var renderer = this;
+    renderer._touchEventFired = true;
 
-      renderer.dragStartX = xCursor;
-      renderer.dragStartY = yCursor;
-      zoomContainer.style.transition = "none";
-    });
+    if (event.touches.length > 1) {
+      return;
+    }
 
-    _utils2.default.addEventListener(innerContainer, "touchend", function (event) {
-      if (event.touches.length > 1) {
-        return;
-      }
+    if (!_utils2.default.hasClass(renderer.boardElement, "tenuki-zoomed")) {
+      return;
+    }
 
-      if (!_utils2.default.hasClass(boardElement, "tenuki-zoomed")) {
-        return;
-      }
+    var xCursor = event.changedTouches[0].clientX;
+    var yCursor = event.changedTouches[0].clientY;
 
-      zoomContainer.style.transition = "";
+    renderer.dragStartX = xCursor;
+    renderer.dragStartY = yCursor;
+    renderer.zoomContainer.style.transition = "none";
+  },
 
-      if (!renderer.moveInProgress) {
-        return;
-      }
-      renderer.translateY = renderer.lastTranslateY;
-      renderer.translateX = renderer.lastTranslateX;
-      renderer.moveInProgress = false;
-    });
+  handleTouchMove: function handleTouchMove(event) {
+    var renderer = this;
 
-    _utils2.default.addEventListener(innerContainer, "touchmove", function (event) {
-      if (event.touches.length > 1) {
-        return;
-      }
+    if (event.touches.length > 1) {
+      return;
+    }
 
-      if (!_utils2.default.hasClass(boardElement, "tenuki-zoomed")) {
-        return true;
-      }
+    if (!_utils2.default.hasClass(renderer.boardElement, "tenuki-zoomed")) {
+      return true;
+    }
 
-      // prevent pull-to-refresh
-      event.preventDefault();
+    // prevent pull-to-refresh
+    event.preventDefault();
 
-      renderer.moveInProgress = true;
+    renderer.touchmoveChangedTouch = event.changedTouches[0];
 
-      var xCursor = event.changedTouches[0].clientX;
-      var yCursor = event.changedTouches[0].clientY;
+    renderer.moveInProgress = true;
+  },
 
-      var deltaX = xCursor - renderer.dragStartX;
-      var deltaY = yCursor - renderer.dragStartY;
+  handleTouchEnd: function handleTouchEnd(event) {
+    var renderer = this;
 
-      var translateY = renderer.translateY + deltaY / 2.5;
-      var translateX = renderer.translateX + deltaX / 2.5;
+    if (event.touches.length > 1) {
+      return;
+    }
 
-      if (translateY > 0.5 * innerContainer.clientHeight - renderer.MARGIN) {
-        translateY = 0.5 * innerContainer.clientHeight - renderer.MARGIN;
-      }
+    if (!_utils2.default.hasClass(renderer.boardElement, "tenuki-zoomed")) {
+      return;
+    }
 
-      if (translateX > 0.5 * innerContainer.clientWidth - renderer.MARGIN) {
-        translateX = 0.5 * innerContainer.clientWidth - renderer.MARGIN;
-      }
+    renderer.zoomContainer.style.transition = "";
 
-      if (translateY < -0.5 * innerContainer.clientHeight + renderer.MARGIN) {
-        translateY = -0.5 * innerContainer.clientHeight + renderer.MARGIN;
-      }
+    if (!renderer.moveInProgress) {
+      return;
+    }
+    renderer.translateY = renderer.lastTranslateY;
+    renderer.translateX = renderer.lastTranslateX;
+    renderer.moveInProgress = false;
+    renderer.touchmoveChangedTouch = null;
+  },
 
-      if (translateX < -0.5 * innerContainer.clientWidth + renderer.MARGIN) {
-        translateX = -0.5 * innerContainer.clientWidth + renderer.MARGIN;
-      }
+  processDragDelta: function processDragDelta() {
+    var renderer = this;
 
-      zoomContainer.style.transform = "translate3d(" + 2.5 * translateX + "px, " + 2.5 * translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+    if (!renderer.touchmoveChangedTouch) {
+      renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
+      return;
+    }
 
-      renderer.lastTranslateX = translateX;
-      renderer.lastTranslateY = translateY;
-    });
+    var innerContainer = renderer.innerContainer;
+    var zoomContainer = renderer.zoomContainer;
+
+    var xCursor = renderer.touchmoveChangedTouch.clientX;
+    var yCursor = renderer.touchmoveChangedTouch.clientY;
+
+    var deltaX = xCursor - renderer.dragStartX;
+    var deltaY = yCursor - renderer.dragStartY;
+
+    var translateY = renderer.translateY + deltaY / 2.5;
+    var translateX = renderer.translateX + deltaX / 2.5;
+
+    if (translateY > 0.5 * innerContainer.clientHeight - renderer.MARGIN) {
+      translateY = 0.5 * innerContainer.clientHeight - renderer.MARGIN;
+    }
+
+    if (translateX > 0.5 * innerContainer.clientWidth - renderer.MARGIN) {
+      translateX = 0.5 * innerContainer.clientWidth - renderer.MARGIN;
+    }
+
+    if (translateY < -0.5 * innerContainer.clientHeight + renderer.MARGIN) {
+      translateY = -0.5 * innerContainer.clientHeight + renderer.MARGIN;
+    }
+
+    if (translateX < -0.5 * innerContainer.clientWidth + renderer.MARGIN) {
+      translateX = -0.5 * innerContainer.clientWidth + renderer.MARGIN;
+    }
+
+    zoomContainer.style.transform = "translate3d(" + 2.5 * translateX + "px, " + 2.5 * translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+
+    renderer.lastTranslateX = translateX;
+    renderer.lastTranslateY = translateY;
+
+    renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
   },
 
   showPossibleMoveAt: function showPossibleMoveAt(intersectionElement) {
@@ -900,14 +938,17 @@ DOMRenderer.prototype = {
     var boardElement = this.boardElement;
     var zoomContainer = this.zoomContainer;
 
+    renderer.zoomContainerHeight = renderer.zoomContainerHeight || zoomContainer.clientHeight;
+    renderer.zoomContainerWidth = renderer.zoomContainerWidth || zoomContainer.clientWidth;
+
     renderer.touchedPoint = intersectionElement;
 
     if (_utils2.default.hasClass(boardElement, "tenuki-scaled")) {
       var top = intersectionElement.offsetTop;
       var left = intersectionElement.offsetLeft;
 
-      var translateY = 0.5 * zoomContainer.clientHeight - top - renderer.MARGIN;
-      var translateX = 0.5 * zoomContainer.clientWidth - left - renderer.MARGIN;
+      var translateY = 0.5 * renderer.zoomContainerHeight - top - renderer.MARGIN;
+      var translateX = 0.5 * renderer.zoomContainerWidth - left - renderer.MARGIN;
 
       zoomContainer.style.transform = "translate3d(" + 2.5 * translateX + "px, " + 2.5 * translateY + "px, 0) scale3d(2.5, 2.5, 1)";
       renderer.translateY = translateY;
@@ -915,6 +956,7 @@ DOMRenderer.prototype = {
 
       _utils2.default.addClass(renderer.cancelZoomElement, "visible");
       _utils2.default.addClass(renderer.boardElement, "tenuki-zoomed");
+      renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
     }
   },
 
@@ -937,6 +979,7 @@ DOMRenderer.prototype = {
     renderer.translateX = null;
     renderer.lastTranslateX = null;
     renderer.lastTranslateY = null;
+    window.cancelAnimationFrame(renderer.animationFrameRequestID);
 
     _utils2.default.removeClass(renderer.cancelZoomElement, "visible");
     _utils2.default.removeClass(renderer.boardElement, "tenuki-zoomed");

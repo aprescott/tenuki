@@ -190,6 +190,14 @@
   height: calc(28px + 1px);
 }
 
+.tenuki-board-textured,
+.tenuki-board-textured .tenuki-inner-container,
+.tenuki-board-textured .tenuki-zoom-container,
+.tenuki-board-textured .intersections {
+  /* scale(1) is for the same iOS 9 reason as above */
+  transform: scale(1) translate3d(0, 0, 0);
+}
+
 .tenuki-board-textured.tenuki-smaller-stones .intersection {
   width: calc(28px + 1px - 2px);
   height: calc(28px + 1px - 2px);
