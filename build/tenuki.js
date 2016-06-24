@@ -586,8 +586,6 @@ var _slicedToArray = function () {
   };
 }();
 
-exports.default = DOMRenderer;
-
 var _utils = require("./utils");
 
 var _utils2 = _interopRequireDefault(_utils);
@@ -596,7 +594,7 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-function DOMRenderer(boardElement, _ref) {
+var DOMRenderer = function DOMRenderer(boardElement, _ref) {
   var hooks = _ref.hooks;
   var options = _ref.options;
 
@@ -616,8 +614,10 @@ function DOMRenderer(boardElement, _ref) {
     _utils2.default.addClass(boardElement, "tenuki-board-textured");
     _utils2.default.addClass(boardElement, "tenuki-smaller-stones");
   }
+};
 
-  this._setup = function (boardState) {
+DOMRenderer.prototype = {
+  _setup: function _setup(boardState) {
     var renderer = this;
     var boardElement = this.boardElement;
 
@@ -893,9 +893,9 @@ function DOMRenderer(boardElement, _ref) {
       renderer.lastTranslateX = translateX;
       renderer.lastTranslateY = translateY;
     });
-  };
+  },
 
-  this.showPossibleMoveAt = function (intersectionElement) {
+  showPossibleMoveAt: function showPossibleMoveAt(intersectionElement) {
     var renderer = this;
     var boardElement = this.boardElement;
     var zoomContainer = this.zoomContainer;
@@ -916,15 +916,15 @@ function DOMRenderer(boardElement, _ref) {
       _utils2.default.addClass(renderer.cancelZoomElement, "visible");
       _utils2.default.addClass(renderer.boardElement, "tenuki-zoomed");
     }
-  };
+  },
 
-  this.resetTouchedPoint = function () {
+  resetTouchedPoint: function resetTouchedPoint() {
     var renderer = this;
 
     renderer.touchedPoint = null;
-  };
+  },
 
-  this.zoomOut = function () {
+  zoomOut: function zoomOut() {
     var renderer = this;
     var zoomContainer = renderer.zoomContainer;
 
@@ -940,9 +940,9 @@ function DOMRenderer(boardElement, _ref) {
 
     _utils2.default.removeClass(renderer.cancelZoomElement, "visible");
     _utils2.default.removeClass(renderer.boardElement, "tenuki-zoomed");
-  };
+  },
 
-  this.render = function (boardState) {
+  render: function render(boardState) {
     var _this = this;
 
     var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
@@ -1022,17 +1022,17 @@ function DOMRenderer(boardElement, _ref) {
     if (territory) {
       this.renderTerritory(territory, deadStones);
     }
-  };
+  },
 
-  this.renderStonesPlayed = function (intersections) {
+  renderStonesPlayed: function renderStonesPlayed(intersections) {
     var _this2 = this;
 
     intersections.forEach(function (intersection) {
       _this2.renderIntersection(intersection);
     });
-  };
+  },
 
-  this.updateMarkerPoints = function (_ref7) {
+  updateMarkerPoints: function updateMarkerPoints(_ref7) {
     var playedPoint = _ref7.playedPoint;
     var koPoint = _ref7.koPoint;
 
@@ -1045,9 +1045,9 @@ function DOMRenderer(boardElement, _ref) {
     if (playedPoint) {
       _utils2.default.addClass(renderer.grid[playedPoint.y][playedPoint.x], "marker");
     }
-  };
+  },
 
-  this.renderIntersection = function (intersection) {
+  renderIntersection: function renderIntersection(intersection) {
     var renderer = this;
 
     var intersectionEl = renderer.grid[intersection.y][intersection.x];
@@ -1077,9 +1077,9 @@ function DOMRenderer(boardElement, _ref) {
     if (intersectionEl.className !== classes.join(" ")) {
       intersectionEl.className = classes.join(" ");
     }
-  };
+  },
 
-  this.renderTerritory = function (territory, deadStones) {
+  renderTerritory: function renderTerritory(territory, deadStones) {
     var _this3 = this;
 
     _utils2.default.flatten(this.grid).forEach(function (element) {
@@ -1099,8 +1099,10 @@ function DOMRenderer(boardElement, _ref) {
     territory.white.forEach(function (territoryPoint) {
       _utils2.default.addClass(_this3.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
-  };
-}
+  }
+};
+
+exports.default = DOMRenderer;
 
 
 },{"./utils":12}],5:[function(require,module,exports){
