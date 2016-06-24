@@ -7,6 +7,10 @@ export default {
     return Array.prototype.concat.apply([], ary.map(lambda));
   },
 
+  cartesianProduct: function(ary1, ary2) {
+    return this.flatten(ary1.map(x => ary2.map(y => [x, y])));
+  },
+
   createElement: function(elementName, options) {
     const element = document.createElement(elementName);
 

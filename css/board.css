@@ -185,6 +185,58 @@
   height: calc(28px + 1px);
 }
 
+.tenuki-board-textured.tenuki-smaller-stones .intersection {
+  width: calc(28px + 1px - 2px);
+  height: calc(28px + 1px - 2px);
+  border: 1px solid transparent;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .occupied {
+  transition: 0.1s margin;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.marker {
+  transition: none;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-up {
+  margin-top: -1px;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-upup {
+  margin-top: -2px;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-down {
+  margin-top: 1px;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-downdown {
+  margin-top: 2px;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-none {
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-left {
+  margin-left: -1px;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-leftleft {
+  margin-left: -2px;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-right {
+  margin-left: 1px;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-rightright {
+  margin-left: 2px;
+}
+
+.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-none {
+}
+
 .tenuki-board .intersection,
 .tenuki-board .intersection .stone {
   position: absolute;

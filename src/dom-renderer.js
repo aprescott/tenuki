@@ -1,15 +1,22 @@
 import utils from "./utils";
 
-export default function DOMRenderer(boardElement, hooks = {}) {
+export default function DOMRenderer(boardElement, { hooks, options }) {
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
   this.BASE_MARGIN = this.INTERSECTION_GAP_SIZE - 10;
   this.MARGIN = boardElement.hasAttribute("data-include-coordinates") ? this.BASE_MARGIN + this.GUTTER_MARGIN : this.BASE_MARGIN;
   this.boardElement = boardElement;
   this.grid = [];
-  this.hooks = hooks;
+  this.hooks = hooks || {};
+  this._options = options || {};
   this._touchEventFired = false;
   this._initialized = false;
+
+  if (this._options["fuzzyStonePlacement"]) {
+    utils.addClass(boardElement, "tenuki-fuzzy-placement");
+    utils.addClass(boardElement, "tenuki-board-textured");
+    utils.addClass(boardElement, "tenuki-smaller-stones");
+  }
 
   this._setup = function(boardState) {
     const renderer = this;
@@ -345,7 +352,73 @@ export default function DOMRenderer(boardElement, hooks = {}) {
     this.resetTouchedPoint();
 
     this.renderStonesPlayed(boardState.intersections);
-    this.updateMarkerPoints({ playedPoint: boardState.playedPoint, koPoint: boardState.koPoint });
+
+    const playedPoint = boardState.playedPoint;
+
+    this.updateMarkerPoints({ playedPoint: playedPoint, koPoint: boardState.koPoint });
+
+    if (this._options["fuzzyStonePlacement"] && playedPoint) {
+      const verticalShiftClasses = [
+        "v-shift-up",
+        "v-shift-upup",
+        "v-shift-down",
+        "v-shift-downdown",
+        "v-shift-none"
+      ];
+
+      const horizontalShiftClasses = [
+        "h-shift-left",
+        "h-shift-leftleft",
+        "h-shift-right",
+        "h-shift-rightright",
+        "h-shift-none"
+      ];
+
+      const shiftClasses = verticalShiftClasses.concat(horizontalShiftClasses);
+
+      const alreadyShifted = shiftClasses.some(c => utils.hasClass(this.grid[playedPoint.y][playedPoint.x], c));
+
+      if (!alreadyShifted) {
+        const possibleShifts = utils.cartesianProduct(verticalShiftClasses, horizontalShiftClasses);
+        const [playedVerticalShift, playedHorizontalShift] = possibleShifts[Math.floor(Math.random() * possibleShifts.length)];
+
+        [
+                   [-1, 0],
+          [0, -1],          [0, 1],
+                    [1, 0]
+        ].forEach(([y, x]) => {
+          if (this.grid[playedPoint.y + y] && this.grid[playedPoint.y + y][playedPoint.x + x]) {
+            const neighboringElement = this.grid[playedPoint.y + y][playedPoint.x + x];
+
+            if (!utils.hasClass(neighboringElement, "empty")) {
+              [
+                [-1, 0, "v-shift-downdown", "v-shift-up", "v-shift-down"],
+                [-1, 0, "v-shift-downdown", "v-shift-upup", "v-shift-none"],
+                [-1, 0, "v-shift-down", "v-shift-upup", "v-shift-none"],
+                [1, 0, "v-shift-upup", "v-shift-down", "v-shift-up"],
+                [1, 0, "v-shift-upup", "v-shift-downdown", "v-shift-none"],
+                [1, 0, "v-shift-up", "v-shift-downdown", "v-shift-none"],
+
+                [0, -1, "h-shift-rightright", "h-shift-left", "h-shift-right"],
+                [0, -1, "h-shift-rightright", "h-shift-leftleft", "h-shift-none"],
+                [0, -1, "h-shift-right", "h-shift-leftleft", "h-shift-none"],
+                [0, 1, "h-shift-leftleft", "h-shift-right", "h-shift-left"],
+                [0, 1, "h-shift-leftleft", "h-shift-rightright", "h-shift-none"],
+                [0, 1, "h-shift-left", "h-shift-rightright", "h-shift-none"]
+              ].forEach(([requiredYOffset, requiredXOffset, requiredNeighborShift, conflictingPlayedShift, newNeighborShift]) => {
+                if (y === requiredYOffset && x === requiredXOffset && utils.hasClass(neighboringElement, requiredNeighborShift) && (playedVerticalShift === conflictingPlayedShift || playedHorizontalShift === conflictingPlayedShift)) {
+                  utils.removeClass(neighboringElement, requiredNeighborShift);
+                  utils.addClass(neighboringElement, newNeighborShift);
+                }
+              });
+            }
+          }
+        });
+
+        utils.addClass(this.grid[playedPoint.y][playedPoint.x], playedVerticalShift);
+        utils.addClass(this.grid[playedPoint.y][playedPoint.x], playedHorizontalShift);
+      }
+    }
 
     if (territory) {
       this.renderTerritory(territory, deadStones);
@@ -387,6 +460,25 @@ export default function DOMRenderer(boardElement, hooks = {}) {
       } else {
         classes.push("white");
       }
+
+      const shiftClasses = [
+        "v-shift-up",
+        "v-shift-upup",
+        "v-shift-down",
+        "v-shift-downdown",
+        "v-shift-none",
+        "h-shift-left",
+        "h-shift-leftleft",
+        "h-shift-right",
+        "h-shift-rightright",
+        "h-shift-none"
+      ];
+
+      shiftClasses.forEach(shiftClass => {
+        if (utils.hasClass(intersectionEl, shiftClass)) {
+          classes.push(shiftClass);
+        }
+      });
     }
 
     if (intersectionEl.className !== classes.join(" ")) {

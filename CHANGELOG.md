@@ -13,3 +13,4 @@
 * Prevent Safari/WebKit from showing a grey box on an empty intersection on tap.
 * Empty intersections are no longer allowed to be treated as dead stones.
 * Stone styling is changed slightly. The last-played-point marker is now a disc not a circle. Textured stone styling is less shiny/reflective in appearance.
+* Fuzzy stone placement is added as a configurable option. When enabled, stones will be randomly placed off center by 1px or 2px. If stones collide after placement, existing stones are moved out of the way.

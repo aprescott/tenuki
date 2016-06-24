@@ -559,6 +559,33 @@ exports.default = Client;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];var _n = true;var _d = false;var _e = undefined;try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;_e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }return _arr;
+  }return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
+
 exports.default = DOMRenderer;
 
 var _utils = require("./utils");
@@ -569,8 +596,9 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-function DOMRenderer(boardElement) {
-  var hooks = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+function DOMRenderer(boardElement, _ref) {
+  var hooks = _ref.hooks;
+  var options = _ref.options;
 
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
@@ -578,9 +606,16 @@ function DOMRenderer(boardElement) {
   this.MARGIN = boardElement.hasAttribute("data-include-coordinates") ? this.BASE_MARGIN + this.GUTTER_MARGIN : this.BASE_MARGIN;
   this.boardElement = boardElement;
   this.grid = [];
-  this.hooks = hooks;
+  this.hooks = hooks || {};
+  this._options = options || {};
   this._touchEventFired = false;
   this._initialized = false;
+
+  if (this._options["fuzzyStonePlacement"]) {
+    _utils2.default.addClass(boardElement, "tenuki-fuzzy-placement");
+    _utils2.default.addClass(boardElement, "tenuki-board-textured");
+    _utils2.default.addClass(boardElement, "tenuki-smaller-stones");
+  }
 
   this._setup = function (boardState) {
     var renderer = this;
@@ -908,10 +943,12 @@ function DOMRenderer(boardElement) {
   };
 
   this.render = function (boardState) {
-    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+    var _this = this;
 
-    var territory = _ref.territory;
-    var deadStones = _ref.deadStones;
+    var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var territory = _ref2.territory;
+    var deadStones = _ref2.deadStones;
 
     if (!this._initialized) {
       this._setup(boardState);
@@ -921,7 +958,66 @@ function DOMRenderer(boardElement) {
     this.resetTouchedPoint();
 
     this.renderStonesPlayed(boardState.intersections);
-    this.updateMarkerPoints({ playedPoint: boardState.playedPoint, koPoint: boardState.koPoint });
+
+    var playedPoint = boardState.playedPoint;
+
+    this.updateMarkerPoints({ playedPoint: playedPoint, koPoint: boardState.koPoint });
+
+    if (this._options["fuzzyStonePlacement"] && playedPoint) {
+      var verticalShiftClasses = ["v-shift-up", "v-shift-upup", "v-shift-down", "v-shift-downdown", "v-shift-none"];
+
+      var horizontalShiftClasses = ["h-shift-left", "h-shift-leftleft", "h-shift-right", "h-shift-rightright", "h-shift-none"];
+
+      var shiftClasses = verticalShiftClasses.concat(horizontalShiftClasses);
+
+      var alreadyShifted = shiftClasses.some(function (c) {
+        return _utils2.default.hasClass(_this.grid[playedPoint.y][playedPoint.x], c);
+      });
+
+      if (!alreadyShifted) {
+        (function () {
+          var possibleShifts = _utils2.default.cartesianProduct(verticalShiftClasses, horizontalShiftClasses);
+
+          var _possibleShifts$Math$ = _slicedToArray(possibleShifts[Math.floor(Math.random() * possibleShifts.length)], 2);
+
+          var playedVerticalShift = _possibleShifts$Math$[0];
+          var playedHorizontalShift = _possibleShifts$Math$[1];
+
+          [[-1, 0], [0, -1], [0, 1], [1, 0]].forEach(function (_ref3) {
+            var _ref4 = _slicedToArray(_ref3, 2);
+
+            var y = _ref4[0];
+            var x = _ref4[1];
+
+            if (_this.grid[playedPoint.y + y] && _this.grid[playedPoint.y + y][playedPoint.x + x]) {
+              (function () {
+                var neighboringElement = _this.grid[playedPoint.y + y][playedPoint.x + x];
+
+                if (!_utils2.default.hasClass(neighboringElement, "empty")) {
+                  [[-1, 0, "v-shift-downdown", "v-shift-up", "v-shift-down"], [-1, 0, "v-shift-downdown", "v-shift-upup", "v-shift-none"], [-1, 0, "v-shift-down", "v-shift-upup", "v-shift-none"], [1, 0, "v-shift-upup", "v-shift-down", "v-shift-up"], [1, 0, "v-shift-upup", "v-shift-downdown", "v-shift-none"], [1, 0, "v-shift-up", "v-shift-downdown", "v-shift-none"], [0, -1, "h-shift-rightright", "h-shift-left", "h-shift-right"], [0, -1, "h-shift-rightright", "h-shift-leftleft", "h-shift-none"], [0, -1, "h-shift-right", "h-shift-leftleft", "h-shift-none"], [0, 1, "h-shift-leftleft", "h-shift-right", "h-shift-left"], [0, 1, "h-shift-leftleft", "h-shift-rightright", "h-shift-none"], [0, 1, "h-shift-left", "h-shift-rightright", "h-shift-none"]].forEach(function (_ref5) {
+                    var _ref6 = _slicedToArray(_ref5, 5);
+
+                    var requiredYOffset = _ref6[0];
+                    var requiredXOffset = _ref6[1];
+                    var requiredNeighborShift = _ref6[2];
+                    var conflictingPlayedShift = _ref6[3];
+                    var newNeighborShift = _ref6[4];
+
+                    if (y === requiredYOffset && x === requiredXOffset && _utils2.default.hasClass(neighboringElement, requiredNeighborShift) && (playedVerticalShift === conflictingPlayedShift || playedHorizontalShift === conflictingPlayedShift)) {
+                      _utils2.default.removeClass(neighboringElement, requiredNeighborShift);
+                      _utils2.default.addClass(neighboringElement, newNeighborShift);
+                    }
+                  });
+                }
+              })();
+            }
+          });
+
+          _utils2.default.addClass(_this.grid[playedPoint.y][playedPoint.x], playedVerticalShift);
+          _utils2.default.addClass(_this.grid[playedPoint.y][playedPoint.x], playedHorizontalShift);
+        })();
+      }
+    }
 
     if (territory) {
       this.renderTerritory(territory, deadStones);
@@ -929,16 +1025,16 @@ function DOMRenderer(boardElement) {
   };
 
   this.renderStonesPlayed = function (intersections) {
-    var _this = this;
+    var _this2 = this;
 
     intersections.forEach(function (intersection) {
-      _this.renderIntersection(intersection);
+      _this2.renderIntersection(intersection);
     });
   };
 
-  this.updateMarkerPoints = function (_ref2) {
-    var playedPoint = _ref2.playedPoint;
-    var koPoint = _ref2.koPoint;
+  this.updateMarkerPoints = function (_ref7) {
+    var playedPoint = _ref7.playedPoint;
+    var koPoint = _ref7.koPoint;
 
     var renderer = this;
 
@@ -968,6 +1064,14 @@ function DOMRenderer(boardElement) {
       } else {
         classes.push("white");
       }
+
+      var shiftClasses = ["v-shift-up", "v-shift-upup", "v-shift-down", "v-shift-downdown", "v-shift-none", "h-shift-left", "h-shift-leftleft", "h-shift-right", "h-shift-rightright", "h-shift-none"];
+
+      shiftClasses.forEach(function (shiftClass) {
+        if (_utils2.default.hasClass(intersectionEl, shiftClass)) {
+          classes.push(shiftClass);
+        }
+      });
     }
 
     if (intersectionEl.className !== classes.join(" ")) {
@@ -976,7 +1080,7 @@ function DOMRenderer(boardElement) {
   };
 
   this.renderTerritory = function (territory, deadStones) {
-    var _this2 = this;
+    var _this3 = this;
 
     _utils2.default.flatten(this.grid).forEach(function (element) {
       _utils2.default.removeClass(element, "territory-black");
@@ -985,15 +1089,15 @@ function DOMRenderer(boardElement) {
     });
 
     deadStones.forEach(function (point) {
-      _utils2.default.addClass(_this2.grid[point.y][point.x], "dead");
+      _utils2.default.addClass(_this3.grid[point.y][point.x], "dead");
     });
 
     territory.black.forEach(function (territoryPoint) {
-      _utils2.default.addClass(_this2.grid[territoryPoint.y][territoryPoint.x], "territory-black");
+      _utils2.default.addClass(_this3.grid[territoryPoint.y][territoryPoint.x], "territory-black");
     });
 
     territory.white.forEach(function (territoryPoint) {
-      _utils2.default.addClass(_this2.grid[territoryPoint.y][territoryPoint.x], "territory-white");
+      _utils2.default.addClass(_this3.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
   };
 }
@@ -1133,7 +1237,7 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "_hooks"];
+var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "_hooks", "fuzzyStonePlacement"];
 
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -1230,7 +1334,12 @@ Game.prototype = {
         }
       };
 
-      this.renderer = new _domRenderer2.default(this._boardElement, options["_hooks"] || defaultRendererHooks);
+      this.renderer = new _domRenderer2.default(this._boardElement, {
+        hooks: options["_hooks"] || defaultRendererHooks,
+        options: {
+          fuzzyStonePlacement: options["fuzzyStonePlacement"]
+        }
+      });
     } else {
       this.renderer = new _nullRenderer2.default();
     }
@@ -2142,6 +2251,14 @@ exports.default = {
 
   flatMap: function flatMap(ary, lambda) {
     return Array.prototype.concat.apply([], ary.map(lambda));
+  },
+
+  cartesianProduct: function cartesianProduct(ary1, ary2) {
+    return this.flatten(ary1.map(function (x) {
+      return ary2.map(function (y) {
+        return [x, y];
+      });
+    }));
   },
 
   createElement: function createElement(elementName, options) {
