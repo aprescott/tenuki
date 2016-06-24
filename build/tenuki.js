@@ -559,7 +559,32 @@ exports.default = Client;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = DOMRenderer;
+
+var _slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];var _n = true;var _d = false;var _e = undefined;try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;_e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }return _arr;
+  }return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
 
 var _utils = require("./utils");
 
@@ -569,8 +594,9 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-function DOMRenderer(boardElement) {
-  var hooks = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+var DOMRenderer = function DOMRenderer(boardElement, _ref) {
+  var hooks = _ref.hooks;
+  var options = _ref.options;
 
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
@@ -578,11 +604,20 @@ function DOMRenderer(boardElement) {
   this.MARGIN = boardElement.hasAttribute("data-include-coordinates") ? this.BASE_MARGIN + this.GUTTER_MARGIN : this.BASE_MARGIN;
   this.boardElement = boardElement;
   this.grid = [];
-  this.hooks = hooks;
+  this.hooks = hooks || {};
+  this._options = options || {};
   this._touchEventFired = false;
   this._initialized = false;
 
-  this._setup = function (boardState) {
+  if (this._options["fuzzyStonePlacement"]) {
+    _utils2.default.addClass(boardElement, "tenuki-fuzzy-placement");
+    _utils2.default.addClass(boardElement, "tenuki-board-textured");
+    _utils2.default.addClass(boardElement, "tenuki-smaller-stones");
+  }
+};
+
+DOMRenderer.prototype = {
+  _setup: function _setup(boardState) {
     var renderer = this;
     var boardElement = this.boardElement;
 
@@ -601,11 +636,17 @@ function DOMRenderer(boardElement) {
 
     renderer.cancelZoomElement = _utils2.default.createElement("div", { class: "cancel-zoom" });
     var cancelZoomBackdrop = _utils2.default.createElement("div", { class: "cancel-zoom-backdrop" });
-    _utils2.default.addEventListener(renderer.cancelZoomElement, "click", function () {
+    _utils2.default.addEventListener(renderer.cancelZoomElement, "click", function (event) {
+      event.preventDefault();
       renderer.zoomOut();
+
+      return false;
     });
-    _utils2.default.addEventListener(cancelZoomBackdrop, "click", function () {
+    _utils2.default.addEventListener(cancelZoomBackdrop, "click", function (event) {
+      event.preventDefault();
       renderer.zoomOut();
+
+      return false;
     });
     _utils2.default.appendElement(innerContainer, renderer.cancelZoomElement);
     _utils2.default.appendElement(innerContainer, cancelZoomBackdrop);
@@ -613,7 +654,7 @@ function DOMRenderer(boardElement) {
     if (boardState.boardSize < 7) {
       if (boardState.boardSize > 1 && boardState.boardSize % 2 === 1) {
         var hoshi = _utils2.default.createElement("div", { class: "hoshi" });
-        hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + (boardState.boardSize - 1) / 2 + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+        hoshi.style.top = renderer.MARGIN + (boardState.boardSize - 1) / 2 * (renderer.INTERSECTION_GAP_SIZE + 1) - 2 + "px";
         hoshi.style.left = hoshi.style.top;
 
         _utils2.default.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
@@ -632,27 +673,27 @@ function DOMRenderer(boardElement) {
             var _hoshi = _utils2.default.createElement("div", { class: "hoshi" });
 
             if (hoshiY === 0) {
-              _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.top = renderer.MARGIN + hoshiOffset * (renderer.INTERSECTION_GAP_SIZE + 1) - 2 + "px";
             }
 
             if (hoshiY === 1) {
-              _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + ((boardState.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.top = renderer.MARGIN + ((boardState.boardSize + 1) / 2 - 1) * (renderer.INTERSECTION_GAP_SIZE + 1) - 2 + "px";
             }
 
             if (hoshiY === 2) {
-              _hoshi.style.top = "calc(" + renderer.MARGIN + "px + " + (boardState.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.top = renderer.MARGIN + (boardState.boardSize - hoshiOffset - 1) * (renderer.INTERSECTION_GAP_SIZE + 1) - 2 + "px";
             }
 
             if (hoshiX === 0) {
-              _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.left = renderer.MARGIN + hoshiOffset * (renderer.INTERSECTION_GAP_SIZE + 1) - 2 + "px";
             }
 
             if (hoshiX === 1) {
-              _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + ((boardState.boardSize + 1) / 2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.left = renderer.MARGIN + ((boardState.boardSize + 1) / 2 - 1) * (renderer.INTERSECTION_GAP_SIZE + 1) - 2 + "px";
             }
 
             if (hoshiX === 2) {
-              _hoshi.style.left = "calc(" + renderer.MARGIN + "px + " + (boardState.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+              _hoshi.style.left = renderer.MARGIN + (boardState.boardSize - hoshiOffset - 1) * (renderer.INTERSECTION_GAP_SIZE + 1) - 2 + "px";
             }
 
             _utils2.default.appendElement(boardElement.querySelector(".hoshi-points"), _hoshi);
@@ -671,8 +712,8 @@ function DOMRenderer(boardElement) {
 
       for (var x = 0; x < boardState.boardSize; x++) {
         var intersectionElement = _utils2.default.createElement("div", { class: "intersection empty" });
-        var highlightElement = _utils2.default.createElement("div", { class: "highlight" });
-        _utils2.default.appendElement(intersectionElement, highlightElement);
+        var stoneElement = _utils2.default.createElement("div", { class: "stone" });
+        _utils2.default.appendElement(intersectionElement, stoneElement);
 
         intersectionElement.setAttribute("data-position-x", x);
         intersectionElement.setAttribute("data-position-y", y);
@@ -710,10 +751,6 @@ function DOMRenderer(boardElement) {
     zoomContainer.style.height = boardHeight + "px";
 
     _utils2.default.flatten(renderer.grid).forEach(function (intersectionEl) {
-      _utils2.default.addEventListener(intersectionEl, "touchstart", function () {
-        renderer._touchEventFired = true;
-      });
-
       _utils2.default.addEventListener(intersectionEl, "mouseenter", function () {
         var intersectionElement = this;
         var hoveredYPosition = Number(intersectionElement.getAttribute("data-position-y"));
@@ -773,97 +810,136 @@ function DOMRenderer(boardElement) {
       innerContainer.style["transform-origin"] = "top left";
       innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
 
+      // we'll potentially be zooming on touch devices
+      zoomContainer.style.willChange = "transform";
+
       // reset the outer element's height to match, ensuring that we free up any lingering whitespace
       boardElement.style.width = innerContainer.getBoundingClientRect().width + "px";
       boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
     }
 
-    _utils2.default.addEventListener(boardElement, "touchstart", function (event) {
-      if (event.touches.length > 1) {
-        return;
-      }
+    renderer.touchmoveChangedTouch = null;
+    renderer.touchstartEventHandler = renderer.handleTouchStart.bind(renderer);
+    renderer.touchmoveEventHandler = renderer.handleTouchMove.bind(renderer);
+    renderer.touchendEventHandler = renderer.handleTouchEnd.bind(renderer);
 
-      if (!_utils2.default.hasClass(boardElement, "tenuki-zoomed")) {
-        return;
-      }
+    _utils2.default.addEventListener(boardElement, "touchstart", renderer.touchstartEventHandler);
+    _utils2.default.addEventListener(boardElement, "touchend", renderer.touchendEventHandler);
+    _utils2.default.addEventListener(boardElement, "touchmove", renderer.touchmoveEventHandler);
+  },
 
-      var xCursor = event.changedTouches[0].clientX;
-      var yCursor = event.changedTouches[0].clientY;
+  handleTouchStart: function handleTouchStart(event) {
+    var renderer = this;
+    renderer._touchEventFired = true;
 
-      renderer.dragStartX = xCursor;
-      renderer.dragStartY = yCursor;
-      zoomContainer.style.transition = "none";
-    });
+    if (event.touches.length > 1) {
+      return;
+    }
 
-    _utils2.default.addEventListener(innerContainer, "touchend", function (event) {
-      if (event.touches.length > 1) {
-        return;
-      }
+    if (!_utils2.default.hasClass(renderer.boardElement, "tenuki-zoomed")) {
+      return;
+    }
 
-      if (!_utils2.default.hasClass(boardElement, "tenuki-zoomed")) {
-        return;
-      }
+    var xCursor = event.changedTouches[0].clientX;
+    var yCursor = event.changedTouches[0].clientY;
 
-      zoomContainer.style.transition = "";
+    renderer.dragStartX = xCursor;
+    renderer.dragStartY = yCursor;
+    renderer.zoomContainer.style.transition = "none";
+  },
 
-      if (!renderer.moveInProgress) {
-        return;
-      }
-      renderer.translateY = renderer.lastTranslateY;
-      renderer.translateX = renderer.lastTranslateX;
-      renderer.moveInProgress = false;
-    });
+  handleTouchMove: function handleTouchMove(event) {
+    var renderer = this;
 
-    _utils2.default.addEventListener(innerContainer, "touchmove", function (event) {
-      if (event.touches.length > 1) {
-        return;
-      }
+    if (event.touches.length > 1) {
+      return;
+    }
 
-      if (!_utils2.default.hasClass(boardElement, "tenuki-zoomed")) {
-        return true;
-      }
+    if (!_utils2.default.hasClass(renderer.boardElement, "tenuki-zoomed")) {
+      return true;
+    }
 
-      // prevent pull-to-refresh
-      event.preventDefault();
+    // prevent pull-to-refresh
+    event.preventDefault();
 
-      renderer.moveInProgress = true;
+    renderer.touchmoveChangedTouch = event.changedTouches[0];
 
-      var xCursor = event.changedTouches[0].clientX;
-      var yCursor = event.changedTouches[0].clientY;
+    renderer.moveInProgress = true;
+  },
 
-      var deltaX = xCursor - renderer.dragStartX;
-      var deltaY = yCursor - renderer.dragStartY;
+  handleTouchEnd: function handleTouchEnd(event) {
+    var renderer = this;
 
-      var translateY = renderer.translateY + deltaY / 2.5;
-      var translateX = renderer.translateX + deltaX / 2.5;
+    if (event.touches.length > 1) {
+      return;
+    }
 
-      if (translateY > 0.5 * innerContainer.clientHeight - renderer.MARGIN) {
-        translateY = 0.5 * innerContainer.clientHeight - renderer.MARGIN;
-      }
+    if (!_utils2.default.hasClass(renderer.boardElement, "tenuki-zoomed")) {
+      return;
+    }
 
-      if (translateX > 0.5 * innerContainer.clientWidth - renderer.MARGIN) {
-        translateX = 0.5 * innerContainer.clientWidth - renderer.MARGIN;
-      }
+    renderer.zoomContainer.style.transition = "";
 
-      if (translateY < -0.5 * innerContainer.clientHeight + renderer.MARGIN) {
-        translateY = -0.5 * innerContainer.clientHeight + renderer.MARGIN;
-      }
+    if (!renderer.moveInProgress) {
+      return;
+    }
+    renderer.translateY = renderer.lastTranslateY;
+    renderer.translateX = renderer.lastTranslateX;
+    renderer.moveInProgress = false;
+    renderer.touchmoveChangedTouch = null;
+  },
 
-      if (translateX < -0.5 * innerContainer.clientWidth + renderer.MARGIN) {
-        translateX = -0.5 * innerContainer.clientWidth + renderer.MARGIN;
-      }
+  processDragDelta: function processDragDelta() {
+    var renderer = this;
 
-      zoomContainer.style.transform = "translate3d(" + 2.5 * translateX + "px, " + 2.5 * translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+    if (!renderer.touchmoveChangedTouch) {
+      renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
+      return;
+    }
 
-      renderer.lastTranslateX = translateX;
-      renderer.lastTranslateY = translateY;
-    });
-  };
+    var innerContainer = renderer.innerContainer;
+    var zoomContainer = renderer.zoomContainer;
 
-  this.showPossibleMoveAt = function (intersectionElement) {
+    var xCursor = renderer.touchmoveChangedTouch.clientX;
+    var yCursor = renderer.touchmoveChangedTouch.clientY;
+
+    var deltaX = xCursor - renderer.dragStartX;
+    var deltaY = yCursor - renderer.dragStartY;
+
+    var translateY = renderer.translateY + deltaY / 2.5;
+    var translateX = renderer.translateX + deltaX / 2.5;
+
+    if (translateY > 0.5 * innerContainer.clientHeight - renderer.MARGIN) {
+      translateY = 0.5 * innerContainer.clientHeight - renderer.MARGIN;
+    }
+
+    if (translateX > 0.5 * innerContainer.clientWidth - renderer.MARGIN) {
+      translateX = 0.5 * innerContainer.clientWidth - renderer.MARGIN;
+    }
+
+    if (translateY < -0.5 * innerContainer.clientHeight + renderer.MARGIN) {
+      translateY = -0.5 * innerContainer.clientHeight + renderer.MARGIN;
+    }
+
+    if (translateX < -0.5 * innerContainer.clientWidth + renderer.MARGIN) {
+      translateX = -0.5 * innerContainer.clientWidth + renderer.MARGIN;
+    }
+
+    zoomContainer.style.transform = "translate3d(" + 2.5 * translateX + "px, " + 2.5 * translateY + "px, 0) scale3d(2.5, 2.5, 1)";
+
+    renderer.lastTranslateX = translateX;
+    renderer.lastTranslateY = translateY;
+
+    renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
+  },
+
+  showPossibleMoveAt: function showPossibleMoveAt(intersectionElement) {
     var renderer = this;
     var boardElement = this.boardElement;
     var zoomContainer = this.zoomContainer;
+
+    renderer.zoomContainerHeight = renderer.zoomContainerHeight || zoomContainer.clientHeight;
+    renderer.zoomContainerWidth = renderer.zoomContainerWidth || zoomContainer.clientWidth;
 
     renderer.touchedPoint = intersectionElement;
 
@@ -871,8 +947,8 @@ function DOMRenderer(boardElement) {
       var top = intersectionElement.offsetTop;
       var left = intersectionElement.offsetLeft;
 
-      var translateY = 0.5 * zoomContainer.clientHeight - top - renderer.MARGIN;
-      var translateX = 0.5 * zoomContainer.clientWidth - left - renderer.MARGIN;
+      var translateY = 0.5 * renderer.zoomContainerHeight - top - renderer.MARGIN;
+      var translateX = 0.5 * renderer.zoomContainerWidth - left - renderer.MARGIN;
 
       zoomContainer.style.transform = "translate3d(" + 2.5 * translateX + "px, " + 2.5 * translateY + "px, 0) scale3d(2.5, 2.5, 1)";
       renderer.translateY = translateY;
@@ -880,16 +956,17 @@ function DOMRenderer(boardElement) {
 
       _utils2.default.addClass(renderer.cancelZoomElement, "visible");
       _utils2.default.addClass(renderer.boardElement, "tenuki-zoomed");
+      renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
     }
-  };
+  },
 
-  this.resetTouchedPoint = function () {
+  resetTouchedPoint: function resetTouchedPoint() {
     var renderer = this;
 
     renderer.touchedPoint = null;
-  };
+  },
 
-  this.zoomOut = function () {
+  zoomOut: function zoomOut() {
     var renderer = this;
     var zoomContainer = renderer.zoomContainer;
 
@@ -902,16 +979,19 @@ function DOMRenderer(boardElement) {
     renderer.translateX = null;
     renderer.lastTranslateX = null;
     renderer.lastTranslateY = null;
+    window.cancelAnimationFrame(renderer.animationFrameRequestID);
 
     _utils2.default.removeClass(renderer.cancelZoomElement, "visible");
     _utils2.default.removeClass(renderer.boardElement, "tenuki-zoomed");
-  };
+  },
 
-  this.render = function (boardState) {
-    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+  render: function render(boardState) {
+    var _this = this;
 
-    var territory = _ref.territory;
-    var deadStones = _ref.deadStones;
+    var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    var territory = _ref2.territory;
+    var deadStones = _ref2.deadStones;
 
     if (!this._initialized) {
       this._setup(boardState);
@@ -921,24 +1001,83 @@ function DOMRenderer(boardElement) {
     this.resetTouchedPoint();
 
     this.renderStonesPlayed(boardState.intersections);
-    this.updateMarkerPoints({ playedPoint: boardState.playedPoint, koPoint: boardState.koPoint });
+
+    var playedPoint = boardState.playedPoint;
+
+    this.updateMarkerPoints({ playedPoint: playedPoint, koPoint: boardState.koPoint });
+
+    if (this._options["fuzzyStonePlacement"] && playedPoint) {
+      var verticalShiftClasses = ["v-shift-up", "v-shift-upup", "v-shift-down", "v-shift-downdown", "v-shift-none"];
+
+      var horizontalShiftClasses = ["h-shift-left", "h-shift-leftleft", "h-shift-right", "h-shift-rightright", "h-shift-none"];
+
+      var shiftClasses = verticalShiftClasses.concat(horizontalShiftClasses);
+
+      var alreadyShifted = shiftClasses.some(function (c) {
+        return _utils2.default.hasClass(_this.grid[playedPoint.y][playedPoint.x], c);
+      });
+
+      if (!alreadyShifted) {
+        (function () {
+          var possibleShifts = _utils2.default.cartesianProduct(verticalShiftClasses, horizontalShiftClasses);
+
+          var _possibleShifts$Math$ = _slicedToArray(possibleShifts[Math.floor(Math.random() * possibleShifts.length)], 2);
+
+          var playedVerticalShift = _possibleShifts$Math$[0];
+          var playedHorizontalShift = _possibleShifts$Math$[1];
+
+          [[-1, 0], [0, -1], [0, 1], [1, 0]].forEach(function (_ref3) {
+            var _ref4 = _slicedToArray(_ref3, 2);
+
+            var y = _ref4[0];
+            var x = _ref4[1];
+
+            if (_this.grid[playedPoint.y + y] && _this.grid[playedPoint.y + y][playedPoint.x + x]) {
+              (function () {
+                var neighboringElement = _this.grid[playedPoint.y + y][playedPoint.x + x];
+
+                if (!_utils2.default.hasClass(neighboringElement, "empty")) {
+                  [[-1, 0, "v-shift-downdown", "v-shift-up", "v-shift-down"], [-1, 0, "v-shift-downdown", "v-shift-upup", "v-shift-none"], [-1, 0, "v-shift-down", "v-shift-upup", "v-shift-none"], [1, 0, "v-shift-upup", "v-shift-down", "v-shift-up"], [1, 0, "v-shift-upup", "v-shift-downdown", "v-shift-none"], [1, 0, "v-shift-up", "v-shift-downdown", "v-shift-none"], [0, -1, "h-shift-rightright", "h-shift-left", "h-shift-right"], [0, -1, "h-shift-rightright", "h-shift-leftleft", "h-shift-none"], [0, -1, "h-shift-right", "h-shift-leftleft", "h-shift-none"], [0, 1, "h-shift-leftleft", "h-shift-right", "h-shift-left"], [0, 1, "h-shift-leftleft", "h-shift-rightright", "h-shift-none"], [0, 1, "h-shift-left", "h-shift-rightright", "h-shift-none"]].forEach(function (_ref5) {
+                    var _ref6 = _slicedToArray(_ref5, 5);
+
+                    var requiredYOffset = _ref6[0];
+                    var requiredXOffset = _ref6[1];
+                    var requiredNeighborShift = _ref6[2];
+                    var conflictingPlayedShift = _ref6[3];
+                    var newNeighborShift = _ref6[4];
+
+                    if (y === requiredYOffset && x === requiredXOffset && _utils2.default.hasClass(neighboringElement, requiredNeighborShift) && (playedVerticalShift === conflictingPlayedShift || playedHorizontalShift === conflictingPlayedShift)) {
+                      _utils2.default.removeClass(neighboringElement, requiredNeighborShift);
+                      _utils2.default.addClass(neighboringElement, newNeighborShift);
+                    }
+                  });
+                }
+              })();
+            }
+          });
+
+          _utils2.default.addClass(_this.grid[playedPoint.y][playedPoint.x], playedVerticalShift);
+          _utils2.default.addClass(_this.grid[playedPoint.y][playedPoint.x], playedHorizontalShift);
+        })();
+      }
+    }
 
     if (territory) {
       this.renderTerritory(territory, deadStones);
     }
-  };
+  },
 
-  this.renderStonesPlayed = function (intersections) {
-    var _this = this;
+  renderStonesPlayed: function renderStonesPlayed(intersections) {
+    var _this2 = this;
 
     intersections.forEach(function (intersection) {
-      _this.renderIntersection(intersection);
+      _this2.renderIntersection(intersection);
     });
-  };
+  },
 
-  this.updateMarkerPoints = function (_ref2) {
-    var playedPoint = _ref2.playedPoint;
-    var koPoint = _ref2.koPoint;
+  updateMarkerPoints: function updateMarkerPoints(_ref7) {
+    var playedPoint = _ref7.playedPoint;
+    var koPoint = _ref7.koPoint;
 
     var renderer = this;
 
@@ -949,9 +1088,9 @@ function DOMRenderer(boardElement) {
     if (playedPoint) {
       _utils2.default.addClass(renderer.grid[playedPoint.y][playedPoint.x], "marker");
     }
-  };
+  },
 
-  this.renderIntersection = function (intersection) {
+  renderIntersection: function renderIntersection(intersection) {
     var renderer = this;
 
     var intersectionEl = renderer.grid[intersection.y][intersection.x];
@@ -961,22 +1100,30 @@ function DOMRenderer(boardElement) {
     if (intersection.isEmpty()) {
       classes.push("empty");
     } else {
-      classes.push("stone");
+      classes.push("occupied");
 
       if (intersection.isBlack()) {
         classes.push("black");
       } else {
         classes.push("white");
       }
+
+      var shiftClasses = ["v-shift-up", "v-shift-upup", "v-shift-down", "v-shift-downdown", "v-shift-none", "h-shift-left", "h-shift-leftleft", "h-shift-right", "h-shift-rightright", "h-shift-none"];
+
+      shiftClasses.forEach(function (shiftClass) {
+        if (_utils2.default.hasClass(intersectionEl, shiftClass)) {
+          classes.push(shiftClass);
+        }
+      });
     }
 
     if (intersectionEl.className !== classes.join(" ")) {
       intersectionEl.className = classes.join(" ");
     }
-  };
+  },
 
-  this.renderTerritory = function (territory, deadStones) {
-    var _this2 = this;
+  renderTerritory: function renderTerritory(territory, deadStones) {
+    var _this3 = this;
 
     _utils2.default.flatten(this.grid).forEach(function (element) {
       _utils2.default.removeClass(element, "territory-black");
@@ -985,18 +1132,20 @@ function DOMRenderer(boardElement) {
     });
 
     deadStones.forEach(function (point) {
-      _utils2.default.addClass(_this2.grid[point.y][point.x], "dead");
+      _utils2.default.addClass(_this3.grid[point.y][point.x], "dead");
     });
 
     territory.black.forEach(function (territoryPoint) {
-      _utils2.default.addClass(_this2.grid[territoryPoint.y][territoryPoint.x], "territory-black");
+      _utils2.default.addClass(_this3.grid[territoryPoint.y][territoryPoint.x], "territory-black");
     });
 
     territory.white.forEach(function (territoryPoint) {
-      _utils2.default.addClass(_this2.grid[territoryPoint.y][territoryPoint.x], "territory-white");
+      _utils2.default.addClass(_this3.grid[territoryPoint.y][territoryPoint.x], "territory-white");
     });
-  };
-}
+  }
+};
+
+exports.default = DOMRenderer;
 
 
 },{"./utils":12}],5:[function(require,module,exports){
@@ -1133,7 +1282,7 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "_hooks"];
+var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "_hooks", "fuzzyStonePlacement"];
 
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -1230,7 +1379,12 @@ Game.prototype = {
         }
       };
 
-      this.renderer = new _domRenderer2.default(this._boardElement, options["_hooks"] || defaultRendererHooks);
+      this.renderer = new _domRenderer2.default(this._boardElement, {
+        hooks: options["_hooks"] || defaultRendererHooks,
+        options: {
+          fuzzyStonePlacement: options["fuzzyStonePlacement"]
+        }
+      });
     } else {
       this.renderer = new _nullRenderer2.default();
     }
@@ -1330,6 +1484,10 @@ Game.prototype = {
 
   toggleDeadAt: function toggleDeadAt(y, x) {
     var _this2 = this;
+
+    if (this.intersectionAt(y, x).isEmpty()) {
+      return;
+    }
 
     var alreadyDead = this._isDeadAt(y, x);
 
@@ -2138,6 +2296,14 @@ exports.default = {
 
   flatMap: function flatMap(ary, lambda) {
     return Array.prototype.concat.apply([], ary.map(lambda));
+  },
+
+  cartesianProduct: function cartesianProduct(ary1, ary2) {
+    return this.flatten(ary1.map(function (x) {
+      return ary2.map(function (y) {
+        return [x, y];
+      });
+    }));
   },
 
   createElement: function createElement(elementName, options) {
