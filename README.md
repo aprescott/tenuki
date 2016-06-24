@@ -36,7 +36,7 @@ Features:
 For live examples, see `examples/`, or view them on GitHub:
 
 * [`example_with_simple_controls.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) — Board with an example of simple custom controls and updating game info.
-* [`example_fuzzy_placement.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) —
+* [`example_fuzzy_placement.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) — Fuzzy stone placement.
 * [`example_with_simple_controls_and_gutter.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls_and_gutter.html) — A19 to T1 coordinates in the margins.
 * [`example_multiboard.html`](https://aprescott.github.io/tenuki.js/examples/example_multiboard.html) — Multiple independent 9x9 boards on a single page.
 * [`example.html`](https://aprescott.github.io/tenuki.js/examples/example.html) — Just the board.
