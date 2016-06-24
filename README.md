@@ -13,7 +13,7 @@ The JavaScript engine is not dependent on the renderer and works stand-alone. Yo
 
 The HTML go board is intended to be a robust, functional component that can be embedded in a web page. By using the JavaScript API you could then build your own custom controls for undo/pass/etc.
 
-<img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board.png" width="151" height="150">
+<img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board.png" width="150" height="150">
 
 Features:
 
@@ -86,7 +86,7 @@ For a textured board, add the class `tenuki-board-textured`:
 <div class="tenuki-board tenuki-board-textured"></div>
 ```
 
-<img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board-textured.png" width="151" height="150">
+<img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board-textured.png" width="150" height="150">
 
 # Auto-shrinking to fit dimensions
 

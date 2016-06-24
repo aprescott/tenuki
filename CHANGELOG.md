@@ -12,3 +12,4 @@
 * A new `Client` interface for playing against a remote server.
 * Prevent Safari/WebKit from showing a grey box on an empty intersection on tap.
 * Empty intersections are no longer allowed to be treated as dead stones.
+* Stone styling is changed slightly. The last-played-point marker is now a disc not a circle. Textured stone styling is less shiny/reflective in appearance.
