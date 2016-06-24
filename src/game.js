@@ -9,7 +9,8 @@ const VALID_GAME_OPTIONS = [
   "scoring",
   "handicapStones",
   "koRule",
-  "_hooks"
+  "_hooks",
+  "fuzzyStonePlacement"
 ];
 
 const Game = function(boardElement) {
@@ -92,7 +93,12 @@ Game.prototype = {
         }
       };
 
-      this.renderer = new DOMRenderer(this._boardElement, options["_hooks"] || defaultRendererHooks);
+      this.renderer = new DOMRenderer(this._boardElement, {
+        hooks: options["_hooks"] || defaultRendererHooks,
+        options: {
+          fuzzyStonePlacement: options["fuzzyStonePlacement"]
+        }
+      });
     } else {
       this.renderer = new NullRenderer();
     }

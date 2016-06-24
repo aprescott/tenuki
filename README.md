@@ -29,13 +29,15 @@ Features:
     - Built-in mobile support for touch devices and small screens, even with a 19x19 board.
     - Automatic shrinking to fit given board (pixel) dimensions.
     - Optional coordinate markers for points A19 through T1.
+    - Optional fuzzy stone placement with collision movement animations.
 
 # Examples
 
 For live examples, see `examples/`, or view them on GitHub:
 
 * [`example_with_simple_controls.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) — Board with an example of simple custom controls and updating game info.
-* [`example_with_simple_controls_and_gutter.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls_and_gutter.html) — Same as above, but with the A19 to T1 coordinate markers.
+* [`example_fuzzy_placement.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) —
+* [`example_with_simple_controls_and_gutter.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls_and_gutter.html) — A19 to T1 coordinates in the margins.
 * [`example_multiboard.html`](https://aprescott.github.io/tenuki.js/examples/example_multiboard.html) — Multiple independent 9x9 boards on a single page.
 * [`example.html`](https://aprescott.github.io/tenuki.js/examples/example.html) — Just the board.
 
@@ -87,6 +89,18 @@ For a textured board, add the class `tenuki-board-textured`:
 ```
 
 <img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board-textured.png" width="150" height="150">
+
+# Fuzzy stone placement
+
+For fuzzy stone placement, pass `fuzzyStonePlacement: true` as a game option:
+
+```js
+game.setup({
+  fuzzyStonePlacement: true
+});
+```
+
+When enabled, stones are set to textured styling, and played stones will be randomly placed slightly off-center. If stones overlap after placement, existing stones are bumped out of the way.
 
 # Auto-shrinking to fit dimensions
 
