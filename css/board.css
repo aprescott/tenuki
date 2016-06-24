@@ -181,88 +181,75 @@
 }
 
 .tenuki-board .intersection {
-  position: absolute;
-}
-
-.tenuki-board .intersection.empty {
-  /* full stone width with border */
   width: calc(28px + 1px);
   height: calc(28px + 1px);
 }
 
-.tenuki-board .intersection.stone.marker:after {
+.tenuki-board .intersection,
+.tenuki-board .intersection .stone {
+  position: absolute;
+}
+
+.tenuki-board .occupied .stone,
+.tenuki-board .empty.hovered .stone {
   content: "";
   display: block;
-  width: calc(28px/4);
-  height: calc(28px/4);
+  border-radius: 50%;
+  border: 1px solid black;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+}
+
+.tenuki-board .intersection.occupied.marker .stone:after {
+  content: "";
+  display: block;
+  width: calc(5px);
+  height: calc(5px);
   border-radius: 50%;
   border: 2px solid;
   position: absolute;
   /*
-   * total occupying stone width is (28 - 1 == 27)px stone width, + 2px for the border on the stone, for 29px total.
-   * the midpoint of the 29px width is then (29px + 1px)/2.
-   * this brings us 1 pixel to the right of, and 1 pixel below the intersection we want.
+   * 100% of the stone width + 2px for its border is an odd number of pixels,
+   * so we go to (n+1)/2 which brings us 1 pixel to the right of, and 1 pixel
+   * below the intersection we want.
    */
-  left: calc((28px - 1px + 2px + 1px)/2);
-  top: calc((28px - 1px + 2px + 1px)/2);
-  /* now correct by the 1 pixel, plus half the width of the marker, accounting for 2*2px border */
-  margin-left: calc(-1 * (((28px/4 + 2*2px) + 1px)/2 + 1px));
-  margin-top: calc(-1 * (((28px/4 + 2*2px) + 1px)/2 + 1px));
+  left: calc((100% + 2px + 1px)/2);
+  top: calc((100% + 2px + 1px)/2);
+  /* now correct by the 1px, plus the width of the marker */
+  margin-left: calc(-1px - 5px);
+  margin-top: calc(-1px - 5px);
 }
 
-.tenuki-board .intersection.white.stone.marker:after {
+.tenuki-board .intersection.white.occupied.marker .stone:after {
   color: black;
+  background: black;
 }
 
-.tenuki-board .intersection.black.stone.marker:after {
+.tenuki-board .intersection.black.occupied.marker .stone:after {
   color: white;
+  background: white;
 }
 
-.tenuki-board .stone {
-  content: "";
-  display: block;
-  width: calc(28px - 1px);
-  height: calc(28px - 1px);
-  border-radius: 50%;
-  border: 1px solid black;
-}
-
-.tenuki-board .stone.white {
+.tenuki-board .occupied.white .stone,
+.tenuki-board .empty.hovered.white .stone {
   background: white;
   border-color: #676767;
 }
 
-.tenuki-board .stone.black {
+.tenuki-board .empty.hovered.white .stone {
+  border-color: black;
+}
+
+.tenuki-board .occupied.black .stone,
+.tenuki-board .empty.hovered.black .stone {
   background: black;
 }
 
-.tenuki-board .intersection .highlight {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.tenuki-board .intersection.empty.hovered .highlight {
-  display: block;
-  /* stone width without border */
-  width: calc(28px - 1px);
-  /* stone width without border */
-  height: calc(28px - 1px);
-  border-radius: 50%;
+.tenuki-board .intersection.empty.hovered .stone {
   opacity: 0.5;
 }
 
-.tenuki-board .intersection.empty.hovered.white .highlight,
-.tenuki-board .intersection.empty.hovered.black .highlight {
-  background: black;
-  border: 1px solid black;
-}
-
-.tenuki-board .intersection.empty.hovered.white .highlight {
-  background: white;
-}
-
-.tenuki-board .intersection.ko .highlight {
+.tenuki-board .intersection.ko .stone {
   background: none !important;
   width: 11px !important;
   height: 11px !important;
@@ -276,16 +263,16 @@
   margin-left: calc(-1px - 6px);
 }
 
-.tenuki-board .intersection.stone.black.dead,
-.tenuki-board .intersection.stone.black.white {
+.tenuki-board .intersection.occupied.black.dead .stone,
+.tenuki-board .intersection.occupied.black.white .stone {
   border-color: rgba(0, 0, 0, 0.5);
 }
 
-.tenuki-board .intersection.stone.black.dead {
+.tenuki-board .intersection.occupied.black.dead .stone {
   background: rgba(0, 0, 0, 0.5);
 }
 
-.tenuki-board .intersection.stone.white.dead {
+.tenuki-board .intersection.occupied.white.dead .stone {
   background: rgba(255, 255, 255, 0.5);
 }
 
@@ -293,43 +280,40 @@
 .tenuki-board .intersection.territory-white:after {
   content: "";
   display: block;
-  width: calc(28px/4);
-  height: calc(28px/4);
-  border: 2px solid;
+  width: calc(25% + 4px);
+  height: calc(25% + 4px);
   position: absolute;
   left: 50%;
   top: 50%;
-  margin-left: calc(-28px/4 + 1px);
-  margin-top: calc(-28px/4 + 1px);
+  margin-left: calc((-25% - 4px)/2);
+  margin-top: calc((-25% - 4px)/2);
 }
 
 .tenuki-board .intersection.territory-black:after {
-  color: black;
   background: black;
 }
 
 .tenuki-board .intersection.territory-white:after {
-  color: white;
   background: white;
 }
 
-.tenuki-board-textured .stone {
+.tenuki-board-textured .occupied .stone {
   box-shadow: 0px 2px 1px rgba(62, 62, 62, 0.38);
 }
 
-.tenuki-board-textured .stone.black,
-.tenuki-board-textured .intersection.empty.hovered.black .highlight {
+.tenuki-board-textured .occupied.black .stone,
+.tenuki-board-textured .empty.hovered.black .stone {
   border-color: #565656;
-  background: radial-gradient(circle at 50% 120%, #000000, #484848 10%, #101010 80%, #FFFFFF 100%);
+  background: radial-gradient(circle at 50% 120%, #000000, #484848 10%, #101010 80%, #585858 100%)
 }
 
-.tenuki-board-textured .stone.white,
-.tenuki-board-textured .intersection.empty.hovered.white .highlight {
+.tenuki-board-textured .occupied.white .stone,
+.tenuki-board-textured .empty.hovered.white .stone {
   border-color: #DEDEDE;
   background: radial-gradient(circle at 50% 120%, #ECEAEA, #D6D6D6 10%, #EAEAEA 80%, #FFFFFF 100%);
 }
 
-.tenuki-board-textured .stone:before {
+.tenuki-board-textured .occupied .stone:before {
   content: "";
   position: absolute;
   top: 1%;
@@ -337,14 +321,10 @@
   width: 90%;
   height: 90%;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 0px, #DADADA, rgba(255, 255, 255, 0) 58%);
+  background: radial-gradient(circle at 50% 0px, #848484, rgba(86, 86, 86, 0) 58%);
   z-index: 2;
 }
 
-.tenuki-board-textured .stone.white:before {
+.tenuki-board-textured .occupied.white .stone:before {
   background: radial-gradient(circle at 50% 0px, #FFFFFF, rgba(255, 255, 255, 0) 58%);
-}
-
-.tenuki-board-textured .marker:after {
-  opacity: 0.9;
 }

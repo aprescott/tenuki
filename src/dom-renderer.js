@@ -42,7 +42,7 @@ export default function DOMRenderer(boardElement, hooks = {}) {
     if (boardState.boardSize < 7) {
       if (boardState.boardSize > 1 && boardState.boardSize % 2 === 1) {
         const hoshi = utils.createElement("div", { class: "hoshi" });
-        hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (boardState.boardSize - 1)/2 + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+        hoshi.style.top = (renderer.MARGIN + ((boardState.boardSize - 1)/2)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
         hoshi.style.left = hoshi.style.top;
 
         utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
@@ -61,27 +61,27 @@ export default function DOMRenderer(boardElement, hooks = {}) {
           const hoshi = utils.createElement("div", { class: "hoshi" });
 
           if (hoshiY === 0) {
-            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.top = (renderer.MARGIN + hoshiOffset*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
           }
 
           if (hoshiY === 1) {
-            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + ((boardState.boardSize + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.top = (renderer.MARGIN + ((boardState.boardSize + 1)/2 - 1)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
           }
 
           if (hoshiY === 2) {
-            hoshi.style.top = "calc(" + (renderer.MARGIN) + "px + " + (boardState.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.top = (renderer.MARGIN + (boardState.boardSize - hoshiOffset - 1)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
           }
 
           if (hoshiX === 0) {
-            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + hoshiOffset + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.left = (renderer.MARGIN + hoshiOffset*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
           }
 
           if (hoshiX === 1) {
-            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + ((boardState.boardSize + 1)/2 - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.left = (renderer.MARGIN + ((boardState.boardSize + 1)/2 - 1)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
           }
 
           if (hoshiX === 2) {
-            hoshi.style.left = "calc(" + (renderer.MARGIN) + "px + " + (boardState.boardSize - hoshiOffset - 1) + "* " + (renderer.INTERSECTION_GAP_SIZE + 1) + "px - 2px)";
+            hoshi.style.left = (renderer.MARGIN + (boardState.boardSize - hoshiOffset - 1)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
           }
 
           utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
@@ -100,8 +100,8 @@ export default function DOMRenderer(boardElement, hooks = {}) {
 
       for (let x = 0; x < boardState.boardSize; x++) {
         const intersectionElement = utils.createElement("div", { class: "intersection empty" });
-        const highlightElement = utils.createElement("div", { class: "highlight" });
-        utils.appendElement(intersectionElement, highlightElement);
+        const stoneElement = utils.createElement("div", { class: "stone" });
+        utils.appendElement(intersectionElement, stoneElement);
 
         intersectionElement.setAttribute("data-position-x", x);
         intersectionElement.setAttribute("data-position-y", y);
@@ -380,7 +380,7 @@ export default function DOMRenderer(boardElement, hooks = {}) {
     if (intersection.isEmpty()) {
       classes.push("empty");
     } else {
-      classes.push("stone");
+      classes.push("occupied");
 
       if (intersection.isBlack()) {
         classes.push("black");
