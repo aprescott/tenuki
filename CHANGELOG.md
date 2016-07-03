@@ -1,6 +1,7 @@
 # Next version
 
-* ...
+* Resizing the window (including rotating) will re-calculate board sizing.
+* When zoomed in with Tenuki's own zoom, pinch-zooming out will zoom the board out.
 
 # v0.2.0
 

@@ -91,17 +91,17 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[5][9], "black")) {
 // marker indicator
 resetTests();
 
-if (boardElementTest.querySelectorAll(".marker").length != 0) {
+if (boardElementTest.querySelectorAll(".played").length != 0) {
   throw "tests failed";
 }
 
 gameTest.renderer.grid[1][1].click();
-if (boardElementTest.querySelectorAll(".marker").length == 0 || !tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "marker")) {
+if (boardElementTest.querySelectorAll(".played").length == 0 || !tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "played")) {
   throw "tests failed";
 }
 
 gameTest.renderer.grid[2][2].click();
-if (boardElementTest.querySelectorAll(".marker").length == 0 || tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "marker") || !tenuki.utils.hasClass(gameTest.renderer.grid[2][2], "marker")) {
+if (boardElementTest.querySelectorAll(".played").length == 0 || tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "played") || !tenuki.utils.hasClass(gameTest.renderer.grid[2][2], "played")) {
   throw "tests failed";
 }
 
@@ -1448,48 +1448,48 @@ if (gameTest.currentState().playedPoint.y != 4 || gameTest.currentState().played
 
 // fancy "pass" print
 resetTests();
-gameTest.renderer.grid[3][2].className = "intersection stone black";
-gameTest.renderer.grid[3][3].className = "intersection stone black";
-gameTest.renderer.grid[3][4].className = "intersection stone black";
-gameTest.renderer.grid[3][6].className = "intersection stone black";
-gameTest.renderer.grid[3][7].className = "intersection stone black";
-gameTest.renderer.grid[3][8].className = "intersection stone black";
-gameTest.renderer.grid[3][10].className = "intersection stone black";
-gameTest.renderer.grid[3][11].className = "intersection stone black";
-gameTest.renderer.grid[3][12].className = "intersection stone black";
-gameTest.renderer.grid[3][14].className = "intersection stone black";
-gameTest.renderer.grid[3][15].className = "intersection stone black";
-gameTest.renderer.grid[3][16].className = "intersection stone black";
-gameTest.renderer.grid[4][2].className = "intersection stone black";
-gameTest.renderer.grid[4][4].className = "intersection stone black";
-gameTest.renderer.grid[4][6].className = "intersection stone black";
-gameTest.renderer.grid[4][8].className = "intersection stone black";
-gameTest.renderer.grid[4][10].className = "intersection stone black";
-gameTest.renderer.grid[4][14].className = "intersection stone black";
-gameTest.renderer.grid[5][2].className = "intersection stone black";
-gameTest.renderer.grid[5][3].className = "intersection stone black";
-gameTest.renderer.grid[5][4].className = "intersection stone black";
-gameTest.renderer.grid[5][6].className = "intersection stone black";
-gameTest.renderer.grid[5][7].className = "intersection stone black";
-gameTest.renderer.grid[5][8].className = "intersection stone black";
-gameTest.renderer.grid[5][10].className = "intersection stone black";
-gameTest.renderer.grid[5][11].className = "intersection stone black";
-gameTest.renderer.grid[5][12].className = "intersection stone black";
-gameTest.renderer.grid[5][14].className = "intersection stone black";
-gameTest.renderer.grid[5][15].className = "intersection stone black";
-gameTest.renderer.grid[5][16].className = "intersection stone black";
-gameTest.renderer.grid[6][2].className = "intersection stone black";
-gameTest.renderer.grid[6][6].className = "intersection stone black";
-gameTest.renderer.grid[6][8].className = "intersection stone black";
-gameTest.renderer.grid[6][12].className = "intersection stone black";
-gameTest.renderer.grid[6][16].className = "intersection stone black";
-gameTest.renderer.grid[7][2].className = "intersection stone black";
-gameTest.renderer.grid[7][6].className = "intersection stone black";
-gameTest.renderer.grid[7][8].className = "intersection stone black";
-gameTest.renderer.grid[7][10].className = "intersection stone black";
-gameTest.renderer.grid[7][11].className = "intersection stone black";
-gameTest.renderer.grid[7][12].className = "intersection stone black";
-gameTest.renderer.grid[7][14].className = "intersection stone black";
-gameTest.renderer.grid[7][15].className = "intersection stone black";
-gameTest.renderer.grid[7][16].className = "intersection stone black";
+gameTest.renderer.grid[3][2].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][3].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][4].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][6].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][7].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][8].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][10].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][11].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][12].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][14].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][15].className = "intersection occupied stone black";
+gameTest.renderer.grid[3][16].className = "intersection occupied stone black";
+gameTest.renderer.grid[4][2].className = "intersection occupied stone black";
+gameTest.renderer.grid[4][4].className = "intersection occupied stone black";
+gameTest.renderer.grid[4][6].className = "intersection occupied stone black";
+gameTest.renderer.grid[4][8].className = "intersection occupied stone black";
+gameTest.renderer.grid[4][10].className = "intersection occupied stone black";
+gameTest.renderer.grid[4][14].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][2].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][3].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][4].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][6].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][7].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][8].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][10].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][11].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][12].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][14].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][15].className = "intersection occupied stone black";
+gameTest.renderer.grid[5][16].className = "intersection occupied stone black";
+gameTest.renderer.grid[6][2].className = "intersection occupied stone black";
+gameTest.renderer.grid[6][6].className = "intersection occupied stone black";
+gameTest.renderer.grid[6][8].className = "intersection occupied stone black";
+gameTest.renderer.grid[6][12].className = "intersection occupied stone black";
+gameTest.renderer.grid[6][16].className = "intersection occupied stone black";
+gameTest.renderer.grid[7][2].className = "intersection occupied stone black";
+gameTest.renderer.grid[7][6].className = "intersection occupied stone black";
+gameTest.renderer.grid[7][8].className = "intersection occupied stone black";
+gameTest.renderer.grid[7][10].className = "intersection occupied stone black";
+gameTest.renderer.grid[7][11].className = "intersection occupied stone black";
+gameTest.renderer.grid[7][12].className = "intersection occupied stone black";
+gameTest.renderer.grid[7][14].className = "intersection occupied stone black";
+gameTest.renderer.grid[7][15].className = "intersection occupied stone black";
+gameTest.renderer.grid[7][16].className = "intersection occupied stone black";
 </script>
