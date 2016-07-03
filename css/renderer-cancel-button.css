@@ -1,0 +1,31 @@
+.tenuki-board.tenuki-scaled .cancel-zoom.visible {
+  background: #B95858;
+  height: 70px;
+  width: 20px;
+  position: absolute;
+  transform: rotateZ(45deg);
+  bottom: 62px;
+  z-index: 2;
+  left: 89px;
+}
+
+.tenuki-board.tenuki-scaled .cancel-zoom.visible:after {
+  background: #B95858;
+  content: "";
+  height: 20px;
+  left: -25px;
+  position: absolute;
+  top: 25px;
+  width: 70px;
+}
+
+.tenuki-board.tenuki-scaled .cancel-zoom.visible + .cancel-zoom-backdrop {
+  position: absolute;
+  z-index: 1;
+  bottom: 48px;
+  background: rgba(226, 188, 106, 0.81);
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  left: 49px;
+}

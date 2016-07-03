@@ -1,554 +1,90 @@
 import utils from "./utils";
+import Renderer from "./renderer";
 
 const DOMRenderer = function(boardElement, { hooks, options }) {
-  this.INTERSECTION_GAP_SIZE = 28;
-  this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
-  this.BASE_MARGIN = this.INTERSECTION_GAP_SIZE - 10;
-  this.MARGIN = boardElement.hasAttribute("data-include-coordinates") ? this.BASE_MARGIN + this.GUTTER_MARGIN : this.BASE_MARGIN;
-  this.boardElement = boardElement;
-  this.grid = [];
-  this.hooks = hooks || {};
-  this._options = options || {};
-  this._touchEventFired = false;
-  this._initialized = false;
+  Renderer.call(this, boardElement, { hooks: hooks, options: options });
 
-  if (this._options["fuzzyStonePlacement"]) {
-    utils.addClass(boardElement, "tenuki-fuzzy-placement");
-    utils.addClass(boardElement, "tenuki-board-textured");
+  if (this.smallerStones) {
     utils.addClass(boardElement, "tenuki-smaller-stones");
   }
+
+  utils.addClass(boardElement, "tenuki-dom-renderer");
 };
 
-DOMRenderer.prototype = {
-  _setup: function(boardState) {
-    const renderer = this;
-    const boardElement = this.boardElement;
+DOMRenderer.prototype = Object.create(Renderer.prototype);
+DOMRenderer.prototype.constructor = DOMRenderer;
 
-    const innerContainer = utils.createElement("div", { class: "tenuki-inner-container" });
-    renderer.innerContainer = innerContainer;
-    utils.appendElement(boardElement, innerContainer);
+DOMRenderer.prototype._setup = function(boardState) {
+  Renderer.prototype._setup.call(this, boardState);
 
-    const zoomContainer = utils.createElement("div", { class: "tenuki-zoom-container" });
-    renderer.zoomContainer = zoomContainer;
-    utils.appendElement(innerContainer, zoomContainer);
+  this.BOARD_LENGTH += 1;
+  this.computeSizing();
+};
 
-    utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines horizontal" }));
-    utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines vertical" }));
-    utils.appendElement(zoomContainer, utils.createElement("div", { class: "hoshi-points" }));
-    utils.appendElement(zoomContainer, utils.createElement("div", { class: "intersections" }));
+DOMRenderer.prototype.generateBoard = function(boardState) {
+  const renderer = this;
+  const boardElement = this.boardElement;
+  const zoomContainer = renderer.zoomContainer;
 
-    renderer.cancelZoomElement = utils.createElement("div", { class: "cancel-zoom" });
-    const cancelZoomBackdrop = utils.createElement("div", { class: "cancel-zoom-backdrop" });
-    utils.addEventListener(renderer.cancelZoomElement, "click", function(event) {
-      event.preventDefault();
-      renderer.zoomOut();
+  utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines horizontal" }));
+  utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines vertical" }));
+  utils.appendElement(zoomContainer, utils.createElement("div", { class: "hoshi-points" }));
+  utils.appendElement(zoomContainer, utils.createElement("div", { class: "intersections" }));
 
-      return false;
-    });
-    utils.addEventListener(cancelZoomBackdrop, "click", function(event) {
-      event.preventDefault();
-      renderer.zoomOut();
+  Renderer.hoshiPositionsFor(boardState.boardSize).forEach(h => {
+    const hoshi = utils.createElement("div", { class: "hoshi" });
+    hoshi.style.left = (h.left * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
+    hoshi.style.top = (h.top * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
 
-      return false;
-    });
-    utils.appendElement(innerContainer, renderer.cancelZoomElement);
-    utils.appendElement(innerContainer, cancelZoomBackdrop);
+    utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
+  });
 
-    if (boardState.boardSize < 7) {
-      if (boardState.boardSize > 1 && boardState.boardSize % 2 === 1) {
-        const hoshi = utils.createElement("div", { class: "hoshi" });
-        hoshi.style.top = (renderer.MARGIN + ((boardState.boardSize - 1)/2)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
-        hoshi.style.left = hoshi.style.top;
+  for (let y = 0; y < boardState.boardSize; y++) {
+    const horizontalLine = utils.createElement("div", { class: "line horizontal" });
+    horizontalLine.setAttribute("data-left-gutter", boardState.yCoordinateFor(y));
+    utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
 
-        utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
-      } else {
-        // no hoshi
-      }
-    } else {
-      const hoshiOffset = boardState.boardSize > 11 ? 3 : 2;
+    const verticalLine = utils.createElement("div", { class: "line vertical" });
+    verticalLine.setAttribute("data-top-gutter", boardState.xCoordinateFor(y));
+    utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
 
-      for (let hoshiY = 0; hoshiY < 3; hoshiY++) {
-        for (let hoshiX = 0; hoshiX < 3; hoshiX++) {
-          if ((boardState.boardSize === 7 || boardState.boardSize % 2 === 0) && (hoshiY === 1 || hoshiX === 1)) {
-            continue;
-          }
+    for (let x = 0; x < boardState.boardSize; x++) {
+      const intersectionElement = utils.createElement("div", { class: "intersection empty" });
+      const stoneElement = utils.createElement("div", { class: "stone" });
+      utils.appendElement(intersectionElement, stoneElement);
 
-          const hoshi = utils.createElement("div", { class: "hoshi" });
+      intersectionElement.setAttribute("data-position-x", x);
+      intersectionElement.setAttribute("data-position-y", y);
 
-          if (hoshiY === 0) {
-            hoshi.style.top = (renderer.MARGIN + hoshiOffset*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
-          }
+      intersectionElement.style.left = (x * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
+      intersectionElement.style.top = (y * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
 
-          if (hoshiY === 1) {
-            hoshi.style.top = (renderer.MARGIN + ((boardState.boardSize + 1)/2 - 1)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
-          }
+      utils.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
 
-          if (hoshiY === 2) {
-            hoshi.style.top = (renderer.MARGIN + (boardState.boardSize - hoshiOffset - 1)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
-          }
+      renderer.grid[y] = renderer.grid[y] || [];
+      renderer.grid[y][x] = intersectionElement;
 
-          if (hoshiX === 0) {
-            hoshi.style.left = (renderer.MARGIN + hoshiOffset*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
-          }
-
-          if (hoshiX === 1) {
-            hoshi.style.left = (renderer.MARGIN + ((boardState.boardSize + 1)/2 - 1)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
-          }
-
-          if (hoshiX === 2) {
-            hoshi.style.left = (renderer.MARGIN + (boardState.boardSize - hoshiOffset - 1)*(renderer.INTERSECTION_GAP_SIZE + 1) - 2) + "px";
-          }
-
-          utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
-        }
-      }
+      this.addIntersectionEventListeners(intersectionElement, y, x);
     }
-
-    for (let y = 0; y < boardState.boardSize; y++) {
-      const horizontalLine = utils.createElement("div", { class: "line horizontal" });
-      horizontalLine.setAttribute("data-left-gutter", boardState.yCoordinateFor(y));
-      utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
-
-      const verticalLine = utils.createElement("div", { class: "line vertical" });
-      verticalLine.setAttribute("data-top-gutter", boardState.xCoordinateFor(y));
-      utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
-
-      for (let x = 0; x < boardState.boardSize; x++) {
-        const intersectionElement = utils.createElement("div", { class: "intersection empty" });
-        const stoneElement = utils.createElement("div", { class: "stone" });
-        utils.appendElement(intersectionElement, stoneElement);
-
-        intersectionElement.setAttribute("data-position-x", x);
-        intersectionElement.setAttribute("data-position-y", y);
-
-        intersectionElement.style.left = (x * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
-        intersectionElement.style.top = (y * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
-
-        utils.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
-
-        renderer.grid[y] = renderer.grid[y] || [];
-        renderer.grid[y][x] = intersectionElement;
-      }
-    }
-
-    // prevent the text-selection cursor
-    utils.addEventListener(boardElement.querySelector(".lines.horizontal"), "mousedown", function(e) {
-      e.preventDefault();
-    });
-    utils.addEventListener(boardElement.querySelector(".lines.vertical"), "mousedown", function(e) {
-      e.preventDefault();
-    });
-
-    boardElement.querySelector(".lines.horizontal").style.width = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
-    boardElement.querySelector(".lines.horizontal").style.height = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
-    boardElement.querySelector(".lines.vertical").style.width = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
-    boardElement.querySelector(".lines.vertical").style.height = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
-
-    const boardWidth = renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1) + boardState.boardSize + renderer.MARGIN*2;
-    const boardHeight = renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1) + boardState.boardSize + renderer.MARGIN*2;
-
-    innerContainer.style.width = boardWidth + "px";
-    innerContainer.style.height = boardHeight + "px";
-
-    zoomContainer.style.width = boardWidth + "px";
-    zoomContainer.style.height = boardHeight + "px";
-
-    utils.flatten(renderer.grid).forEach(function(intersectionEl) {
-      utils.addEventListener(intersectionEl, "mouseenter", function() {
-        const intersectionElement = this;
-        const hoveredYPosition = Number(intersectionElement.getAttribute("data-position-y"));
-        const hoveredXPosition = Number(intersectionElement.getAttribute("data-position-x"));
-        const hoverValue = renderer.hooks.hoverValue(hoveredYPosition, hoveredXPosition);
-
-        if (hoverValue) {
-          utils.addClass(intersectionElement, "hovered");
-          utils.addClass(intersectionElement, hoverValue);
-        }
-      });
-
-      utils.addEventListener(intersectionEl, "mouseleave", function() {
-        const intersectionElement = this;
-
-        if (utils.hasClass(this, "hovered")) {
-          utils.removeClass(intersectionElement, "hovered");
-          utils.removeClass(intersectionElement, "black");
-          utils.removeClass(intersectionElement, "white");
-        }
-
-        renderer.resetTouchedPoint();
-      });
-
-      utils.addEventListener(intersectionEl, "click", function() {
-        const intersectionElement = this;
-        const playedYPosition = Number(intersectionElement.getAttribute("data-position-y"));
-        const playedXPosition = Number(intersectionElement.getAttribute("data-position-x"));
-
-        // if this isn't part of a touch,
-        // or it is and the user is zoomed in,
-        // or it's game over and we're marking stones dead,
-        // then don't use the zoom/double-select system.
-        if (!renderer._touchEventFired || (document.body.clientWidth / window.innerWidth > 1) || renderer.hooks.gameIsOver()) {
-          renderer.hooks.handleClick(playedYPosition, playedXPosition);
-          return;
-        }
-
-        if (renderer.touchedPoint) {
-          if (intersectionElement === renderer.touchedPoint) {
-            renderer.hooks.handleClick(playedYPosition, playedXPosition);
-          } else {
-            renderer.showPossibleMoveAt(intersectionElement);
-          }
-        } else {
-          renderer.showPossibleMoveAt(intersectionElement);
-        }
-      });
-    });
-
-    const scaleX = innerContainer.parentNode.clientWidth / innerContainer.clientWidth;
-    const scaleY = innerContainer.parentNode.clientHeight / innerContainer.clientHeight;
-    const scale = Math.min(scaleX, scaleY);
-
-    if (scale > 0 && scale < 1) {
-      utils.addClass(boardElement, "tenuki-scaled");
-      innerContainer.style["transform-origin"] = "top left";
-      innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
-
-      // we'll potentially be zooming on touch devices
-      zoomContainer.style.willChange = "transform";
-
-      // reset the outer element's height to match, ensuring that we free up any lingering whitespace
-      boardElement.style.width = innerContainer.getBoundingClientRect().width + "px";
-      boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
-    }
-
-    renderer.touchmoveChangedTouch = null;
-    renderer.touchstartEventHandler = renderer.handleTouchStart.bind(renderer);
-    renderer.touchmoveEventHandler = renderer.handleTouchMove.bind(renderer);
-    renderer.touchendEventHandler = renderer.handleTouchEnd.bind(renderer);
-
-    utils.addEventListener(boardElement, "touchstart", renderer.touchstartEventHandler);
-    utils.addEventListener(boardElement, "touchend", renderer.touchendEventHandler);
-    utils.addEventListener(boardElement, "touchmove", renderer.touchmoveEventHandler);
-  },
-
-  handleTouchStart: function(event) {
-    const renderer = this;
-    renderer._touchEventFired = true;
-
-    if (event.touches.length > 1) {
-      return;
-    }
-
-    if (!utils.hasClass(renderer.boardElement, "tenuki-zoomed")) {
-      return;
-    }
-
-    const xCursor = event.changedTouches[0].clientX;
-    const yCursor = event.changedTouches[0].clientY;
-
-    renderer.dragStartX = xCursor;
-    renderer.dragStartY = yCursor;
-    renderer.zoomContainer.style.transition = "none";
-  },
-
-  handleTouchMove: function(event) {
-    const renderer = this;
-
-    if (event.touches.length > 1) {
-      return;
-    }
-
-    if (!utils.hasClass(renderer.boardElement, "tenuki-zoomed")) {
-      return true;
-    }
-
-    // prevent pull-to-refresh
-    event.preventDefault();
-
-    renderer.touchmoveChangedTouch = event.changedTouches[0];
-
-    renderer.moveInProgress = true;
-  },
-
-  handleTouchEnd: function(event) {
-    const renderer = this;
-
-    if (event.touches.length > 1) {
-      return;
-    }
-
-    if (!utils.hasClass(renderer.boardElement, "tenuki-zoomed")) {
-      return;
-    }
-
-    renderer.zoomContainer.style.transition = "";
-
-    if (!renderer.moveInProgress) {
-      return;
-    }
-    renderer.translateY = renderer.lastTranslateY;
-    renderer.translateX = renderer.lastTranslateX;
-    renderer.moveInProgress = false;
-    renderer.touchmoveChangedTouch = null;
-  },
-
-  processDragDelta: function() {
-    const renderer = this;
-
-    if (!renderer.touchmoveChangedTouch) {
-      renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
-      return;
-    }
-
-    const innerContainer = renderer.innerContainer;
-    const zoomContainer = renderer.zoomContainer;
-
-    const xCursor = renderer.touchmoveChangedTouch.clientX;
-    const yCursor = renderer.touchmoveChangedTouch.clientY;
-
-    const deltaX = xCursor - renderer.dragStartX;
-    const deltaY = yCursor - renderer.dragStartY;
-
-    let translateY = renderer.translateY + deltaY/2.5;
-    let translateX = renderer.translateX + deltaX/2.5;
-
-    if (translateY > 0.5*innerContainer.clientHeight - renderer.MARGIN) {
-      translateY = 0.5*innerContainer.clientHeight - renderer.MARGIN;
-    }
-
-    if (translateX > 0.5*innerContainer.clientWidth - renderer.MARGIN) {
-      translateX = 0.5*innerContainer.clientWidth - renderer.MARGIN;
-    }
-
-    if (translateY < -0.5*innerContainer.clientHeight + renderer.MARGIN) {
-      translateY = -0.5*innerContainer.clientHeight + renderer.MARGIN;
-    }
-
-    if (translateX < -0.5*innerContainer.clientWidth + renderer.MARGIN) {
-      translateX = -0.5*innerContainer.clientWidth + renderer.MARGIN;
-    }
-
-    zoomContainer.style.transform = "translate3d(" + 2.5*translateX + "px, " + 2.5*translateY + "px, 0) scale3d(2.5, 2.5, 1)";
-
-    renderer.lastTranslateX = translateX;
-    renderer.lastTranslateY = translateY;
-
-    renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
-  },
-
-  showPossibleMoveAt: function(intersectionElement) {
-    const renderer = this;
-    const boardElement = this.boardElement;
-    const zoomContainer = this.zoomContainer;
-
-    renderer.zoomContainerHeight = renderer.zoomContainerHeight || zoomContainer.clientHeight;
-    renderer.zoomContainerWidth = renderer.zoomContainerWidth || zoomContainer.clientWidth;
-
-    renderer.touchedPoint = intersectionElement;
-
-    if (utils.hasClass(boardElement, "tenuki-scaled")) {
-      const top = intersectionElement.offsetTop;
-      const left = intersectionElement.offsetLeft;
-
-      const translateY = 0.5 * renderer.zoomContainerHeight - top - renderer.MARGIN;
-      const translateX = 0.5 * renderer.zoomContainerWidth - left - renderer.MARGIN;
-
-      zoomContainer.style.transform = "translate3d(" + 2.5*translateX + "px, " + 2.5*translateY + "px, 0) scale3d(2.5, 2.5, 1)";
-      renderer.translateY = translateY;
-      renderer.translateX = translateX;
-
-      utils.addClass(renderer.cancelZoomElement, "visible");
-      utils.addClass(renderer.boardElement, "tenuki-zoomed");
-      renderer.animationFrameRequestID = window.requestAnimationFrame(renderer.processDragDelta.bind(renderer));
-    }
-  },
-
-  resetTouchedPoint: function() {
-    const renderer = this;
-
-    renderer.touchedPoint = null;
-  },
-
-  zoomOut: function() {
-    const renderer = this;
-    const zoomContainer = renderer.zoomContainer;
-
-    this.resetTouchedPoint();
-    zoomContainer.style.transform = "";
-    zoomContainer.style.transition = "";
-    renderer.dragStartX = null;
-    renderer.dragStartY = null;
-    renderer.translateY = null;
-    renderer.translateX = null;
-    renderer.lastTranslateX = null;
-    renderer.lastTranslateY = null;
-    window.cancelAnimationFrame(renderer.animationFrameRequestID);
-
-    utils.removeClass(renderer.cancelZoomElement, "visible");
-    utils.removeClass(renderer.boardElement, "tenuki-zoomed");
-  },
-
-  render: function(boardState, { territory, deadStones } = {}) {
-    if (!this._initialized) {
-      this._setup(boardState);
-      this._initialized = true;
-    }
-
-    this.resetTouchedPoint();
-
-    this.renderStonesPlayed(boardState.intersections);
-
-    const playedPoint = boardState.playedPoint;
-
-    this.updateMarkerPoints({ playedPoint: playedPoint, koPoint: boardState.koPoint });
-
-    if (this._options["fuzzyStonePlacement"] && playedPoint) {
-      const verticalShiftClasses = [
-        "v-shift-up",
-        "v-shift-upup",
-        "v-shift-down",
-        "v-shift-downdown",
-        "v-shift-none"
-      ];
-
-      const horizontalShiftClasses = [
-        "h-shift-left",
-        "h-shift-leftleft",
-        "h-shift-right",
-        "h-shift-rightright",
-        "h-shift-none"
-      ];
-
-      const shiftClasses = verticalShiftClasses.concat(horizontalShiftClasses);
-
-      const alreadyShifted = shiftClasses.some(c => utils.hasClass(this.grid[playedPoint.y][playedPoint.x], c));
-
-      if (!alreadyShifted) {
-        const possibleShifts = utils.cartesianProduct(verticalShiftClasses, horizontalShiftClasses);
-        const [playedVerticalShift, playedHorizontalShift] = possibleShifts[Math.floor(Math.random() * possibleShifts.length)];
-
-        [
-                   [-1, 0],
-          [0, -1],          [0, 1],
-                    [1, 0]
-        ].forEach(([y, x]) => {
-          if (this.grid[playedPoint.y + y] && this.grid[playedPoint.y + y][playedPoint.x + x]) {
-            const neighboringElement = this.grid[playedPoint.y + y][playedPoint.x + x];
-
-            if (!utils.hasClass(neighboringElement, "empty")) {
-              [
-                [-1, 0, "v-shift-downdown", "v-shift-up", "v-shift-down"],
-                [-1, 0, "v-shift-downdown", "v-shift-upup", "v-shift-none"],
-                [-1, 0, "v-shift-down", "v-shift-upup", "v-shift-none"],
-                [1, 0, "v-shift-upup", "v-shift-down", "v-shift-up"],
-                [1, 0, "v-shift-upup", "v-shift-downdown", "v-shift-none"],
-                [1, 0, "v-shift-up", "v-shift-downdown", "v-shift-none"],
-
-                [0, -1, "h-shift-rightright", "h-shift-left", "h-shift-right"],
-                [0, -1, "h-shift-rightright", "h-shift-leftleft", "h-shift-none"],
-                [0, -1, "h-shift-right", "h-shift-leftleft", "h-shift-none"],
-                [0, 1, "h-shift-leftleft", "h-shift-right", "h-shift-left"],
-                [0, 1, "h-shift-leftleft", "h-shift-rightright", "h-shift-none"],
-                [0, 1, "h-shift-left", "h-shift-rightright", "h-shift-none"]
-              ].forEach(([requiredYOffset, requiredXOffset, requiredNeighborShift, conflictingPlayedShift, newNeighborShift]) => {
-                if (y === requiredYOffset && x === requiredXOffset && utils.hasClass(neighboringElement, requiredNeighborShift) && (playedVerticalShift === conflictingPlayedShift || playedHorizontalShift === conflictingPlayedShift)) {
-                  utils.removeClass(neighboringElement, requiredNeighborShift);
-                  utils.addClass(neighboringElement, newNeighborShift);
-                }
-              });
-            }
-          }
-        });
-
-        utils.addClass(this.grid[playedPoint.y][playedPoint.x], playedVerticalShift);
-        utils.addClass(this.grid[playedPoint.y][playedPoint.x], playedHorizontalShift);
-      }
-    }
-
-    if (territory) {
-      this.renderTerritory(territory, deadStones);
-    }
-  },
-
-  renderStonesPlayed: function(intersections) {
-    intersections.forEach(intersection => {
-      this.renderIntersection(intersection);
-    });
-  },
-
-  updateMarkerPoints: function({ playedPoint, koPoint }) {
-    const renderer = this;
-
-    if (koPoint) {
-      utils.addClass(renderer.grid[koPoint.y][koPoint.x], "ko");
-    }
-
-    if (playedPoint) {
-      utils.addClass(renderer.grid[playedPoint.y][playedPoint.x], "marker");
-    }
-  },
-
-  renderIntersection: function(intersection) {
-    const renderer = this;
-
-    const intersectionEl = renderer.grid[intersection.y][intersection.x];
-
-    let classes = ["intersection"];
-
-    if (intersection.isEmpty()) {
-      classes.push("empty");
-    } else {
-      classes.push("occupied");
-
-      if (intersection.isBlack()) {
-        classes.push("black");
-      } else {
-        classes.push("white");
-      }
-
-      const shiftClasses = [
-        "v-shift-up",
-        "v-shift-upup",
-        "v-shift-down",
-        "v-shift-downdown",
-        "v-shift-none",
-        "h-shift-left",
-        "h-shift-leftleft",
-        "h-shift-right",
-        "h-shift-rightright",
-        "h-shift-none"
-      ];
-
-      shiftClasses.forEach(shiftClass => {
-        if (utils.hasClass(intersectionEl, shiftClass)) {
-          classes.push(shiftClass);
-        }
-      });
-    }
-
-    if (intersectionEl.className !== classes.join(" ")) {
-      intersectionEl.className = classes.join(" ");
-    }
-  },
-
-  renderTerritory: function(territory, deadStones) {
-    utils.flatten(this.grid).forEach(element => {
-      utils.removeClass(element, "territory-black");
-      utils.removeClass(element, "territory-white");
-      utils.removeClass(element, "dead");
-    });
-
-    deadStones.forEach(point => {
-      utils.addClass(this.grid[point.y][point.x], "dead");
-    });
-
-    territory.black.forEach(territoryPoint => {
-      utils.addClass(this.grid[territoryPoint.y][territoryPoint.x], "territory-black");
-    });
-
-    territory.white.forEach(territoryPoint => {
-      utils.addClass(this.grid[territoryPoint.y][territoryPoint.x], "territory-white");
-    });
+  }
+
+  // prevent the text-selection cursor
+  utils.addEventListener(boardElement.querySelector(".lines.horizontal"), "mousedown", function(e) {
+    e.preventDefault();
+  });
+  utils.addEventListener(boardElement.querySelector(".lines.vertical"), "mousedown", function(e) {
+    e.preventDefault();
+  });
+
+  boardElement.querySelector(".lines.horizontal").style.width = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+  boardElement.querySelector(".lines.horizontal").style.height = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+  boardElement.querySelector(".lines.vertical").style.width = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+  boardElement.querySelector(".lines.vertical").style.height = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+};
+
+DOMRenderer.prototype.setIntersectionClasses = function(intersectionEl, intersection, classes) {
+  if (intersectionEl.className !== classes.join(" ")) {
+    intersectionEl.className = classes.join(" ");
   }
 };
 

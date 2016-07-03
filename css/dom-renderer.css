@@ -1,8 +1,3 @@
-/*!
- * tenuki v0.2.0 (https://github.com/aprescott/tenuki.js)
- * Copyright © 2016 Adam Prescott.
- * Licensed under the MIT license.
- */
 .tenuki-dom-renderer.tenuki-board {
   position: relative;
   -webkit-user-select: none;
@@ -375,34 +370,3 @@
   background: radial-gradient(circle at 50% 0px, #FFFFFF, rgba(255, 255, 255, 0) 58%);
 }
 
-.tenuki-board.tenuki-scaled .cancel-zoom.visible {
-  background: #B95858;
-  height: 70px;
-  width: 20px;
-  position: absolute;
-  transform: rotateZ(45deg);
-  bottom: 62px;
-  z-index: 2;
-  left: 89px;
-}
-
-.tenuki-board.tenuki-scaled .cancel-zoom.visible:after {
-  background: #B95858;
-  content: "";
-  height: 20px;
-  left: -25px;
-  position: absolute;
-  top: 25px;
-  width: 70px;
-}
-
-.tenuki-board.tenuki-scaled .cancel-zoom.visible + .cancel-zoom-backdrop {
-  position: absolute;
-  z-index: 1;
-  bottom: 48px;
-  background: rgba(226, 188, 106, 0.81);
-  border-radius: 50%;
-  width: 100px;
-  height: 100px;
-  left: 49px;
-}
