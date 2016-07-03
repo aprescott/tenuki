@@ -2,6 +2,7 @@
 
 * Resizing the window (including rotating) will re-calculate board sizing.
 * When zoomed in with Tenuki's own zoom, pinch-zooming out will zoom the board out.
+* Simplify textured stone styling.
 
 # v0.2.0
 
