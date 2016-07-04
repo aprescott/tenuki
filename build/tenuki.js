@@ -1065,10 +1065,6 @@ Game.prototype = {
   },
 
   isIllegalAt: function isIllegalAt(y, x) {
-    if (this._moves.length === 0) {
-      return false;
-    }
-
     return this._ruleset.isIllegal(y, x, this);
   },
 

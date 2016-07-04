@@ -6,6 +6,7 @@
 * Add a new default renderer which uses SVG.
 * Support for komi as a `game.setup()` option.
 * Support for free handicap placement.
+* Correctly treat handicap stones as occupied (and thus illegal for white) at the start of a game. This fixes a bug where white could play over an occupied black handicap stone as the first move, and where the stone would visually be removed on hover in the UI.
 
 # v0.2.0
 

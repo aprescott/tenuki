@@ -11,6 +11,30 @@ describe("Game", function() {
       expect(game.boardSize).to.equal(19);
     });
 
+    it("does not allow unknown scoring types", function() {
+      var game = new Game();
+      expect(function() { game.setup({ boardSize: 19, scoring: "area" }); }).to.not.throw(Error);
+      expect(function() { game.setup({ boardSize: 19, scoring: "territory" }); }).to.not.throw(Error);
+      expect(function() { game.setup({ boardSize: 19, scoring: "equivalence" }); }).to.not.throw(Error);
+
+      expect(function() { game.setup({ boardSize: 19, scoring: "Area" }); }).to.throw(Error,  "Unknown scoring type: Area");
+      expect(function() { game.setup({ boardSize: 19, scoring: "terRitory" }); }).to.throw(Error,  "Unknown scoring type: terRitory");
+      expect(function() { game.setup({ boardSize: 19, scoring: "gibberish" }); }).to.throw(Error,  "Unknown scoring type: gibberish");
+    });
+
+    it("does not allow unknown ko rules", function() {
+      var game = new Game();
+
+      expect(function() { game.setup({ boardSize: 19, koRule: "simple" }); }).to.not.throw(Error);
+
+      expect(function() { game.setup({ boardSize: 19, koRule: "Simple" }); }).to.throw(Error, "Unknown ko rule: Simple");
+      expect(function() { game.setup({ boardSize: 19, koRule: "SIMPLE" }); }).to.throw(Error, "Unknown ko rule: SIMPLE");
+      expect(function() { game.setup({ boardSize: 19, koRule: "positional" }); }).to.throw(Error, "Unknown ko rule: positional");
+      expect(function() { game.setup({ boardSize: 19, koRule: "gibberish" }); }).to.throw(Error, "Unknown ko rule: gibberish");
+    });
+  });
+
+  describe("handicap stones", function() {
     it("defaults to no handicap stones", function() {
       var game = new Game();
       game.setup();
@@ -56,26 +80,11 @@ describe("Game", function() {
       expect(function() { game.setup({ boardSize: 17, handicapStones: 2 }); }).to.throw(Error, "Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
     });
 
-    it("does not allow unknown scoring types", function() {
+    it("treats handicap stone positions as illegal moves", function() {
       var game = new Game();
-      expect(function() { game.setup({ boardSize: 19, scoring: "area" }); }).to.not.throw(Error);
-      expect(function() { game.setup({ boardSize: 19, scoring: "territory" }); }).to.not.throw(Error);
-      expect(function() { game.setup({ boardSize: 19, scoring: "equivalence" }); }).to.not.throw(Error);
+      game.setup({ handicapStones: 9 });
 
-      expect(function() { game.setup({ boardSize: 19, scoring: "Area" }); }).to.throw(Error,  "Unknown scoring type: Area");
-      expect(function() { game.setup({ boardSize: 19, scoring: "terRitory" }); }).to.throw(Error,  "Unknown scoring type: terRitory");
-      expect(function() { game.setup({ boardSize: 19, scoring: "gibberish" }); }).to.throw(Error,  "Unknown scoring type: gibberish");
-    });
-
-    it("does not allow unknown ko rules", function() {
-      var game = new Game();
-
-      expect(function() { game.setup({ boardSize: 19, koRule: "simple" }); }).to.not.throw(Error);
-
-      expect(function() { game.setup({ boardSize: 19, koRule: "Simple" }); }).to.throw(Error, "Unknown ko rule: Simple");
-      expect(function() { game.setup({ boardSize: 19, koRule: "SIMPLE" }); }).to.throw(Error, "Unknown ko rule: SIMPLE");
-      expect(function() { game.setup({ boardSize: 19, koRule: "positional" }); }).to.throw(Error, "Unknown ko rule: positional");
-      expect(function() { game.setup({ boardSize: 19, koRule: "gibberish" }); }).to.throw(Error, "Unknown ko rule: gibberish");
+      expect(game.isIllegalAt(3, 3)).to.be.true;
     });
   });
 
