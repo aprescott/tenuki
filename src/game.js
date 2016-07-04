@@ -13,7 +13,8 @@ const VALID_GAME_OPTIONS = [
   "komi",
   "_hooks",
   "fuzzyStonePlacement",
-  "renderer"
+  "renderer",
+  "freeHandicapPlacement"
 ];
 
 const Game = function(boardElement) {
@@ -31,7 +32,7 @@ const Game = function(boardElement) {
 };
 
 Game.prototype = {
-  _configureOptions: function({ boardSize = this._defaultBoardSize, komi = 0, handicapStones = 0, scoring = this._defaultScoring, koRule = this._defaultKoRule, renderer = this._defaultRenderer } = {}) {
+  _configureOptions: function({ boardSize = this._defaultBoardSize, komi = 0, handicapStones = 0, freeHandicapPlacement = false, scoring = this._defaultScoring, koRule = this._defaultKoRule, renderer = this._defaultRenderer } = {}) {
     if (typeof boardSize !== "number") {
       throw new Error("Board size must be a number, but was: " + (typeof boardSize));
     }
@@ -54,6 +55,8 @@ Game.prototype = {
 
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
+    this._freeHandicapPlacement = freeHandicapPlacement;
+
     this._scorer = new Scorer({
       scoreBy: scoring,
       komi: komi
@@ -74,7 +77,15 @@ Game.prototype = {
       koRule: koRule
     });
 
-    this._initialState = BoardState._initialFor(boardSize, handicapStones);
+    if (this._freeHandicapPlacement) {
+      this._initialState = BoardState._initialFor(boardSize, 0);
+    } else {
+      this._initialState = BoardState._initialFor(boardSize, handicapStones);
+    }
+  },
+
+  _stillPlayingHandicapStones: function() {
+    return this._freeHandicapPlacement && this.handicapStones > 0 && this._moves.length < this.handicapStones;
   },
 
   setup: function(options = {}) {
@@ -137,6 +148,10 @@ Game.prototype = {
   },
 
   currentPlayer: function() {
+    if (this._stillPlayingHandicapStones()) {
+      return "black";
+    }
+
     const lastMoveColor = this.currentState().color;
 
     if (lastMoveColor === "black") {

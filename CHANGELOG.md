@@ -5,6 +5,7 @@
 * Simplify textured stone styling.
 * Add a new default renderer which uses SVG.
 * Support for komi as a `game.setup()` option.
+* Support for free handicap placement.
 
 # v0.2.0
 

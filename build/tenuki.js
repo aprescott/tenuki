@@ -803,7 +803,7 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "komi", "_hooks", "fuzzyStonePlacement", "renderer"];
+var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "komi", "_hooks", "fuzzyStonePlacement", "renderer", "freeHandicapPlacement"];
 
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -829,6 +829,8 @@ Game.prototype = {
     var komi = _ref$komi === undefined ? 0 : _ref$komi;
     var _ref$handicapStones = _ref.handicapStones;
     var handicapStones = _ref$handicapStones === undefined ? 0 : _ref$handicapStones;
+    var _ref$freeHandicapPlac = _ref.freeHandicapPlacement;
+    var freeHandicapPlacement = _ref$freeHandicapPlac === undefined ? false : _ref$freeHandicapPlac;
     var _ref$scoring = _ref.scoring;
     var scoring = _ref$scoring === undefined ? this._defaultScoring : _ref$scoring;
     var _ref$koRule = _ref.koRule;
@@ -858,6 +860,8 @@ Game.prototype = {
 
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
+    this._freeHandicapPlacement = freeHandicapPlacement;
+
     this._scorer = new _scorer2.default({
       scoreBy: scoring,
       komi: komi
@@ -878,7 +882,15 @@ Game.prototype = {
       koRule: koRule
     });
 
-    this._initialState = _boardState2.default._initialFor(boardSize, handicapStones);
+    if (this._freeHandicapPlacement) {
+      this._initialState = _boardState2.default._initialFor(boardSize, 0);
+    } else {
+      this._initialState = _boardState2.default._initialFor(boardSize, handicapStones);
+    }
+  },
+
+  _stillPlayingHandicapStones: function _stillPlayingHandicapStones() {
+    return this._freeHandicapPlacement && this.handicapStones > 0 && this._moves.length < this.handicapStones;
   },
 
   setup: function setup() {
@@ -945,6 +957,10 @@ Game.prototype = {
   },
 
   currentPlayer: function currentPlayer() {
+    if (this._stillPlayingHandicapStones()) {
+      return "black";
+    }
+
     var lastMoveColor = this.currentState().color;
 
     if (lastMoveColor === "black") {
