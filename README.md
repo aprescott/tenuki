@@ -25,7 +25,7 @@ Features:
   * Different scoring rules: territory, area, equivalence (with pass stones).
   * Seki detection for the territory rules.
   * A client interface for playing against a server.
-  * For the interface:
+  * For the visual interface:
     - Built-in mobile support for touch devices and small screens, even with a 19x19 board.
     - Automatic shrinking to fit given board (pixel) dimensions.
     - Optional coordinate markers for points A19 through T1.
