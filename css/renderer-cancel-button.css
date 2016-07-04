@@ -9,6 +9,10 @@
   left: 89px;
 }
 
+.tenuki-svg-renderer.tenuki-board.tenuki-scaled .cancel-zoom.visible {
+  left: 87px;
+}
+
 .tenuki-board.tenuki-scaled .cancel-zoom.visible:after {
   background: #B95858;
   content: "";
@@ -28,4 +32,10 @@
   width: 100px;
   height: 100px;
   left: 49px;
+}
+
+.tenuki-svg-renderer.tenuki-board.tenuki-scaled .cancel-zoom.visible + .cancel-zoom-backdrop {
+  width: 99px;
+  height: 98px;
+  left: 47px;
 }

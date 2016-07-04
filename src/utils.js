@@ -11,12 +11,45 @@ export default {
     return this.flatten(ary1.map(x => ary2.map(y => [x, y])));
   },
 
+  randomID: function(prefix) {
+    const str = [0, 1, 2, 3].map(() => {
+      return Math.floor(Math.random() * 0x10000).toString(16).substring(1);
+    }).join("");
+
+    return `${prefix}-${str}`;
+  },
+
   createElement: function(elementName, options) {
     const element = document.createElement(elementName);
 
     if (typeof options !== "undefined") {
       if (options.class) {
         element.className = options.class;
+      }
+    }
+
+    return element;
+  },
+
+  createSVGElement: function(elementName, options) {
+    const svgNamespace = "http://www.w3.org/2000/svg";
+    const element = document.createElementNS(svgNamespace, elementName);
+
+    if (typeof options !== "undefined") {
+      if (options.class) {
+        options.class.split(" ").forEach(name => {
+          this.addClass(element, name);
+        });
+      }
+
+      if (options.attributes) {
+        Object.keys(options.attributes).forEach(k => {
+          element.setAttribute(k, options.attributes[k]);
+        });
+      }
+
+      if (options.text) {
+        element.textContent = options.text.toString();
       }
     }
 

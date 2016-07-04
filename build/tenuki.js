@@ -2429,12 +2429,47 @@ exports.default = {
     }));
   },
 
+  randomID: function randomID(prefix) {
+    var str = [0, 1, 2, 3].map(function () {
+      return Math.floor(Math.random() * 0x10000).toString(16).substring(1);
+    }).join("");
+
+    return prefix + "-" + str;
+  },
+
   createElement: function createElement(elementName, options) {
     var element = document.createElement(elementName);
 
     if (typeof options !== "undefined") {
       if (options.class) {
         element.className = options.class;
+      }
+    }
+
+    return element;
+  },
+
+  createSVGElement: function createSVGElement(elementName, options) {
+    var _this = this;
+
+    var svgNamespace = "http://www.w3.org/2000/svg";
+    var element = document.createElementNS(svgNamespace, elementName);
+
+    if (typeof options !== "undefined") {
+      if (options.class) {
+        options.class.split(" ").forEach(function (name) {
+          _this.addClass(element, name);
+        });
+      }
+
+      if (options.attributes) {
+        Object.keys(options.attributes).forEach(function (k) {
+          element.setAttribute(k, options.attributes[k]);
+        });
+      }
+
+      if (options.text) {
+        element.textContent = options.text.toString();
       }
     }
 
