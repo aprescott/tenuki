@@ -10,7 +10,7 @@ exports.Game = require("./lib/game").default;
 exports.Client = require("./lib/client").default;
 exports.utils = require("./lib/utils").default;
 
-},{"./lib/client":3,"./lib/game":6,"./lib/utils":13}],2:[function(require,module,exports){
+},{"./lib/client":3,"./lib/game":6,"./lib/utils":14}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -394,7 +394,7 @@ BoardState._initialFor = function (boardSize, handicapStones) {
 exports.default = BoardState;
 
 
-},{"./intersection":7,"./utils":13,"./zobrist":14}],3:[function(require,module,exports){
+},{"./intersection":7,"./utils":14,"./zobrist":15}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -665,7 +665,7 @@ DOMRenderer.prototype.setIntersectionClasses = function (intersectionEl, interse
 exports.default = DOMRenderer;
 
 
-},{"./renderer":10,"./utils":13}],5:[function(require,module,exports){
+},{"./renderer":10,"./utils":14}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -779,6 +779,10 @@ var _domRenderer = require("./dom-renderer");
 
 var _domRenderer2 = _interopRequireDefault(_domRenderer);
 
+var _svgRenderer = require("./svg-renderer");
+
+var _svgRenderer2 = _interopRequireDefault(_svgRenderer);
+
 var _nullRenderer = require("./null-renderer");
 
 var _nullRenderer2 = _interopRequireDefault(_nullRenderer);
@@ -799,7 +803,7 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "_hooks", "fuzzyStonePlacement"];
+var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "_hooks", "fuzzyStonePlacement", "renderer"];
 
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -811,6 +815,7 @@ var Game = function Game(boardElement) {
   this._boardElement = boardElement;
   this._defaultScoring = "territory";
   this._defaultKoRule = "simple";
+  this._defaultRenderer = "svg";
   this._deadPoints = [];
 };
 
@@ -826,6 +831,8 @@ Game.prototype = {
     var scoring = _ref$scoring === undefined ? this._defaultScoring : _ref$scoring;
     var _ref$koRule = _ref.koRule;
     var koRule = _ref$koRule === undefined ? this._defaultKoRule : _ref$koRule;
+    var _ref$renderer = _ref.renderer;
+    var renderer = _ref$renderer === undefined ? this._defaultRenderer : _ref$renderer;
 
     if (typeof boardSize !== "number") {
       throw new Error("Board size must be a number, but was: " + (typeof boardSize === "undefined" ? "undefined" : _typeof(boardSize)));
@@ -852,6 +859,15 @@ Game.prototype = {
     this._scorer = new _scorer2.default({
       scoreBy: scoring
     });
+
+    this._rendererChoice = {
+      "dom": _domRenderer2.default,
+      "svg": _svgRenderer2.default
+    }[renderer];
+
+    if (!this._rendererChoice) {
+      throw new Error("Unknown renderer: " + renderer);
+    }
 
     this._whiteMustPassLast = this._scorer.usingPassStones();
 
@@ -896,7 +912,7 @@ Game.prototype = {
         }
       };
 
-      this.renderer = new _domRenderer2.default(this._boardElement, {
+      this.renderer = new this._rendererChoice(this._boardElement, {
         hooks: options["_hooks"] || defaultRendererHooks,
         options: {
           fuzzyStonePlacement: options["fuzzyStonePlacement"]
@@ -1070,7 +1086,7 @@ Game.prototype = {
 exports.default = Game;
 
 
-},{"./board-state":2,"./dom-renderer":4,"./null-renderer":8,"./ruleset":11,"./scorer":12}],7:[function(require,module,exports){
+},{"./board-state":2,"./dom-renderer":4,"./null-renderer":8,"./ruleset":11,"./scorer":12,"./svg-renderer":13}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1435,7 +1451,7 @@ Region.prototype = {
 exports.default = Region;
 
 
-},{"./utils":13}],10:[function(require,module,exports){
+},{"./utils":14}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2041,7 +2057,7 @@ Renderer.prototype = {
 exports.default = Renderer;
 
 
-},{"./utils":13}],11:[function(require,module,exports){
+},{"./utils":14}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2404,7 +2420,309 @@ Scorer.prototype = {
 exports.default = Scorer;
 
 
-},{"./eye-point":5,"./intersection":7,"./region":9,"./utils":13}],13:[function(require,module,exports){
+},{"./eye-point":5,"./intersection":7,"./region":9,"./utils":14}],13:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _utils = require("./utils");
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _renderer = require("./renderer");
+
+var _renderer2 = _interopRequireDefault(_renderer);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+var SVGRenderer = function SVGRenderer(boardElement, _ref) {
+  var hooks = _ref.hooks;
+  var options = _ref.options;
+
+  _renderer2.default.call(this, boardElement, { hooks: hooks, options: options });
+  _utils2.default.addClass(boardElement, "tenuki-svg-renderer");
+};
+
+SVGRenderer.prototype = Object.create(_renderer2.default.prototype);
+SVGRenderer.prototype.constructor = SVGRenderer;
+
+SVGRenderer.prototype.generateBoard = function (boardState) {
+  var _this = this;
+
+  var renderer = this;
+  var zoomContainer = renderer.zoomContainer;
+
+  var svg = _utils2.default.createSVGElement("svg");
+  renderer.svgElement = svg;
+
+  var defs = _utils2.default.createSVGElement("defs");
+  _utils2.default.appendElement(svg, defs);
+
+  renderer.blackGradientID = _utils2.default.randomID("black-gradient");
+  renderer.whiteGradientID = _utils2.default.randomID("white-gradient");
+
+  var blackGradient = _utils2.default.createSVGElement("radialGradient", {
+    attributes: {
+      id: renderer.blackGradientID,
+      cy: "0",
+      r: "55%"
+    }
+  });
+  _utils2.default.appendElement(blackGradient, _utils2.default.createSVGElement("stop", {
+    attributes: {
+      offset: "0%",
+      "stop-color": "#848484"
+    }
+  }));
+  _utils2.default.appendElement(blackGradient, _utils2.default.createSVGElement("stop", {
+    attributes: {
+      offset: "100%",
+      "stop-color": "hsl(0, 0%, 20%)"
+    }
+  }));
+  _utils2.default.appendElement(defs, blackGradient);
+
+  var whiteGradient = _utils2.default.createSVGElement("radialGradient", {
+    attributes: {
+      id: renderer.whiteGradientID,
+      cy: "0",
+      r: "70%"
+    }
+  });
+  _utils2.default.appendElement(whiteGradient, _utils2.default.createSVGElement("stop", {
+    attributes: {
+      offset: "0%",
+      "stop-color": "white"
+    }
+  }));
+  _utils2.default.appendElement(whiteGradient, _utils2.default.createSVGElement("stop", {
+    attributes: {
+      offset: "100%",
+      "stop-color": "#DDDDDD"
+    }
+  }));
+  _utils2.default.appendElement(defs, whiteGradient);
+
+  var contentsContainer = _utils2.default.createSVGElement("g", {
+    attributes: {
+      class: "contents",
+      transform: "translate(" + this.MARGIN + ", " + this.MARGIN + ")"
+    }
+  });
+
+  var lines = _utils2.default.createSVGElement("g", {
+    attributes: {
+      class: "lines"
+    }
+  });
+  _utils2.default.appendElement(contentsContainer, lines);
+
+  for (var y = 0; y < boardState.boardSize - 1; y++) {
+    for (var x = 0; x < boardState.boardSize - 1; x++) {
+      var lineBox = _utils2.default.createSVGElement("rect", {
+        attributes: {
+          y: y * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
+          x: x * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
+          width: this.INTERSECTION_GAP_SIZE + 1,
+          height: this.INTERSECTION_GAP_SIZE + 1,
+          class: "line-box"
+        }
+      });
+
+      _utils2.default.appendElement(lines, lineBox);
+    }
+  }
+
+  var hoshiPoints = _utils2.default.createSVGElement("g", { attributes: { class: "hoshi" } });
+  _utils2.default.appendElement(contentsContainer, hoshiPoints);
+
+  _renderer2.default.hoshiPositionsFor(boardState.boardSize).forEach(function (h) {
+    var hoshi = _utils2.default.createSVGElement("circle", {
+      attributes: {
+        class: "hoshi",
+        cy: h.top * (_this.INTERSECTION_GAP_SIZE + 1) - 0.5,
+        cx: h.left * (_this.INTERSECTION_GAP_SIZE + 1) - 0.5,
+        r: 2
+      }
+    });
+
+    _utils2.default.appendElement(hoshiPoints, hoshi);
+  });
+
+  var intersections = _utils2.default.createSVGElement("g", { attributes: { class: "intersections" } });
+  _utils2.default.appendElement(contentsContainer, intersections);
+
+  if (this.hasCoordinates) {
+    (function () {
+      var coordinateContainer = _utils2.default.createSVGElement("g", {
+        attributes: {
+          class: "coordinates",
+          transform: "translate(" + _this.MARGIN + ", " + _this.MARGIN + ")"
+        }
+      });
+
+      var _loop = function _loop(_y) {
+        if (_this.hasCoordinates) {
+          // TODO: 16 is for the rendered height _on my browser_. not reliable...
+
+          [16 / 2 + 1 - (16 + 16 / 2 + 16 / (2 * 2) + 16 / (2 * 2 * 2)), 16 / 2 + 1 + (16 + 16 / 2) + (boardState.boardSize - 1) * (_this.INTERSECTION_GAP_SIZE + 1)].forEach(function (verticalOffset) {
+            _utils2.default.appendElement(coordinateContainer, _utils2.default.createSVGElement("text", {
+              text: boardState.xCoordinateFor(_y),
+              attributes: {
+                "text-anchor": "middle",
+                y: verticalOffset - 0.5,
+                x: _y * (_this.INTERSECTION_GAP_SIZE + 1) - 0.5
+              }
+            }));
+          });
+
+          [-1 * (16 + 16 / 2 + 16 / (2 * 2)), 16 + 16 / 2 + 16 / (2 * 2) + (boardState.boardSize - 1) * (_this.INTERSECTION_GAP_SIZE + 1)].forEach(function (horizontalOffset) {
+            _utils2.default.appendElement(coordinateContainer, _utils2.default.createSVGElement("text", {
+              text: boardState.yCoordinateFor(_y),
+              attributes: {
+                "text-anchor": "middle",
+                y: _y * (_this.INTERSECTION_GAP_SIZE + 1) - 0.5 + 16 / (2 * 2),
+                x: horizontalOffset - 0.5
+              }
+            }));
+          });
+
+          _utils2.default.appendElement(svg, coordinateContainer);
+        }
+      };
+
+      for (var _y = 0; _y < boardState.boardSize; _y++) {
+        _loop(_y);
+      }
+    })();
+  }
+
+  for (var _y2 = 0; _y2 < boardState.boardSize; _y2++) {
+    for (var _x = 0; _x < boardState.boardSize; _x++) {
+      var intersectionGroup = _utils2.default.createSVGElement("g", {
+        attributes: {
+          class: "intersection"
+        }
+      });
+      _utils2.default.appendElement(intersections, intersectionGroup);
+
+      var intersectionInnerContainer = _utils2.default.createSVGElement("g", {
+        attributes: {
+          class: "intersection-inner-container"
+        }
+      });
+      _utils2.default.appendElement(intersectionGroup, intersectionInnerContainer);
+
+      var intersectionBox = _utils2.default.createSVGElement("rect", {
+        attributes: {
+          y: _y2 * (this.INTERSECTION_GAP_SIZE + 1) - this.INTERSECTION_GAP_SIZE / 2 - 0.5,
+          x: _x * (this.INTERSECTION_GAP_SIZE + 1) - this.INTERSECTION_GAP_SIZE / 2 - 0.5,
+          width: this.INTERSECTION_GAP_SIZE,
+          height: this.INTERSECTION_GAP_SIZE
+        }
+      });
+      _utils2.default.appendElement(intersectionInnerContainer, intersectionBox);
+
+      var stoneRadius = this.INTERSECTION_GAP_SIZE / 2;
+
+      if (this.smallerStones) {
+        stoneRadius -= 1;
+      }
+
+      var stoneAttributes = {
+        class: "stone",
+        cy: _y2 * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
+        cx: _x * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
+        width: this.INTERSECTION_GAP_SIZE + 1,
+        height: this.INTERSECTION_GAP_SIZE + 1,
+        r: stoneRadius
+      };
+
+      if (this.texturedStones) {
+        _utils2.default.appendElement(intersectionInnerContainer, _utils2.default.createSVGElement("circle", {
+          attributes: {
+            class: "stone-shadow",
+            cy: stoneAttributes["cy"] + 2,
+            cx: stoneAttributes["cx"],
+            width: stoneAttributes["width"],
+            height: stoneAttributes["height"],
+            r: stoneRadius
+          }
+        }));
+      }
+
+      var intersection = _utils2.default.createSVGElement("circle", {
+        attributes: stoneAttributes
+      });
+      _utils2.default.appendElement(intersectionInnerContainer, intersection);
+
+      _utils2.default.appendElement(intersectionInnerContainer, _utils2.default.createSVGElement("circle", {
+        attributes: {
+          class: "marker",
+          cy: _y2 * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
+          cx: _x * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
+          width: this.INTERSECTION_GAP_SIZE + 1,
+          height: this.INTERSECTION_GAP_SIZE + 1,
+          r: 4.5
+        }
+      }));
+
+      _utils2.default.appendElement(intersectionInnerContainer, _utils2.default.createSVGElement("rect", {
+        attributes: {
+          class: "ko-marker",
+          y: _y2 * (this.INTERSECTION_GAP_SIZE + 1) - 6 - 0.5,
+          x: _x * (this.INTERSECTION_GAP_SIZE + 1) - 6 - 0.5,
+          width: 12,
+          height: 12
+        }
+      }));
+
+      _utils2.default.appendElement(intersectionInnerContainer, _utils2.default.createSVGElement("rect", {
+        attributes: {
+          class: "territory-marker",
+          y: _y2 * (this.INTERSECTION_GAP_SIZE + 1) - 6,
+          x: _x * (this.INTERSECTION_GAP_SIZE + 1) - 6,
+          width: 11,
+          height: 11
+        }
+      }));
+
+      this.grid[_y2] = this.grid[_y2] || [];
+      this.grid[_y2][_x] = intersectionGroup;
+
+      this.addIntersectionEventListeners(intersectionGroup, _y2, _x);
+    }
+  }
+
+  _utils2.default.appendElement(svg, contentsContainer);
+  _utils2.default.appendElement(zoomContainer, svg);
+
+  renderer.svgElement.setAttribute("height", renderer.BOARD_LENGTH);
+  renderer.svgElement.setAttribute("width", renderer.BOARD_LENGTH);
+};
+
+SVGRenderer.prototype.setIntersectionClasses = function (intersectionEl, intersection, classes) {
+  if (intersectionEl.getAttribute("class") !== classes.join(" ")) {
+    intersectionEl.setAttribute("class", classes.join(" "));
+  }
+
+  if (this.texturedStones) {
+    if (intersection.isEmpty()) {
+      intersectionEl.querySelector(".stone").setAttribute("style", "");
+    } else {
+      intersectionEl.querySelector(".stone").setAttribute("style", "fill: url(#" + this[intersection.value + "GradientID"] + ")");
+    }
+  }
+};
+
+exports.default = SVGRenderer;
+
+
+},{"./renderer":10,"./utils":14}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2429,12 +2747,47 @@ exports.default = {
     }));
   },
 
+  randomID: function randomID(prefix) {
+    var str = [0, 1, 2, 3].map(function () {
+      return Math.floor(Math.random() * 0x10000).toString(16).substring(1);
+    }).join("");
+
+    return prefix + "-" + str;
+  },
+
   createElement: function createElement(elementName, options) {
     var element = document.createElement(elementName);
 
     if (typeof options !== "undefined") {
       if (options.class) {
         element.className = options.class;
+      }
+    }
+
+    return element;
+  },
+
+  createSVGElement: function createSVGElement(elementName, options) {
+    var _this = this;
+
+    var svgNamespace = "http://www.w3.org/2000/svg";
+    var element = document.createElementNS(svgNamespace, elementName);
+
+    if (typeof options !== "undefined") {
+      if (options.class) {
+        options.class.split(" ").forEach(function (name) {
+          _this.addClass(element, name);
+        });
+      }
+
+      if (options.attributes) {
+        Object.keys(options.attributes).forEach(function (k) {
+          element.setAttribute(k, options.attributes[k]);
+        });
+      }
+
+      if (options.text) {
+        element.textContent = options.text.toString();
       }
     }
 
@@ -2450,18 +2803,53 @@ exports.default = {
   },
 
   removeClass: function removeClass(el, className) {
-    el.classList.remove(className);
+    if (el.classList && el.classList.remove) {
+      el.classList.remove(className);
+      return;
+    }
+
+    var classNameRegex = RegExp('\\b' + className + '\\b', "g");
+
+    if (el instanceof SVGElement) {
+      el.setAttribute("class", el.getAttribute("class").replace(classNameRegex, ""));
+    } else {
+      el.className = el.getAttribute("class").replace(classNameRegex, "");
+    }
   },
 
   addClass: function addClass(el, className) {
-    el.classList.add(className);
+    if (el.classList && el.classList.add) {
+      el.classList.add(className);
+      return;
+    }
+
+    if (el instanceof SVGElement) {
+      el.setAttribute("class", el.getAttribute("class") + " " + className);
+    } else {
+      el.className = el.getAttribute("class") + " " + className;
+    }
   },
 
   hasClass: function hasClass(el, className) {
-    return el.classList.contains(className);
+    if (el.classList && el.classList.contains) {
+      return el.classList.contains(className);
+    }
+
+    var classNameRegex = RegExp('\\b' + className + '\\b', "g");
+
+    if (el instanceof SVGElement) {
+      return classNameRegex.test(el.getAttribute("class"));
+    } else {
+      return classNameRegex.test(el.className);
+    }
   },
 
   toggleClass: function toggleClass(el, className) {
+    if (el.classList && el.classList.toggle) {
+      el.classList.toggle(className);
+      return;
+    }
+
     if (this.hasClass(el, className)) {
       this.removeClass(el, className);
     } else {
@@ -2481,7 +2869,7 @@ exports.default = {
 };
 
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

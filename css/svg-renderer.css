@@ -1,0 +1,176 @@
+.tenuki-svg-renderer text {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured svg,
+.tenuki-svg-renderer.tenuki-board-textured .tenuki-zoom-container,
+.tenuki-svg-renderer.tenuki-board-textured .intersections {
+  transform: translate3d(0, 0, 0);
+}
+
+.tenuki-svg-renderer.tenuki-board {
+  position: relative;
+  background-color: rgb(225, 188, 106);
+
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.tenuki-svg-renderer.tenuki-board .line-box {
+  stroke: rgb(135, 113, 63);
+  fill: transparent;
+}
+
+.tenuki-svg-renderer.tenuki-board .hoshi {
+  stroke: rgb(135, 113, 63);
+  fill: rgb(135, 113, 63);
+}
+
+.tenuki-svg-renderer.tenuki-board .tenuki-inner-container {
+  overflow: hidden;
+}
+
+.tenuki-svg-renderer.tenuki-board .tenuki-zoom-container {
+  transition: transform 0.2s ease-in-out;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection,
+.tenuki-svg-renderer.tenuki-board .intersection .stone {
+  fill: transparent;
+  stroke: transparent;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.black .stone {
+  fill: black;
+  stroke: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.white .stone {
+  fill: white;
+  stroke: #676767;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.hovered .stone,
+.tenuki-svg-renderer.tenuki-board .intersection.dead .stone {
+  opacity: 0.5;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.dead.white .stone,
+.tenuki-svg-renderer.tenuki-board .intersection.hovered.white .stone {
+  stroke: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection .marker,
+.tenuki-svg-renderer.tenuki-board .intersection .ko-marker,
+.tenuki-svg-renderer.tenuki-board .intersection .territory-marker {
+  visibility: hidden;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.black .marker {
+  fill: white;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.white .marker {
+  fill: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.ko .ko-marker {
+  stroke: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.territory-black .territory-marker {
+  fill: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.territory-white .territory-marker {
+  fill: white;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.territory-black .territory-marker,
+.tenuki-svg-renderer.tenuki-board .intersection.territory-white .territory-marker,
+.tenuki-svg-renderer.tenuki-board .intersection.ko .ko-marker,
+.tenuki-svg-renderer.tenuki-board .intersection.played .marker {
+  visibility: visible;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.black .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.white .stone {
+  filter: none !important;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.black .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.dead.black .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.black .stone {
+  stroke: hsl(0, 0%, 20%);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.black .stone-shadow,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.white .stone-shadow {
+  fill: hsla(0, 0%, 24%, 0.38);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.white .stone-shadow,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.black .stone-shadow {
+  fill: none;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.white .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.dead.white .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.white .stone {
+  stroke: #DEDEDE;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.occupied,
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.occupied .intersection-inner-container {
+  transition: 0.1s transform;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.played,
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.played .intersection-inner-container {
+  transition: none;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-up {
+  transform: translateY(-1px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-upup {
+  transform: translateY(-2px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-down {
+  transform: translateY(1px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-downdown {
+  transform: translateY(2px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-none {
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-left .intersection-inner-container {
+  transform: translateX(-1px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-leftleft .intersection-inner-container {
+  transform: translateX(-2px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-right .intersection-inner-container {
+  transform: translateX(1px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-rightright .intersection-inner-container {
+  transform: translateX(2px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-none .intersection-inner-container {
+}
+
+.tenuki-svg-renderer .coordinates {
+  fill: rgb(135, 113, 63);
+  font-family: sans-serif;
+  font-size: 14px;
+}

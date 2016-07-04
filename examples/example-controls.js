@@ -55,7 +55,6 @@ ExampleGameControls = function(element, game) {
 
     var passButton = document.querySelector(".pass");
     var undoButton = document.querySelector(".undo");
-    var texturedButton = document.querySelector(".textured");
 
     passButton.addEventListener("click", function(e) {
       e.preventDefault();
@@ -67,12 +66,6 @@ ExampleGameControls = function(element, game) {
       e.preventDefault();
 
       controls.game.undo();
-    });
-
-    texturedButton.addEventListener("click", function(e) {
-      e.preventDefault();
-
-      controls.game.renderer.boardElement.classList.toggle("tenuki-board-textured");
     });
   }
 };

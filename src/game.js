@@ -1,4 +1,5 @@
 import DOMRenderer from "./dom-renderer";
+import SVGRenderer from "./svg-renderer";
 import NullRenderer from "./null-renderer";
 import BoardState from "./board-state";
 import Ruleset from "./ruleset";
@@ -10,7 +11,8 @@ const VALID_GAME_OPTIONS = [
   "handicapStones",
   "koRule",
   "_hooks",
-  "fuzzyStonePlacement"
+  "fuzzyStonePlacement",
+  "renderer"
 ];
 
 const Game = function(boardElement) {
@@ -23,11 +25,12 @@ const Game = function(boardElement) {
   this._boardElement = boardElement;
   this._defaultScoring = "territory";
   this._defaultKoRule = "simple";
+  this._defaultRenderer = "svg";
   this._deadPoints = [];
 };
 
 Game.prototype = {
-  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0, scoring = this._defaultScoring, koRule = this._defaultKoRule } = {}) {
+  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0, scoring = this._defaultScoring, koRule = this._defaultKoRule, renderer = this._defaultRenderer } = {}) {
     if (typeof boardSize !== "number") {
         throw new Error("Board size must be a number, but was: " + (typeof boardSize));
       }
@@ -53,6 +56,15 @@ Game.prototype = {
     this._scorer = new Scorer({
       scoreBy: scoring
     });
+
+    this._rendererChoice = {
+      "dom": DOMRenderer,
+      "svg": SVGRenderer
+    }[renderer];
+
+    if (!this._rendererChoice) {
+      throw new Error("Unknown renderer: " + renderer);
+    }
 
     this._whiteMustPassLast = this._scorer.usingPassStones();
 
@@ -93,7 +105,7 @@ Game.prototype = {
         }
       };
 
-      this.renderer = new DOMRenderer(this._boardElement, {
+      this.renderer = new this._rendererChoice(this._boardElement, {
         hooks: options["_hooks"] || defaultRendererHooks,
         options: {
           fuzzyStonePlacement: options["fuzzyStonePlacement"]
