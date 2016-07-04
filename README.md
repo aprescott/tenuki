@@ -7,11 +7,11 @@ _The API is still subject to change at any point. Treat it as beta software!_
 There are two main pieces:
 
 1. **A JavaScript engine** representing the board, game, and rules.
-2. **A HTML go board interface**.
+2. **A go board interface**.
 
 The JavaScript engine is not dependent on the renderer and works stand-alone. You can use it by itself as part of a larger JavaScript application.
 
-The HTML go board is intended to be a robust, functional component that can be embedded in a web page. By using the JavaScript API you could then build your own custom controls for undo/pass/etc.
+The go board interface is intended to be a robust, functional component that can be embedded in a web page. By using the JavaScript API you could then build your own custom controls for undo/pass/etc.
 
 <img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board.png" width="124" height="124">
 
@@ -25,7 +25,7 @@ Features:
   * Different scoring rules: territory, area, equivalence (with pass stones).
   * Seki detection for the territory rules.
   * A client interface for playing against a server.
-  * For the HTML renderer:
+  * For the interface:
     - Built-in mobile support for touch devices and small screens, even with a 19x19 board.
     - Automatic shrinking to fit given board (pixel) dimensions.
     - Optional coordinate markers for points A19 through T1.
@@ -125,6 +125,10 @@ For coordinate markers, indicating positions A19 through T1, add `data-include-c
 <div class="tenuki-board" data-include-coordinates="true"></div>
 ```
 
+# SVG renderer
+
+The default renderer uses SVG to display the board. If this is a problem, you can pass `renderer: "dom"` as a game setup option to switch to using a renderer based solely on DOM elements. This is _not recommended_. The all-DOM approach has worse performance and has alignment issues at browser zoom levels other than 100%, 200%, etc.
+
 # Board sizes other than 19x19
 
 You can pass a second argument to `new tenuki.Game` to specify the board size. If no size is given, the default of 19 is used. All sizes between 1x1 and 19x19 should work. Sizes above 19x19 will error and won't render.
@@ -176,10 +180,6 @@ Valid ko rule values are:
 
   * `"simple"` — Immediately recreating the previous board position is illegal.
   * `"superko"` — Recreating any previous position is illegal. (Also known as "positional superko".)
-
-# Known problems
-
-On a desktop, because the browser is rendered with pure CSS and no images, there are some pixel rounding issues when the browser's zoom level is not 100% after zooming with `Ctrl-+` (or `Cmd-+`). This can create positioning/alignment problems, for instance, at 110%, because widths and lines on the board are not consistent with each other.
 
 # Usage outside of a browser
 
