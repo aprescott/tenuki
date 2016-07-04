@@ -2485,18 +2485,53 @@ exports.default = {
   },
 
   removeClass: function removeClass(el, className) {
-    el.classList.remove(className);
+    if (el.classList && el.classList.remove) {
+      el.classList.remove(className);
+      return;
+    }
+
+    var classNameRegex = RegExp('\\b' + className + '\\b', "g");
+
+    if (el instanceof SVGElement) {
+      el.setAttribute("class", el.getAttribute("class").replace(classNameRegex, ""));
+    } else {
+      el.className = el.getAttribute("class").replace(classNameRegex, "");
+    }
   },
 
   addClass: function addClass(el, className) {
-    el.classList.add(className);
+    if (el.classList && el.classList.add) {
+      el.classList.add(className);
+      return;
+    }
+
+    if (el instanceof SVGElement) {
+      el.setAttribute("class", el.getAttribute("class") + " " + className);
+    } else {
+      el.className = el.getAttribute("class") + " " + className;
+    }
   },
 
   hasClass: function hasClass(el, className) {
-    return el.classList.contains(className);
+    if (el.classList && el.classList.contains) {
+      return el.classList.contains(className);
+    }
+
+    var classNameRegex = RegExp('\\b' + className + '\\b', "g");
+
+    if (el instanceof SVGElement) {
+      return classNameRegex.test(el.getAttribute("class"));
+    } else {
+      return classNameRegex.test(el.className);
+    }
   },
 
   toggleClass: function toggleClass(el, className) {
+    if (el.classList && el.classList.toggle) {
+      el.classList.toggle(className);
+      return;
+    }
+
     if (this.hasClass(el, className)) {
       this.removeClass(el, className);
     } else {
