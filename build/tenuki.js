@@ -1518,8 +1518,6 @@ var Renderer = function Renderer(boardElement, _ref) {
   }
 };
 
-// TODO: some overlap with BoardState._initialFor's calculation
-// of hoshi points.
 Renderer.hoshiPositionsFor = function (boardSize) {
   var hoshiElements = [];
 
