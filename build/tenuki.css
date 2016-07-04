@@ -1,20 +1,21 @@
 /*!
- * tenuki v0.1.0 (https://github.com/aprescott/tenuki.js)
+ * tenuki v0.2.0 (https://github.com/aprescott/tenuki.js)
  * Copyright © 2016 Adam Prescott.
  * Licensed under the MIT license.
  */
-.tenuki-board {
+.tenuki-dom-renderer.tenuki-board {
   position: relative;
   -webkit-user-select: none;
+  user-select: none;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
-.tenuki-board .tenuki-inner-container {
+.tenuki-dom-renderer.tenuki-board .tenuki-inner-container {
   background: rgb(226, 188, 106);
   overflow: hidden;
 }
 
-.tenuki-board .tenuki-zoom-container {
+.tenuki-dom-renderer.tenuki-board .tenuki-zoom-container {
   transition: transform 0.2s ease-in-out;
   /*
    * address an issue somewhat related to the shrink-to-fit problem on iOS 9: https://forums.developer.apple.com/thread/13510
@@ -24,46 +25,14 @@
   transform: scale(1);
 }
 
-.tenuki-board.tenuki-scaled .cancel-zoom.visible {
-  background: #B95858;
-  height: 70px;
-  width: 20px;
-  position: absolute;
-  transform: rotateZ(45deg);
-  bottom: 62px;
-  left: 89px;
-  z-index: 2;
-}
-
-.tenuki-board.tenuki-scaled .cancel-zoom.visible:after {
-  background: #B95858;
-  content: "";
-  height: 20px;
-  left: -25px;
-  position: absolute;
-  top: 25px;
-  width: 70px;
-}
-
-.tenuki-board.tenuki-scaled .cancel-zoom.visible + .cancel-zoom-backdrop {
-  width: 100px;
-  height: 100px;
-  position: absolute;
-  z-index: 1;
-  bottom: 48px;
-  left: 49px;
-  background: rgba(226, 188, 106, 0.81);
-  border-radius: 50%;
-}
-
-.tenuki-board[data-include-coordinates=true] .cancel-zoom.visible,
-.tenuki-board[data-include-coordinates=true] .cancel-zoom.visible + .cancel-zoom-backdrop {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .cancel-zoom.visible,
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .cancel-zoom.visible + .cancel-zoom-backdrop {
   /* additional gutter margin offset */
   margin-left: calc(28px - 3px);
   margin-bottom: calc(28px - 3px);
 }
 
-.tenuki-board .lines {
+.tenuki-dom-renderer.tenuki-board .lines {
   position: absolute;
   top: 0;
   left: 0;
@@ -71,18 +40,18 @@
   margin: calc(28px - 10px);
 }
 
-.tenuki-board[data-include-coordinates=true] .lines {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .lines {
   /* base margin + additional gutter margin */
   margin: calc((28px - 10px) + (28px - 3px));
 }
 
-.tenuki-board .line {
+.tenuki-dom-renderer.tenuki-board .line {
   background: rgb(135, 113, 63);
   float: left;
   position: relative;
 }
 
-.tenuki-board .line.horizontal {
+.tenuki-dom-renderer.tenuki-board .line.horizontal {
   height: 1px;
   width: 100%;
   /* intersection gap size */
@@ -90,21 +59,21 @@
   clear: left;
 }
 
-.tenuki-board .line.vertical {
+.tenuki-dom-renderer.tenuki-board .line.vertical {
   width: 1px;
   height: 100%;
   /* intersection gap size */
   margin-right: 28px;
 }
 
-.tenuki-board .line.vertical:last-child {
+.tenuki-dom-renderer.tenuki-board .line.vertical:last-child {
   margin-right: -1px;
 }
 
-.tenuki-board[data-include-coordinates=true] .line.vertical:before,
-.tenuki-board[data-include-coordinates=true] .line.vertical:after,
-.tenuki-board[data-include-coordinates=true] .line.horizontal:before,
-.tenuki-board[data-include-coordinates=true] .line.horizontal:after {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.vertical:before,
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.vertical:after,
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.horizontal:before,
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.horizontal:after {
   /* gutter margin, less 5px */
   width: calc((28px - 3px) - 5px);
   /* gutter margin, less 5px */
@@ -118,24 +87,24 @@
   font-size: 14px;
 }
 
-.tenuki-board[data-include-coordinates=true] .line.vertical:before,
-.tenuki-board[data-include-coordinates=true] .line.vertical:after {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.vertical:before,
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.vertical:after {
   content: attr(data-top-gutter);
 }
 
-.tenuki-board[data-include-coordinates=true] .line.horizontal:before,
-.tenuki-board[data-include-coordinates=true] .line.horizontal:after {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.horizontal:before,
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.horizontal:after {
   content: attr(data-left-gutter);
 }
 
-.tenuki-board[data-include-coordinates=true] .line.vertical:before {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.vertical:before {
   /* -1*width/2 */
   margin-left: calc(-1*((28px - 3px) - 5px)/2);
   /* -1*width/2, less the intersection gap size */
   margin-top: calc(-1*((28px - 3px) - 5px)/2 - 28px);
 }
 
-.tenuki-board[data-include-coordinates=true] .line.vertical:after {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.vertical:after {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -145,14 +114,14 @@
   margin-bottom: calc(-1*((28px - 3px) - 5px)/2 - 28px);
 }
 
-.tenuki-board[data-include-coordinates=true] .line.horizontal:before {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.horizontal:before {
   /* -1*width/2, less the intersection gap size */
   margin-left: calc(-1*((28px - 3px) - 5px)/2 - 28px);
   /* -1*width/2 */
   margin-top: calc(-1*((28px - 3px) - 5px)/2);
 }
 
-.tenuki-board[data-include-coordinates=true] .line.horizontal:after {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .line.horizontal:after {
   position: absolute;
   top: 0;
   right: 0;
@@ -162,7 +131,19 @@
   margin-top: calc(-1*((28px - 3px) - 5px)/2);
 }
 
-.tenuki-board .hoshi {
+.tenuki-dom-renderer.tenuki-board .hoshi {
+  /* -2px to account for the hoshi's own width */
+  margin-top: calc((28px - 10px) - 2px);
+  margin-left: calc((28px - 10px) - 2px);
+}
+
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .hoshi {
+  /* -2px to account for the hoshi's own width */
+  margin-top: calc((28px - 10px) + (28px - 3px) - 2px);
+  margin-left: calc((28px - 10px) + (28px - 3px) - 2px);
+}
+
+.tenuki-dom-renderer.tenuki-board .hoshi {
   width: calc(2 * 2px + 1px);
   height: calc(2 * 2px + 1px);
   border-radius: 50%;
@@ -170,7 +151,7 @@
   position: absolute;
 }
 
-.tenuki-board .intersections {
+.tenuki-dom-renderer.tenuki-board .intersections {
   position: absolute;
   /* base margin, less half the intersection gap size */
   top: calc((28px - 10px) - 28px/2);
@@ -178,85 +159,85 @@
   left: calc((28px - 10px) - 28px/2);
 }
 
-.tenuki-board[data-include-coordinates=true] .intersections {
+.tenuki-dom-renderer.tenuki-board[data-include-coordinates=true] .intersections {
   /* additional gutter margin */
   margin-top: calc(28px - 3px);
   /* additional gutter margin */
   margin-left: calc(28px - 3px);
 }
 
-.tenuki-board .intersection {
+.tenuki-dom-renderer.tenuki-board .intersection {
   width: calc(28px + 1px);
   height: calc(28px + 1px);
 }
 
-.tenuki-board-textured,
-.tenuki-board-textured .tenuki-inner-container,
-.tenuki-board-textured .tenuki-zoom-container,
-.tenuki-board-textured .intersections {
+.tenuki-dom-renderer.tenuki-board-textured,
+.tenuki-dom-renderer.tenuki-board-textured .tenuki-inner-container,
+.tenuki-dom-renderer.tenuki-board-textured .tenuki-zoom-container,
+.tenuki-dom-renderer.tenuki-board-textured .intersections {
   /* scale(1) is for the same iOS 9 reason as above */
   transform: scale(1) translate3d(0, 0, 0);
 }
 
-.tenuki-board-textured.tenuki-smaller-stones .intersection {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-smaller-stones .intersection {
   width: calc(28px + 1px - 2px);
   height: calc(28px + 1px - 2px);
   border: 1px solid transparent;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .occupied {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .occupied {
   transition: 0.1s margin;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.marker {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.played {
   transition: none;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-up {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-up {
   margin-top: -1px;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-upup {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-upup {
   margin-top: -2px;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-down {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-down {
   margin-top: 1px;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-downdown {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-downdown {
   margin-top: 2px;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-none {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-none {
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-left {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-left {
   margin-left: -1px;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-leftleft {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-leftleft {
   margin-left: -2px;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-right {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-right {
   margin-left: 1px;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-rightright {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-rightright {
   margin-left: 2px;
 }
 
-.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-none {
+.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-none {
 }
 
-.tenuki-board .intersection,
-.tenuki-board .intersection .stone {
+.tenuki-dom-renderer.tenuki-board .intersection,
+.tenuki-dom-renderer.tenuki-board .intersection .stone {
   position: absolute;
 }
 
-.tenuki-board .occupied .stone,
-.tenuki-board .empty.hovered .stone {
+.tenuki-dom-renderer.tenuki-board .occupied .stone,
+.tenuki-dom-renderer.tenuki-board .empty.hovered .stone {
   content: "";
   display: block;
   border-radius: 50%;
@@ -265,7 +246,7 @@
   height: calc(100% - 2px);
 }
 
-.tenuki-board .intersection.occupied.marker .stone:after {
+.tenuki-dom-renderer.tenuki-board .intersection.occupied.played .stone:after {
   content: "";
   display: block;
   width: calc(5px);
@@ -280,41 +261,42 @@
    */
   left: calc((100% + 2px + 1px)/2);
   top: calc((100% + 2px + 1px)/2);
-  /* now correct by the 1px, plus the width of the marker */
+  /* now correct by the 1px, plus the width of the played marker */
   margin-left: calc(-1px - 5px);
   margin-top: calc(-1px - 5px);
+  z-index: 2;
 }
 
-.tenuki-board .intersection.white.occupied.marker .stone:after {
+.tenuki-dom-renderer.tenuki-board .intersection.white.occupied.played .stone:after {
   color: black;
   background: black;
 }
 
-.tenuki-board .intersection.black.occupied.marker .stone:after {
+.tenuki-dom-renderer.tenuki-board .intersection.black.occupied.played .stone:after {
   color: white;
   background: white;
 }
 
-.tenuki-board .occupied.white .stone,
-.tenuki-board .empty.hovered.white .stone {
+.tenuki-dom-renderer.tenuki-board .occupied.white .stone,
+.tenuki-dom-renderer.tenuki-board .empty.hovered.white .stone {
   background: white;
   border-color: #676767;
 }
 
-.tenuki-board .empty.hovered.white .stone {
+.tenuki-dom-renderer.tenuki-board .empty.hovered.white .stone {
   border-color: black;
 }
 
-.tenuki-board .occupied.black .stone,
-.tenuki-board .empty.hovered.black .stone {
+.tenuki-dom-renderer.tenuki-board .occupied.black .stone,
+.tenuki-dom-renderer.tenuki-board .empty.hovered.black .stone {
   background: black;
 }
 
-.tenuki-board .intersection.empty.hovered .stone {
+.tenuki-dom-renderer.tenuki-board .intersection.empty.hovered .stone {
   opacity: 0.5;
 }
 
-.tenuki-board .intersection.ko .stone {
+.tenuki-dom-renderer.tenuki-board .intersection.ko .stone {
   background: none !important;
   width: 11px !important;
   height: 11px !important;
@@ -328,21 +310,21 @@
   margin-left: calc(-1px - 6px);
 }
 
-.tenuki-board .intersection.occupied.black.dead .stone,
-.tenuki-board .intersection.occupied.black.white .stone {
+.tenuki-dom-renderer.tenuki-board .intersection.occupied.black.dead .stone,
+.tenuki-dom-renderer.tenuki-board .intersection.occupied.black.white .stone {
   border-color: rgba(0, 0, 0, 0.5);
 }
 
-.tenuki-board .intersection.occupied.black.dead .stone {
+.tenuki-dom-renderer.tenuki-board .intersection.occupied.black.dead .stone {
   background: rgba(0, 0, 0, 0.5);
 }
 
-.tenuki-board .intersection.occupied.white.dead .stone {
+.tenuki-dom-renderer.tenuki-board .intersection.occupied.white.dead .stone {
   background: rgba(255, 255, 255, 0.5);
 }
 
-.tenuki-board .intersection.territory-black:after,
-.tenuki-board .intersection.territory-white:after {
+.tenuki-dom-renderer.tenuki-board .intersection.territory-black:after,
+.tenuki-dom-renderer.tenuki-board .intersection.territory-white:after {
   content: "";
   display: block;
   width: calc(25% + 4px);
@@ -354,42 +336,261 @@
   margin-top: calc((-25% - 4px)/2);
 }
 
-.tenuki-board .intersection.territory-black:after {
+.tenuki-dom-renderer.tenuki-board .intersection.territory-black:after {
   background: black;
 }
 
-.tenuki-board .intersection.territory-white:after {
+.tenuki-dom-renderer.tenuki-board .intersection.territory-white:after {
   background: white;
 }
 
-.tenuki-board-textured .occupied .stone {
-  box-shadow: 0px 2px 1px rgba(62, 62, 62, 0.38);
+.tenuki-dom-renderer.tenuki-board-textured .occupied .stone {
+  box-shadow: 0px 1.5px 0px rgba(62, 62, 62, 0.38);
 }
 
-.tenuki-board-textured .occupied.black .stone,
-.tenuki-board-textured .empty.hovered.black .stone {
-  border-color: #565656;
-  background: radial-gradient(circle at 50% 120%, #000000, #484848 10%, #101010 80%, #585858 100%)
+.tenuki-dom-renderer.tenuki-board-textured .occupied.black .stone,
+.tenuki-dom-renderer.tenuki-board-textured .empty.hovered.black .stone {
+  border-color: hsl(0, 0%, 20%);
 }
 
-.tenuki-board-textured .occupied.white .stone,
-.tenuki-board-textured .empty.hovered.white .stone {
+.tenuki-dom-renderer.tenuki-board-textured .occupied.white .stone,
+.tenuki-dom-renderer.tenuki-board-textured .empty.hovered.white .stone {
   border-color: #DEDEDE;
-  background: radial-gradient(circle at 50% 120%, #ECEAEA, #D6D6D6 10%, #EAEAEA 80%, #FFFFFF 100%);
 }
 
-.tenuki-board-textured .occupied .stone:before {
+.tenuki-dom-renderer.tenuki-board-textured .occupied .stone:before {
   content: "";
   position: absolute;
-  top: 1%;
-  left: 5%;
-  width: 90%;
-  height: 90%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 0px, #848484, rgba(86, 86, 86, 0) 58%);
   z-index: 2;
 }
 
-.tenuki-board-textured .occupied.white .stone:before {
-  background: radial-gradient(circle at 50% 0px, #FFFFFF, rgba(255, 255, 255, 0) 58%);
+.tenuki-dom-renderer.tenuki-board-textured .occupied.black .stone:before {
+  background: radial-gradient(circle at 50% 0px, #848484, hsl(0, 0%, 20%) 50%);
+}
+
+.tenuki-dom-renderer.tenuki-board-textured .occupied.white .stone:before {
+  background: radial-gradient(circle at 50% 0px, #FFFFFF, #DDDDDD 70%);
+}
+
+.tenuki-board.tenuki-scaled .cancel-zoom.visible {
+  background: #B95858;
+  height: 70px;
+  width: 20px;
+  position: absolute;
+  transform: rotateZ(45deg);
+  bottom: 62px;
+  z-index: 2;
+  left: 89px;
+}
+
+.tenuki-svg-renderer.tenuki-board.tenuki-scaled .cancel-zoom.visible {
+  left: 87px;
+}
+
+.tenuki-board.tenuki-scaled .cancel-zoom.visible:after {
+  background: #B95858;
+  content: "";
+  height: 20px;
+  left: -25px;
+  position: absolute;
+  top: 25px;
+  width: 70px;
+}
+
+.tenuki-board.tenuki-scaled .cancel-zoom.visible + .cancel-zoom-backdrop {
+  position: absolute;
+  z-index: 1;
+  bottom: 48px;
+  background: rgba(226, 188, 106, 0.81);
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  left: 49px;
+}
+
+.tenuki-svg-renderer.tenuki-board.tenuki-scaled .cancel-zoom.visible + .cancel-zoom-backdrop {
+  width: 99px;
+  height: 98px;
+  left: 47px;
+}
+.tenuki-svg-renderer text {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured svg,
+.tenuki-svg-renderer.tenuki-board-textured .tenuki-zoom-container,
+.tenuki-svg-renderer.tenuki-board-textured .intersections {
+  transform: translate3d(0, 0, 0);
+}
+
+.tenuki-svg-renderer.tenuki-board {
+  position: relative;
+  background-color: rgb(225, 188, 106);
+
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.tenuki-svg-renderer.tenuki-board .line-box {
+  stroke: rgb(135, 113, 63);
+  fill: transparent;
+}
+
+.tenuki-svg-renderer.tenuki-board .hoshi {
+  stroke: rgb(135, 113, 63);
+  fill: rgb(135, 113, 63);
+}
+
+.tenuki-svg-renderer.tenuki-board .tenuki-inner-container {
+  overflow: hidden;
+}
+
+.tenuki-svg-renderer.tenuki-board .tenuki-zoom-container {
+  transition: transform 0.2s ease-in-out;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection,
+.tenuki-svg-renderer.tenuki-board .intersection .stone {
+  fill: transparent;
+  stroke: transparent;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.black .stone {
+  fill: black;
+  stroke: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.white .stone {
+  fill: white;
+  stroke: #676767;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.hovered .stone,
+.tenuki-svg-renderer.tenuki-board .intersection.dead .stone {
+  opacity: 0.5;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.dead.white .stone,
+.tenuki-svg-renderer.tenuki-board .intersection.hovered.white .stone {
+  stroke: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection .marker,
+.tenuki-svg-renderer.tenuki-board .intersection .ko-marker,
+.tenuki-svg-renderer.tenuki-board .intersection .territory-marker {
+  visibility: hidden;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.black .marker {
+  fill: white;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.white .marker {
+  fill: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.ko .ko-marker {
+  stroke: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.territory-black .territory-marker {
+  fill: black;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.territory-white .territory-marker {
+  fill: white;
+}
+
+.tenuki-svg-renderer.tenuki-board .intersection.territory-black .territory-marker,
+.tenuki-svg-renderer.tenuki-board .intersection.territory-white .territory-marker,
+.tenuki-svg-renderer.tenuki-board .intersection.ko .ko-marker,
+.tenuki-svg-renderer.tenuki-board .intersection.played .marker {
+  visibility: visible;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.black .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.white .stone {
+  filter: none !important;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.black .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.dead.black .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.black .stone {
+  stroke: hsl(0, 0%, 20%);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.black .stone-shadow,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.white .stone-shadow {
+  fill: hsla(0, 0%, 24%, 0.38);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.white .stone-shadow,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.black .stone-shadow {
+  fill: none;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured .intersection.white .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.dead.white .stone,
+.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.white .stone {
+  stroke: #DEDEDE;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.occupied,
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.occupied .intersection-inner-container {
+  transition: 0.1s transform;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.played,
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.played .intersection-inner-container {
+  transition: none;
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-up {
+  transform: translateY(-1px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-upup {
+  transform: translateY(-2px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-down {
+  transform: translateY(1px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-downdown {
+  transform: translateY(2px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-none {
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-left .intersection-inner-container {
+  transform: translateX(-1px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-leftleft .intersection-inner-container {
+  transform: translateX(-2px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-right .intersection-inner-container {
+  transform: translateX(1px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-rightright .intersection-inner-container {
+  transform: translateX(2px);
+}
+
+.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-none .intersection-inner-container {
+}
+
+.tenuki-svg-renderer .coordinates {
+  fill: rgb(135, 113, 63);
+  font-family: sans-serif;
+  font-size: 14px;
 }

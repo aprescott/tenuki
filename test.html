@@ -7,7 +7,8 @@
 <div id="test-board" class="tenuki-board"></div>
 
 <script>
-// phantomjs has no click(). patch courtesy of http://stackoverflow.com/a/17789929/528044
+// phantomjs has no click().
+// patch courtesy of http://stackoverflow.com/a/17789929/528044
 if (!HTMLElement.prototype.click) {
   HTMLElement.prototype.click = function() {
     var ev = document.createEvent('MouseEvent');
@@ -22,6 +23,24 @@ if (!HTMLElement.prototype.click) {
     this.dispatchEvent(ev);
   };
 }
+
+// give ourselves a click function on SVG elements, courtesy of
+// http://stackoverflow.com/a/28077816/528044
+if (!SVGElement.prototype.click) {
+  SVGElement.prototype.click = function() {
+    var ev = document.createEvent('SVGEvents');
+    ev.initEvent("click", true, true);
+    this.dispatchEvent(ev);
+  };
+}
+
+// phantomjs pre-2.0 has no Function.bind. simple polyfill courtesy of https://github.com/ariya/phantomjs/issues/10522#issuecomment-66449127
+Function.prototype.bind = Function.prototype.bind || function (thisp) {
+    var fn = this;
+    return function () {
+        return fn.apply(thisp, arguments);
+    };
+};
 </script>
 
 <script>
@@ -83,17 +102,17 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[5][9], "black")) {
 // marker indicator
 resetTests();
 
-if (boardElementTest.querySelectorAll(".marker").length != 0) {
+if (boardElementTest.querySelectorAll(".played").length != 0) {
   throw "tests failed";
 }
 
 gameTest.renderer.grid[1][1].click();
-if (boardElementTest.querySelectorAll(".marker").length == 0 || !tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "marker")) {
+if (boardElementTest.querySelectorAll(".played").length == 0 || !tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "played")) {
   throw "tests failed";
 }
 
 gameTest.renderer.grid[2][2].click();
-if (boardElementTest.querySelectorAll(".marker").length == 0 || tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "marker") || !tenuki.utils.hasClass(gameTest.renderer.grid[2][2], "marker")) {
+if (boardElementTest.querySelectorAll(".played").length == 0 || tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "played") || !tenuki.utils.hasClass(gameTest.renderer.grid[2][2], "played")) {
   throw "tests failed";
 }
 
@@ -1440,48 +1459,48 @@ if (gameTest.currentState().playedPoint.y != 4 || gameTest.currentState().played
 
 // fancy "pass" print
 resetTests();
-gameTest.renderer.grid[3][2].className = "intersection stone black";
-gameTest.renderer.grid[3][3].className = "intersection stone black";
-gameTest.renderer.grid[3][4].className = "intersection stone black";
-gameTest.renderer.grid[3][6].className = "intersection stone black";
-gameTest.renderer.grid[3][7].className = "intersection stone black";
-gameTest.renderer.grid[3][8].className = "intersection stone black";
-gameTest.renderer.grid[3][10].className = "intersection stone black";
-gameTest.renderer.grid[3][11].className = "intersection stone black";
-gameTest.renderer.grid[3][12].className = "intersection stone black";
-gameTest.renderer.grid[3][14].className = "intersection stone black";
-gameTest.renderer.grid[3][15].className = "intersection stone black";
-gameTest.renderer.grid[3][16].className = "intersection stone black";
-gameTest.renderer.grid[4][2].className = "intersection stone black";
-gameTest.renderer.grid[4][4].className = "intersection stone black";
-gameTest.renderer.grid[4][6].className = "intersection stone black";
-gameTest.renderer.grid[4][8].className = "intersection stone black";
-gameTest.renderer.grid[4][10].className = "intersection stone black";
-gameTest.renderer.grid[4][14].className = "intersection stone black";
-gameTest.renderer.grid[5][2].className = "intersection stone black";
-gameTest.renderer.grid[5][3].className = "intersection stone black";
-gameTest.renderer.grid[5][4].className = "intersection stone black";
-gameTest.renderer.grid[5][6].className = "intersection stone black";
-gameTest.renderer.grid[5][7].className = "intersection stone black";
-gameTest.renderer.grid[5][8].className = "intersection stone black";
-gameTest.renderer.grid[5][10].className = "intersection stone black";
-gameTest.renderer.grid[5][11].className = "intersection stone black";
-gameTest.renderer.grid[5][12].className = "intersection stone black";
-gameTest.renderer.grid[5][14].className = "intersection stone black";
-gameTest.renderer.grid[5][15].className = "intersection stone black";
-gameTest.renderer.grid[5][16].className = "intersection stone black";
-gameTest.renderer.grid[6][2].className = "intersection stone black";
-gameTest.renderer.grid[6][6].className = "intersection stone black";
-gameTest.renderer.grid[6][8].className = "intersection stone black";
-gameTest.renderer.grid[6][12].className = "intersection stone black";
-gameTest.renderer.grid[6][16].className = "intersection stone black";
-gameTest.renderer.grid[7][2].className = "intersection stone black";
-gameTest.renderer.grid[7][6].className = "intersection stone black";
-gameTest.renderer.grid[7][8].className = "intersection stone black";
-gameTest.renderer.grid[7][10].className = "intersection stone black";
-gameTest.renderer.grid[7][11].className = "intersection stone black";
-gameTest.renderer.grid[7][12].className = "intersection stone black";
-gameTest.renderer.grid[7][14].className = "intersection stone black";
-gameTest.renderer.grid[7][15].className = "intersection stone black";
-gameTest.renderer.grid[7][16].className = "intersection stone black";
+gameTest.renderer.grid[3][2].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][3].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][4].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][6].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][7].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][8].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][10].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][11].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][12].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][14].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][15].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[3][16].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[4][2].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[4][4].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[4][6].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[4][8].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[4][10].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[4][14].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][2].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][3].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][4].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][6].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][7].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][8].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][10].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][11].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][12].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][14].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][15].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[5][16].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[6][2].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[6][6].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[6][8].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[6][12].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[6][16].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[7][2].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[7][6].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[7][8].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[7][10].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[7][11].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[7][12].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[7][14].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[7][15].setAttribute("class", "intersection occupied stone black");
+gameTest.renderer.grid[7][16].setAttribute("class", "intersection occupied stone black");
 </script>
