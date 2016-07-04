@@ -3,6 +3,9 @@ set -e
 export PATH="./node_modules/.bin:$PATH"
 
 rm -rf lib
+rm -rf build
+mkdir build
+
 babel --source-maps --presets es2015 src -d lib > /dev/null
 
 cat copyright_header.txt <(browserify index.js --standalone tenuki -t [ babelify --presets [ es2015 ] ]) > build/tenuki.js
