@@ -10,6 +10,7 @@ const VALID_GAME_OPTIONS = [
   "scoring",
   "handicapStones",
   "koRule",
+  "komi",
   "_hooks",
   "fuzzyStonePlacement",
   "renderer"
@@ -30,10 +31,10 @@ const Game = function(boardElement) {
 };
 
 Game.prototype = {
-  _configureOptions: function({ boardSize = this._defaultBoardSize, handicapStones = 0, scoring = this._defaultScoring, koRule = this._defaultKoRule, renderer = this._defaultRenderer } = {}) {
+  _configureOptions: function({ boardSize = this._defaultBoardSize, komi = 0, handicapStones = 0, scoring = this._defaultScoring, koRule = this._defaultKoRule, renderer = this._defaultRenderer } = {}) {
     if (typeof boardSize !== "number") {
-        throw new Error("Board size must be a number, but was: " + (typeof boardSize));
-      }
+      throw new Error("Board size must be a number, but was: " + (typeof boardSize));
+    }
 
     if (typeof handicapStones !== "number") {
       throw new Error("Handicap stones must be a number, but was: " + (typeof boardSize));
@@ -54,7 +55,8 @@ Game.prototype = {
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
     this._scorer = new Scorer({
-      scoreBy: scoring
+      scoreBy: scoring,
+      komi: komi
     });
 
     this._rendererChoice = {

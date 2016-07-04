@@ -23,6 +23,7 @@ Features:
   * Handicap stones.
   * End-game functionality: dead stone marking and scoring.
   * Different scoring rules: territory, area, equivalence (with pass stones).
+  * Komi.
   * Seki detection for the territory rules.
   * A client interface for playing against a server.
   * For the visual interface:
@@ -151,7 +152,7 @@ game.setup({
 });
 ```
 
-# Configuring scoring
+# Configuring scoring and komi
 
 The default scoring is territory scoring. The scoring can be given as part of the `setup()` options:
 
@@ -165,6 +166,16 @@ Valid scoring types are:
 
   * `"area"` — Area scoring.
   * `"territory"` — Territory scoring.
+
+The default komi value is 0. To alter the value of white's score, pass `komi`:
+
+```js
+game.setup({
+  komi: 6.5
+});
+```
+
+Komi is not automatically chosen based on the scoring type.
 
 # Ko and superko
 

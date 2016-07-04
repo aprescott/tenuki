@@ -803,7 +803,7 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "_hooks", "fuzzyStonePlacement", "renderer"];
+var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "komi", "_hooks", "fuzzyStonePlacement", "renderer"];
 
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -825,6 +825,8 @@ Game.prototype = {
 
     var _ref$boardSize = _ref.boardSize;
     var boardSize = _ref$boardSize === undefined ? this._defaultBoardSize : _ref$boardSize;
+    var _ref$komi = _ref.komi;
+    var komi = _ref$komi === undefined ? 0 : _ref$komi;
     var _ref$handicapStones = _ref.handicapStones;
     var handicapStones = _ref$handicapStones === undefined ? 0 : _ref$handicapStones;
     var _ref$scoring = _ref.scoring;
@@ -857,7 +859,8 @@ Game.prototype = {
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
     this._scorer = new _scorer2.default({
-      scoreBy: scoring
+      scoreBy: scoring,
+      komi: komi
     });
 
     this._rendererChoice = {
@@ -2376,6 +2379,7 @@ var Scorer = function Scorer() {
   var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
   var scoreBy = _ref.scoreBy;
+  var komi = _ref.komi;
 
   this._strategy = {
     "area": AreaScoring,
@@ -2383,8 +2387,18 @@ var Scorer = function Scorer() {
     "equivalence": AreaScoring
   }[scoreBy];
 
+  this._komi = komi;
+
   if (!this._strategy) {
     throw new Error("Unknown scoring type: " + scoreBy);
+  }
+
+  if (this._komi === null || typeof this._komi === "undefined") {
+    throw new Error("Error initializing scorer without a komi value");
+  }
+
+  if (typeof this._komi !== "number") {
+    throw new Error("Komi value given is not a number: " + komi);
   }
 
   this._usePassStones = scoreBy === "equivalence";
@@ -2395,6 +2409,7 @@ var Scorer = function Scorer() {
 Scorer.prototype = {
   score: function score(game) {
     var result = this._strategy.score(game);
+    result.white += this._komi;
 
     if (this._usePassStones) {
       return {

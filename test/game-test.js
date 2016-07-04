@@ -79,6 +79,30 @@ describe("Game", function() {
     });
   });
 
+  describe("komi", function() {
+    var game = new Game();
+    game.setup();
+
+    game.pass();
+    game.pass();
+
+    expect(game.isOver()).to.be.true;
+
+    expect(game.score().black).to.equal(0);
+    expect(game.score().white).to.equal(0);
+
+    [0.5, 7, 7.5, 100].forEach(function(komiValue) {
+      var game = new Game();
+      game.setup({ komi: komiValue });
+
+      game.pass();
+      game.pass();
+
+      expect(game.score().black).to.equal(0);
+      expect(game.score().white).to.equal(komiValue);
+    });
+  });
+
   describe("coordinatesFor", function() {
     it("is the A19-T1 coordinate value for a point", function() {
       var game = new Game();

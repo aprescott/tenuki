@@ -141,15 +141,25 @@ const AreaScoring = Object.freeze({
   }
 });
 
-const Scorer = function({ scoreBy } = {}) {
+const Scorer = function({ scoreBy, komi } = {}) {
   this._strategy = {
     "area": AreaScoring,
     "territory": TerritoryScoring,
     "equivalence": AreaScoring
   }[scoreBy];
 
+  this._komi = komi;
+
   if (!this._strategy) {
     throw new Error("Unknown scoring type: " + scoreBy);
+  }
+
+  if (this._komi === null || typeof this._komi === "undefined") {
+    throw new Error("Error initializing scorer without a komi value");
+  }
+
+  if (typeof this._komi !== "number") {
+    throw new Error("Komi value given is not a number: " + komi);
   }
 
   this._usePassStones = scoreBy === "equivalence";
@@ -161,6 +171,7 @@ const Scorer = function({ scoreBy } = {}) {
 Scorer.prototype = {
   score: function(game) {
     const result = this._strategy.score(game);
+    result.white += this._komi;
 
     if (this._usePassStones) {
       return {
