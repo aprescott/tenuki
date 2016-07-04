@@ -20,7 +20,7 @@ Features:
   * Simple ko and superko.
   * Pass.
   * Undo.
-  * Handicap stones.
+  * Handicap stones, with or without free placement.
   * End-game functionality: dead stone marking and scoring.
   * Different scoring rules: territory, area, equivalence (with pass stones).
   * Komi.
@@ -149,6 +149,15 @@ Handicap stones (2 through 9) are supported on sizes 9x9, 13x13 and 19x19.
 ```js
 game.setup({
   handicapStones: 5
+});
+```
+
+By default, handicap placement is fixed at the traditional star points. To allow free handicap placement, set `freeHandicapPlacement: true`:
+
+```js
+game.setup({
+  handicapStones: 5,
+  freeHandicapPlacement: true
 });
 ```
 
