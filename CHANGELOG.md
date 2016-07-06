@@ -5,7 +5,7 @@
 # v0.2.1
 
 * Resizing the window (including rotating) will re-calculate board sizing.
-* When zoomed in with Tenuki's own zoom, pinch-zooming out will zoom the board out.
+* When zoomed in with Tenuki's own zoom, pinch-zooming on the board has no effect.
 * Simplify textured stone styling.
 * Add a new default renderer which uses SVG.
 * Support for komi as a `game.setup()` option.
