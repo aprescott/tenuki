@@ -1,6 +1,6 @@
 # Next version
 
-* ...
+* SVG renderer: Don't colour the entire board element, just the area around the playable intersections.
 
 # v0.2.1
 

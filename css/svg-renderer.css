@@ -12,7 +12,6 @@
 
 .tenuki-svg-renderer.tenuki-board {
   position: relative;
-  background-color: rgb(225, 188, 106);
 
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -29,6 +28,7 @@
 
 .tenuki-svg-renderer.tenuki-board .tenuki-inner-container {
   overflow: hidden;
+  background-color: rgb(225, 188, 106);
 }
 
 .tenuki-svg-renderer.tenuki-board .tenuki-zoom-container {
