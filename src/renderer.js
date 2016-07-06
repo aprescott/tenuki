@@ -142,9 +142,9 @@ Renderer.prototype = {
     renderer.touchmoveEventHandler = renderer.handleTouchMove.bind(renderer);
     renderer.touchendEventHandler = renderer.handleTouchEnd.bind(renderer);
 
-    utils.addEventListener(boardElement, "touchstart", renderer.touchstartEventHandler);
-    utils.addEventListener(boardElement, "touchend", renderer.touchendEventHandler);
-    utils.addEventListener(boardElement, "touchmove", renderer.touchmoveEventHandler);
+    utils.addEventListener(renderer.innerContainer, "touchstart", renderer.touchstartEventHandler);
+    utils.addEventListener(renderer.innerContainer, "touchend", renderer.touchendEventHandler);
+    utils.addEventListener(renderer.innerContainer, "touchmove", renderer.touchmoveEventHandler);
   },
 
   computeSizing: function() {

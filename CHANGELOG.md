@@ -1,6 +1,7 @@
 # Next version
 
 * SVG renderer: Don't colour the entire board element, just the area around the playable intersections.
+* Make sure only the visible board is treated as draggable.
 
 # v0.2.1
 
