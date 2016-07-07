@@ -10,8 +10,11 @@
     "go",
     "goban",
     "board",
-    "game",
-    "gaming"
+    "baduk",
+    "weiqi",
+    "board",
+    "fuzzy",
+    "game"
   ],
   "moduleType": [],
   "homepage": "",
