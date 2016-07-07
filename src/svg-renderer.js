@@ -257,6 +257,19 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
   renderer.svgElement.setAttribute("width", renderer.BOARD_LENGTH);
 };
 
+SVGRenderer.prototype.computeSizing = function() {
+  Renderer.prototype.computeSizing.call(this);
+
+  // In addition to the will-change re-raster in Renderer,
+  // the SVG element appears to sometimes need this to
+  // prevent blurriness on resize.
+  this.svgElement.style.transform = "none";
+
+  window.requestAnimationFrame(() => {
+    this.svgElement.style.transform = "";
+  });
+};
+
 SVGRenderer.prototype.setIntersectionClasses = function(intersectionEl, intersection, classes) {
   if (intersectionEl.getAttribute("class") !== classes.join(" ")) {
     intersectionEl.setAttribute("class", classes.join(" "));

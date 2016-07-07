@@ -15,6 +15,8 @@ describe("Client", function() {
 
   global["document"] = document;
   global["window"] = window;
+  // we don't really need this for these tests.
+  window.requestAnimationFrame = function() {};
   global["navigator"] = { userAgent: "node.js" };
   global["HTMLElement"] = global["window"].HTMLElement;
 

@@ -41,6 +41,12 @@ Function.prototype.bind = Function.prototype.bind || function (thisp) {
         return fn.apply(thisp, arguments);
     };
 };
+
+// let tests pass with phantomjs. we don't actually need a functioning
+// implementation for the stuff being tested.
+if (!window.requestAnimationFrame) {
+  window.requestAnimationFrame = function() {};
+}
 </script>
 
 <script>

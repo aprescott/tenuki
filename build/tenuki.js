@@ -1645,6 +1645,9 @@ Renderer.prototype = {
 
     renderer.computeSizing();
 
+    // we'll potentially be zooming on touch devices
+    zoomContainer.style.willChange = "transform";
+
     window.addEventListener("optimizedResize", function () {
       renderer.computeSizing();
     });
@@ -1688,18 +1691,34 @@ Renderer.prototype = {
     var scaleY = innerContainer.parentNode.clientHeight / innerContainer.clientHeight;
     var scale = Math.min(scaleX, scaleY);
 
-    if (scale > 0 && scale < 1) {
-      _utils2.default.addClass(boardElement, "tenuki-scaled");
-      innerContainer.style["transform-origin"] = "top left";
-      innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
+    if (scale > 0) {
+      if (scale < 1) {
+        _utils2.default.addClass(boardElement, "tenuki-scaled");
+      } else {
+        _utils2.default.removeClass(boardElement, "tenuki-scaled");
+      }
 
-      // we'll potentially be zooming on touch devices
-      zoomContainer.style.willChange = "transform";
+      if (scale < 1 || scale > 1) {
+        innerContainer.style["transform-origin"] = "top left";
+        innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
+      }
     }
 
     // reset the outer element's height to match, ensuring that we free up any lingering whitespace
     boardElement.style.width = innerContainer.getBoundingClientRect().width + "px";
     boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
+
+    // Work around lack of re-raster in Chrome. See https://github.com/w3c/csswg-drafts/issues/236
+    // and https://bugs.chromium.org/p/chromium/issues/detail?id=600482 for more
+    // information. This is preventing, e.g., horizontal/vertical line width
+    // mismatches after scaling. By adding this, lines are re-rastered and are
+    // all the same width, as if the user had hit refresh at the new viewport
+    // size.
+    zoomContainer.style.willChange = "";
+
+    window.requestAnimationFrame(function () {
+      zoomContainer.style.willChange = "transform";
+    });
   },
 
   addIntersectionEventListeners: function addIntersectionEventListeners(element, y, x) {
@@ -2728,6 +2747,21 @@ SVGRenderer.prototype.generateBoard = function (boardState) {
 
   renderer.svgElement.setAttribute("height", renderer.BOARD_LENGTH);
   renderer.svgElement.setAttribute("width", renderer.BOARD_LENGTH);
+};
+
+SVGRenderer.prototype.computeSizing = function () {
+  var _this2 = this;
+
+  _renderer2.default.prototype.computeSizing.call(this);
+
+  // In addition to the will-change re-raster in Renderer,
+  // the SVG element appears to sometimes need this to
+  // prevent blurriness on resize.
+  this.svgElement.style.transform = "none";
+
+  window.requestAnimationFrame(function () {
+    _this2.svgElement.style.transform = "";
+  });
 };
 
 SVGRenderer.prototype.setIntersectionClasses = function (intersectionEl, intersection, classes) {
