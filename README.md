@@ -24,7 +24,7 @@ Features:
   * End-game functionality: dead stone marking and scoring.
   * Different scoring rules: territory, area, equivalence (with pass stones).
   * Komi.
-  * Seki detection for the territory rules.
+  * Seki detection for territory scoring rules.
   * Support for playing against a server.
   * For the visual interface:
     - Built-in mobile support for touch devices and small screens.
