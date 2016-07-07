@@ -2,6 +2,7 @@
 
 * SVG renderer: Don't colour the entire board element, just the area around the playable intersections.
 * Make sure only the visible board is treated as draggable.
+* Automatically scale up the board to the container's size. Previously we were only scaling down. Now it's in both directions.
 
 # v0.2.1
 

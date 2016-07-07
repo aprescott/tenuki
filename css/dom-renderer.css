@@ -3,11 +3,11 @@
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  overflow: hidden;
 }
 
 .tenuki-dom-renderer.tenuki-board .tenuki-inner-container {
   background: rgb(226, 188, 106);
-  overflow: hidden;
 }
 
 .tenuki-dom-renderer.tenuki-board .tenuki-zoom-container {

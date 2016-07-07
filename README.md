@@ -25,10 +25,10 @@ Features:
   * Different scoring rules: territory, area, equivalence (with pass stones).
   * Komi.
   * Seki detection for the territory rules.
-  * A client interface for playing against a server.
+  * Support for playing against a server.
   * For the visual interface:
-    - Built-in mobile support for touch devices and small screens, even with a 19x19 board.
-    - Automatic shrinking to fit given board (pixel) dimensions.
+    - Built-in mobile support for touch devices and small screens.
+    - Automatic board resizing and responsiveness.
     - Optional coordinate markers for points A19 through T1.
     - Optional fuzzy stone placement with collision movement animations.
 
@@ -42,7 +42,7 @@ For live examples, see `examples/`, or view them on GitHub:
 * [`example_multiboard.html`](https://aprescott.github.io/tenuki.js/examples/example_multiboard.html) — Multiple independent 9x9 boards on a single page.
 * [`example.html`](https://aprescott.github.io/tenuki.js/examples/example.html) — Just the board.
 
-These examples are also set up to **work on mobile/touch displays**.
+These examples are also set up to work on mobile/touch displays, because the board is set to fit within the browser window.
 
 Here are some screenshots and GIFs:
 
@@ -102,21 +102,41 @@ game.setup({
 
 When enabled, stones are set to textured styling, and played stones will be randomly placed slightly off-center. If stones overlap after placement, existing stones are bumped out of the way.
 
-# Auto-shrinking to fit dimensions
+# Auto-scaling and responsiveness
 
-If the container element (e.g., `<div class="tenuki-board">`) is given smaller dimensions than the board would occupy, the board is rendered at a smaller scale.
+By default, the `.tenuki-board` element will take up only the necessary amount of space in the document.
+
+If your CSS causes the `.tenuki-board` HTML element to be set to a smaller size than it would ordinarily be, then the board will automatically shrink to fit within that size.
+
+Similarly, if your CSS causes `.tenuki-board` to be larger than the board ordinarily would be, then the board will automatically expand to fit the container.
+
+For example, let's say you'd like the board to be a width of 200px:
 
 ```html
 <style>
   .my-class {
-    max-width: 200px;
+    width: 200px;
   }
 </style>
 
 <div class="my-class tenuki-board"></div>
 ```
 
-A full 19x19 board is usually larger than 200px, but here, because of the `.my-class` styling, the entire board will automatically scale down to fit.
+A full 19x19 board is usually larger than 200px. But, here, because of the `.my-class` styling, the entire board will automatically scale down to fit the 200px constraint.
+
+Similarly, suppose the board is set to have a dynamic size based on the viewport:
+
+```html
+<style>
+  .my-class {
+    width: 50%; /* say this is 50% of the body */
+  }
+</style>
+
+<div class="my-class tenuki-board"></div>
+```
+
+Now the board will be sized dynamically. If the viewport changes, the board will resize.
 
 # Coordinate markers
 

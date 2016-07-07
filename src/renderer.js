@@ -133,6 +133,9 @@ Renderer.prototype = {
 
     renderer.computeSizing();
 
+    // we'll potentially be zooming on touch devices
+    zoomContainer.style.willChange = "transform";
+
     window.addEventListener("optimizedResize", () => {
       renderer.computeSizing();
     });
@@ -176,18 +179,34 @@ Renderer.prototype = {
     const scaleY = innerContainer.parentNode.clientHeight / innerContainer.clientHeight;
     const scale = Math.min(scaleX, scaleY);
 
-    if (scale > 0 && scale < 1) {
-      utils.addClass(boardElement, "tenuki-scaled");
-      innerContainer.style["transform-origin"] = "top left";
-      innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
+    if (scale > 0) {
+      if (scale < 1) {
+        utils.addClass(boardElement, "tenuki-scaled");
+      } else {
+        utils.removeClass(boardElement, "tenuki-scaled");
+      }
 
-      // we'll potentially be zooming on touch devices
-      zoomContainer.style.willChange = "transform";
+      if (scale < 1 || scale > 1) {
+        innerContainer.style["transform-origin"] = "top left";
+        innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
+      }
     }
 
     // reset the outer element's height to match, ensuring that we free up any lingering whitespace
     boardElement.style.width = innerContainer.getBoundingClientRect().width + "px";
     boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
+
+    // Work around lack of re-raster in Chrome. See https://github.com/w3c/csswg-drafts/issues/236
+    // and https://bugs.chromium.org/p/chromium/issues/detail?id=600482 for more
+    // information. This is preventing, e.g., horizontal/vertical line width
+    // mismatches after scaling. By adding this, lines are re-rastered and are
+    // all the same width, as if the user had hit refresh at the new viewport
+    // size.
+    zoomContainer.style.willChange = "";
+
+    window.requestAnimationFrame(() => {
+      zoomContainer.style.willChange = "transform";
+    });
   },
 
   addIntersectionEventListeners: function(element, y, x) {
