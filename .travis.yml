@@ -18,6 +18,5 @@ before_script:
   - ./build.sh
 script:
   - npm test
-  - git diff --exit-code # require build/ to be up-to-date
   - phantomjs phantomjs-test.js
   - ./node_modules/.bin/eslint src

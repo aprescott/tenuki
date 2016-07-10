@@ -55,11 +55,9 @@ Here are some screenshots and GIFs:
 
 # Installation
 
-* With bower: `bower install tenuki`
-* With npm: `npm install tenuki`
-* Download the `zip` or `tar.gz` file for a specific version from [the releases page](https://github.com/aprescott/tenuki.js/releases), then use `build/` however you want.
+If you use npm, then `npm install tenuki`. Otherwise, you can download the files you need from [the latest release](https://github.com/aprescott/tenuki.js/releases).
 
-You can also clone this repo and get the `build/` files that way.
+It's also possible to clone this repo and run `./build.sh` against the latest commit, which will generate files in `build/`.
 
 # Simple usage
 
@@ -307,4 +305,4 @@ npm install
 
 To make changes, update individual files in `src/` and `css/`. Then, run `./build.sh` to generate files in `build/`.
 
-To test changes, use `test.html` and the files in `examples/` to check that things still work.
+To test changes, use `npm test` and load `test.html` in a browser. You can also smoke test the examples in `examples/`.
