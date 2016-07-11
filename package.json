@@ -40,6 +40,7 @@
     "express": "^4.13.4",
     "jsdom": "*",
     "mocha": "^2.4.5",
+    "node-sass": "*",
     "source-map-support": "^0.4.0",
     "uglify-js": "*"
   },

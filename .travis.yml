@@ -15,8 +15,6 @@ node_js:
   - "4.1"
   - "4.0"
 before_script:
-  - ./build.sh
+  - make
 script:
-  - npm test
-  - phantomjs phantomjs-test.js
-  - ./node_modules/.bin/eslint src
+  - make test

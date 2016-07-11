@@ -57,7 +57,7 @@ Here are some screenshots and GIFs:
 
 If you use npm, then `npm install tenuki`. Otherwise, you can download the files you need from [the latest release](https://github.com/aprescott/tenuki.js/releases).
 
-It's also possible to clone this repo and run `./build.sh` against the latest commit, which will generate files in `build/`.
+It's also possible to clone this repo and run `make` against the latest commit, which will generate files in `build/`.
 
 # Simple usage
 
@@ -300,9 +300,9 @@ For other tests, use `npm test`.
 First, make sure [`npm`](https://www.npmjs.com/) is installed, then run:
 
 ```shell
-npm install
+npm install && make
 ```
 
-To make changes, update individual files in `src/` and `css/`. Then, run `./build.sh` to generate files in `build/`.
+To make changes, update individual files in `src/` and `scss/`. Then, run `make` to generate files in `build/`.
 
 To test changes, use `npm test` and load `test.html` in a browser. You can also smoke test the examples in `examples/`.
