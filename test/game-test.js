@@ -34,6 +34,69 @@ describe("Game", function() {
     });
   });
 
+  describe("playAt", function() {
+    it("is true or false depending on move success", function() {
+      var game = new Game();
+      game.setup();
+
+      expect(game.playAt(5, 10)).to.be.true;
+      expect(game.playAt(5, 11)).to.be.true;
+      expect(game.playAt(5, 11)).to.be.false;
+    });
+
+    it("starts with black and alternates", function() {
+      var game = new Game();
+      game.setup();
+
+      game.playAt(5, 5);
+      expect(game.intersectionAt(5, 5).value).to.eq("black");
+
+      game.playAt(5, 6);
+      expect(game.intersectionAt(5, 6).value).to.eq("white");
+    });
+  });
+
+  describe("isOver", function() {
+    it("is false until two successive passes", function() {
+      var game = new Game();
+      game.setup();
+
+      expect(game.isOver()).to.be.false;
+
+      game.playAt(5, 5);
+      expect(game.isOver()).to.be.false;
+
+      game.pass();
+      expect(game.isOver()).to.be.false;
+
+      game.pass();
+      expect(game.isOver()).to.be.true;
+    });
+  });
+
+  describe("toggleDeadAt", function() {
+    it("toggles stones dead as part of the scoring calculation", function() {
+      var game = new Game();
+      game.setup();
+
+      game.playAt(5, 5);
+      game.playAt(5, 6);
+
+      game.pass();
+      game.pass();
+
+      expect(game.score()).to.deep.equal({ black: 0, white: 0 });
+
+      game.toggleDeadAt(5, 6);
+
+      expect(game.score()).to.deep.equal({ black: 361, white: 0 });
+
+      game.toggleDeadAt(5, 6);
+
+      expect(game.score()).to.deep.equal({ black: 0, white: 0 });
+    });
+  });
+
   describe("handicap stones", function() {
     it("defaults to no handicap stones", function() {
       var game = new Game();

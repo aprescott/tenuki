@@ -72,7 +72,7 @@ resetTests = window.resetTests = function() {
   });
 };
 
-// black and white alternate
+// the board is initially empty and moves result in alternating stones
 resetTests();
 
 gameTest.renderer.grid.forEach(function(row) {
@@ -85,9 +85,6 @@ gameTest.renderer.grid.forEach(function(row) {
 
 gameTest.renderer.grid[5][5].click(); // b
 gameTest.renderer.grid[5][6].click(); // w
-gameTest.renderer.grid[5][7].click(); // b
-gameTest.renderer.grid[5][8].click(); // w
-gameTest.renderer.grid[5][9].click(); // b
 
 if (!tenuki.utils.hasClass(gameTest.renderer.grid[5][5], "black")) {
   throw "tests failed";
@@ -95,17 +92,16 @@ if (!tenuki.utils.hasClass(gameTest.renderer.grid[5][5], "black")) {
 if (!tenuki.utils.hasClass(gameTest.renderer.grid[5][6], "white")) {
   throw "tests failed";
 }
-if (!tenuki.utils.hasClass(gameTest.renderer.grid[5][7], "black")) {
-  throw "tests failed";
-}
-if (!tenuki.utils.hasClass(gameTest.renderer.grid[5][8], "white")) {
-  throw "tests failed";
-}
-if (!tenuki.utils.hasClass(gameTest.renderer.grid[5][9], "black")) {
+
+if (gameTest.intersectionAt(5, 5).value !== "black") {
   throw "tests failed";
 }
 
-// marker indicator
+if (gameTest.intersectionAt(5, 6).value !== "white") {
+  throw "tests failed";
+}
+
+// marker indicator is added on each move
 resetTests();
 
 if (boardElementTest.querySelectorAll(".played").length != 0) {
@@ -113,12 +109,20 @@ if (boardElementTest.querySelectorAll(".played").length != 0) {
 }
 
 gameTest.renderer.grid[1][1].click();
+
 if (boardElementTest.querySelectorAll(".played").length == 0 || !tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "played")) {
   throw "tests failed";
 }
 
 gameTest.renderer.grid[2][2].click();
+
 if (boardElementTest.querySelectorAll(".played").length == 0 || tenuki.utils.hasClass(gameTest.renderer.grid[1][1], "played") || !tenuki.utils.hasClass(gameTest.renderer.grid[2][2], "played")) {
+  throw "tests failed";
+}
+
+gameTest.pass();
+
+if (boardElementTest.querySelectorAll(".played").length !== 0) {
   throw "tests failed";
 }
 
