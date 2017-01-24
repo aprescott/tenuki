@@ -1,9 +1,7 @@
 .tenuki-svg-renderer {
-  text {
-    -webkit-user-select: none;
-    user-select: none;
-    cursor: default;
-  }
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
 
   &.tenuki-board-textured svg,
   &.tenuki-board-textured .tenuki-zoom-container,

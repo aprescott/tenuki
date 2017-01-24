@@ -10,6 +10,7 @@ $board-margin: $base-margin + $gutter-margin;
     user-select: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     overflow: hidden;
+    cursor: default;
   }
 
   &.tenuki-board .tenuki-inner-container {
