@@ -34,11 +34,11 @@ const Game = function(boardElement) {
 Game.prototype = {
   _configureOptions: function({ boardSize = this._defaultBoardSize, komi = 0, handicapStones = 0, freeHandicapPlacement = false, scoring = this._defaultScoring, koRule = this._defaultKoRule, renderer = this._defaultRenderer } = {}) {
     if (typeof boardSize !== "number") {
-      throw new Error("Board size must be a number, but was: " + (typeof boardSize));
+      throw new Error("Board size must be a number, but was: " + typeof boardSize);
     }
 
     if (typeof handicapStones !== "number") {
-      throw new Error("Handicap stones must be a number, but was: " + (typeof boardSize));
+      throw new Error("Handicap stones must be a number, but was: " + typeof boardSize);
     }
 
     if (handicapStones > 0 && boardSize !== 9 && boardSize !== 13 && boardSize !== 19) {
