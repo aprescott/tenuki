@@ -35,7 +35,7 @@
     "body-parser": "^1.15.1",
     "browserify": "*",
     "chai": "^3.5.0",
-    "clean-css": "*",
+    "clean-css-cli": "*",
     "eslint": "*",
     "express": "^4.13.4",
     "jsdom": "*",
