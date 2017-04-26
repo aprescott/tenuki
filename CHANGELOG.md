@@ -4,6 +4,7 @@
 * Make sure only the visible board is treated as draggable.
 * Automatically scale up the board to the container's size. Previously we were only scaling down. Now it's in both directions.
 * Stop showing the text selection cursor when dragging.
+* Fix SVG stone rendering issues in Firefox when using textured stones. (#27)
 
 # v0.2.1
 
