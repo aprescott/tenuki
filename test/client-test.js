@@ -9,9 +9,9 @@ var nullClientHooks = {
 };
 
 describe("Client", function() {
-  var jsdom = require("jsdom");
-  var document = jsdom.jsdom('<!doctype html><html><body><div id="test-board" class="tenuki-board"></div></body></html>');
-  var window = document.defaultView;
+  var JSDOM = require("jsdom").JSDOM;
+  var window = new JSDOM('<!doctype html><html><body><div id="test-board" class="tenuki-board"></div></body></html>').window;
+  var document = window.document;
 
   global["document"] = document;
   global["window"] = window;
@@ -71,7 +71,7 @@ describe("Client", function() {
       testBoardElement.querySelectorAll(".intersection")[0*9 + 5].click();
     });
 
-    it("plays a white move if the player is white", function() {
+    it("plays a white move if the player is white", function(done) {
       var testBoardElement = document.querySelector("#test-board");
 
       var client = new Client(testBoardElement);
