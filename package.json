@@ -1,6 +1,6 @@
 {
   "name": "tenuki",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Tenuki is a web-based board and JavaScript library for the game of go/baduk/weiqi.",
   "main": "index.js",
   "scripts": {
