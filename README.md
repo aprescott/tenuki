@@ -32,7 +32,7 @@ Features:
     - Optional coordinate markers for points A19 through T1.
     - Optional fuzzy stone placement with collision movement animations.
 
-# Examples
+# Live examples
 
 For live examples, see `examples/`, or view them on GitHub:
 
