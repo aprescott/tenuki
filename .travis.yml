@@ -5,15 +5,10 @@ cache:
     - node_modules
 node_js:
   - "node"
-  - "6"
-  - "6.1"
+  - "7" # latest 7.x
+  - "7.0"
+  - "6" # latest 6.x
   - "6.0"
-  - "5"
-  - "5.1"
-  - "4"
-  - "4.2"
-  - "4.1"
-  - "4.0"
 before_script:
   - make
 script:
