@@ -279,7 +279,7 @@ SVGRenderer.prototype.setIntersectionClasses = function(intersectionEl, intersec
     if (intersection.isEmpty()) {
       intersectionEl.querySelector(".stone").setAttribute("style", "");
     } else {
-      intersectionEl.querySelector(".stone").setAttribute("style", "fill: url(#" + this[intersection.value + "GradientID"] + ")");
+      intersectionEl.querySelector(".stone").setAttribute("style", "fill: url(" + window.location + "#" + this[intersection.value + "GradientID"] + ")");
     }
   }
 };
