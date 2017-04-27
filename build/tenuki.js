@@ -1,5 +1,5 @@
 /*!
- * tenuki v0.2.0 (https://github.com/aprescott/tenuki.js)
+ * tenuki v0.2.2 (https://github.com/aprescott/tenuki.js)
  * Copyright © 2016 Adam Prescott.
  * Licensed under the MIT license.
  */
@@ -60,18 +60,18 @@ function _interopRequireDefault(obj) {
 }
 
 var BoardState = function BoardState(_ref) {
-  var moveNumber = _ref.moveNumber;
-  var playedPoint = _ref.playedPoint;
-  var color = _ref.color;
-  var pass = _ref.pass;
-  var blackPassStones = _ref.blackPassStones;
-  var whitePassStones = _ref.whitePassStones;
-  var intersections = _ref.intersections;
-  var blackStonesCaptured = _ref.blackStonesCaptured;
-  var whiteStonesCaptured = _ref.whiteStonesCaptured;
-  var capturedPositions = _ref.capturedPositions;
-  var koPoint = _ref.koPoint;
-  var boardSize = _ref.boardSize;
+  var moveNumber = _ref.moveNumber,
+      playedPoint = _ref.playedPoint,
+      color = _ref.color,
+      pass = _ref.pass,
+      blackPassStones = _ref.blackPassStones,
+      whitePassStones = _ref.whitePassStones,
+      intersections = _ref.intersections,
+      blackStonesCaptured = _ref.blackStonesCaptured,
+      whiteStonesCaptured = _ref.whiteStonesCaptured,
+      capturedPositions = _ref.capturedPositions,
+      koPoint = _ref.koPoint,
+      boardSize = _ref.boardSize;
 
   this.moveNumber = moveNumber;
   this.playedPoint = playedPoint;
@@ -240,12 +240,10 @@ BoardState.prototype = {
 
     var _partitionTraverse = this.partitionTraverse(startingPoint, function (neighbor) {
       return neighbor.sameColorAs(startingPoint);
-    });
-
-    var _partitionTraverse2 = _slicedToArray(_partitionTraverse, 2);
-
-    var group = _partitionTraverse2[0];
-    var _ = _partitionTraverse2[1];
+    }),
+        _partitionTraverse2 = _slicedToArray(_partitionTraverse, 2),
+        group = _partitionTraverse2[0],
+        _ = _partitionTraverse2[1];
 
     return group;
   },
@@ -314,20 +312,20 @@ BoardState.prototype = {
       if (checkedPoints.indexOf(point) > -1) {
         // skip it, we already checked
       } else {
-          checkedPoints.push(point);
+        checkedPoints.push(point);
 
-          this.neighborsFor(point.y, point.x).forEach(function (neighbor) {
-            if (checkedPoints.indexOf(neighbor) > -1) {
-              // skip this neighbor, we already checked it
+        this.neighborsFor(point.y, point.x).forEach(function (neighbor) {
+          if (checkedPoints.indexOf(neighbor) > -1) {
+            // skip this neighbor, we already checked it
+          } else {
+            if (inclusionCondition(neighbor)) {
+              pointsToCheck.push(neighbor);
             } else {
-                if (inclusionCondition(neighbor)) {
-                  pointsToCheck.push(neighbor);
-                } else {
-                  boundaryPoints.push(neighbor);
-                }
-              }
-          });
-        }
+              boundaryPoints.push(neighbor);
+            }
+          }
+        });
+      }
     }
 
     return [checkedPoints, _utils2.default.unique(boundaryPoints)];
@@ -394,6 +392,7 @@ BoardState._initialFor = function (boardSize, handicapStones) {
 exports.default = BoardState;
 
 
+
 },{"./intersection":7,"./utils":14,"./zobrist":15}],3:[function(require,module,exports){
 "use strict";
 
@@ -417,9 +416,9 @@ Client.prototype = {
   setup: function setup(_ref) {
     var _this = this;
 
-    var player = _ref.player;
-    var gameOptions = _ref.gameOptions;
-    var hooks = _ref.hooks;
+    var player = _ref.player,
+        gameOptions = _ref.gameOptions,
+        hooks = _ref.hooks;
 
     this._player = player;
     this._hooks = hooks;
@@ -553,6 +552,7 @@ Client.prototype = {
 exports.default = Client;
 
 
+
 },{"./game":6}],4:[function(require,module,exports){
 "use strict";
 
@@ -573,8 +573,8 @@ function _interopRequireDefault(obj) {
 }
 
 var DOMRenderer = function DOMRenderer(boardElement, _ref) {
-  var hooks = _ref.hooks;
-  var options = _ref.options;
+  var hooks = _ref.hooks,
+      options = _ref.options;
 
   _renderer2.default.call(this, boardElement, { hooks: hooks, options: options });
 
@@ -663,6 +663,7 @@ DOMRenderer.prototype.setIntersectionClasses = function (intersectionEl, interse
 };
 
 exports.default = DOMRenderer;
+
 
 
 },{"./renderer":10,"./utils":14}],5:[function(require,module,exports){
@@ -760,10 +761,11 @@ EyePoint.prototype = {
 exports.default = EyePoint;
 
 
+
 },{}],6:[function(require,module,exports){
 "use strict";
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -772,7 +774,7 @@ Object.defineProperty(exports, "__esModule", {
 var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
   return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
 } : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
 };
 
 var _domRenderer = require("./dom-renderer");
@@ -803,7 +805,7 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "_hooks", "fuzzyStonePlacement", "renderer"];
+var VALID_GAME_OPTIONS = ["boardSize", "scoring", "handicapStones", "koRule", "komi", "_hooks", "fuzzyStonePlacement", "renderer", "freeHandicapPlacement"];
 
 var Game = function Game(boardElement) {
   this._defaultBoardSize = 19;
@@ -821,18 +823,21 @@ var Game = function Game(boardElement) {
 
 Game.prototype = {
   _configureOptions: function _configureOptions() {
-    var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-    var _ref$boardSize = _ref.boardSize;
-    var boardSize = _ref$boardSize === undefined ? this._defaultBoardSize : _ref$boardSize;
-    var _ref$handicapStones = _ref.handicapStones;
-    var handicapStones = _ref$handicapStones === undefined ? 0 : _ref$handicapStones;
-    var _ref$scoring = _ref.scoring;
-    var scoring = _ref$scoring === undefined ? this._defaultScoring : _ref$scoring;
-    var _ref$koRule = _ref.koRule;
-    var koRule = _ref$koRule === undefined ? this._defaultKoRule : _ref$koRule;
-    var _ref$renderer = _ref.renderer;
-    var renderer = _ref$renderer === undefined ? this._defaultRenderer : _ref$renderer;
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref$boardSize = _ref.boardSize,
+        boardSize = _ref$boardSize === undefined ? this._defaultBoardSize : _ref$boardSize,
+        _ref$komi = _ref.komi,
+        komi = _ref$komi === undefined ? 0 : _ref$komi,
+        _ref$handicapStones = _ref.handicapStones,
+        handicapStones = _ref$handicapStones === undefined ? 0 : _ref$handicapStones,
+        _ref$freeHandicapPlac = _ref.freeHandicapPlacement,
+        freeHandicapPlacement = _ref$freeHandicapPlac === undefined ? false : _ref$freeHandicapPlac,
+        _ref$scoring = _ref.scoring,
+        scoring = _ref$scoring === undefined ? this._defaultScoring : _ref$scoring,
+        _ref$koRule = _ref.koRule,
+        koRule = _ref$koRule === undefined ? this._defaultKoRule : _ref$koRule,
+        _ref$renderer = _ref.renderer,
+        renderer = _ref$renderer === undefined ? this._defaultRenderer : _ref$renderer;
 
     if (typeof boardSize !== "number") {
       throw new Error("Board size must be a number, but was: " + (typeof boardSize === "undefined" ? "undefined" : _typeof(boardSize)));
@@ -856,8 +861,11 @@ Game.prototype = {
 
     this.boardSize = boardSize;
     this.handicapStones = handicapStones;
+    this._freeHandicapPlacement = freeHandicapPlacement;
+
     this._scorer = new _scorer2.default({
-      scoreBy: scoring
+      scoreBy: scoring,
+      komi: komi
     });
 
     this._rendererChoice = {
@@ -875,13 +883,21 @@ Game.prototype = {
       koRule: koRule
     });
 
-    this._initialState = _boardState2.default._initialFor(boardSize, handicapStones);
+    if (this._freeHandicapPlacement) {
+      this._initialState = _boardState2.default._initialFor(boardSize, 0);
+    } else {
+      this._initialState = _boardState2.default._initialFor(boardSize, handicapStones);
+    }
+  },
+
+  _stillPlayingHandicapStones: function _stillPlayingHandicapStones() {
+    return this._freeHandicapPlacement && this.handicapStones > 0 && this._moves.length < this.handicapStones;
   },
 
   setup: function setup() {
     var _this = this;
 
-    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     for (var key in options) {
       if (options.hasOwnProperty(key) && VALID_GAME_OPTIONS.indexOf(key) < 0) {
@@ -942,6 +958,10 @@ Game.prototype = {
   },
 
   currentPlayer: function currentPlayer() {
+    if (this._stillPlayingHandicapStones()) {
+      return "black";
+    }
+
     var lastMoveColor = this.currentState().color;
 
     if (lastMoveColor === "black") {
@@ -1046,10 +1066,6 @@ Game.prototype = {
   },
 
   isIllegalAt: function isIllegalAt(y, x) {
-    if (this._moves.length === 0) {
-      return false;
-    }
-
     return this._ruleset.isIllegal(y, x, this);
   },
 
@@ -1084,6 +1100,7 @@ Game.prototype = {
 };
 
 exports.default = Game;
+
 
 
 },{"./board-state":2,"./dom-renderer":4,"./null-renderer":8,"./ruleset":11,"./scorer":12,"./svg-renderer":13}],7:[function(require,module,exports){
@@ -1129,6 +1146,7 @@ Intersection.prototype = {
 exports.default = Intersection;
 
 
+
 },{}],8:[function(require,module,exports){
 "use strict";
 
@@ -1141,6 +1159,7 @@ function NullRenderer() {
   this.render = function () {};
   this.renderTerritory = function () {};
 }
+
 
 
 },{}],9:[function(require,module,exports){
@@ -1196,12 +1215,10 @@ Region._startingAt = function (boardState, y, x) {
 
   var _boardState$partition = boardState.partitionTraverse(startingPoint, function (neighbor) {
     return neighbor.sameColorAs(startingPoint);
-  });
-
-  var _boardState$partition2 = _slicedToArray(_boardState$partition, 2);
-
-  var includedPoints = _boardState$partition2[0];
-  var boundaryPoints = _boardState$partition2[1];
+  }),
+      _boardState$partition2 = _slicedToArray(_boardState$partition, 2),
+      includedPoints = _boardState$partition2[0],
+      boundaryPoints = _boardState$partition2[1];
 
   return [includedPoints, boundaryPoints];
 };
@@ -1214,18 +1231,16 @@ Region.allFor = function (boardState) {
     if (checkedPoints.indexOf(point) > -1) {
       // do nothing
     } else {
-        var _boardState$partition3 = boardState.partitionTraverse(point, function (neighbor) {
-          return neighbor.sameColorAs(point);
-        });
+      var _boardState$partition3 = boardState.partitionTraverse(point, function (neighbor) {
+        return neighbor.sameColorAs(point);
+      }),
+          _boardState$partition4 = _slicedToArray(_boardState$partition3, 2),
+          regionPoints = _boardState$partition4[0],
+          _ = _boardState$partition4[1];
 
-        var _boardState$partition4 = _slicedToArray(_boardState$partition3, 2);
-
-        var regionPoints = _boardState$partition4[0];
-        var _ = _boardState$partition4[1];
-
-        regions.push(new Region(boardState, regionPoints));
-        checkedPoints = checkedPoints.concat(regionPoints);
-      }
+      regions.push(new Region(boardState, regionPoints));
+      checkedPoints = checkedPoints.concat(regionPoints);
+    }
   });
 
   return regions;
@@ -1262,12 +1277,10 @@ Region.prototype = {
       return false;
     }
 
-    var _Region$_startingAt = Region._startingAt(this.boardState, point.y, point.x);
-
-    var _Region$_startingAt2 = _slicedToArray(_Region$_startingAt, 2);
-
-    var _ = _Region$_startingAt2[0];
-    var boundaryPoints = _Region$_startingAt2[1];
+    var _Region$_startingAt = Region._startingAt(this.boardState, point.y, point.x),
+        _Region$_startingAt2 = _slicedToArray(_Region$_startingAt, 2),
+        _ = _Region$_startingAt2[0],
+        boundaryPoints = _Region$_startingAt2[1];
 
     var surroundingColors = _utils2.default.unique(boundaryPoints.map(function (i) {
       return i.value;
@@ -1280,12 +1293,10 @@ Region.prototype = {
   territoryColor: function territoryColor() {
     var point = this.intersections[0];
 
-    var _Region$_startingAt3 = Region._startingAt(this.boardState, point.y, point.x);
-
-    var _Region$_startingAt4 = _slicedToArray(_Region$_startingAt3, 2);
-
-    var _ = _Region$_startingAt4[0];
-    var boundaryPoints = _Region$_startingAt4[1];
+    var _Region$_startingAt3 = Region._startingAt(this.boardState, point.y, point.x),
+        _Region$_startingAt4 = _slicedToArray(_Region$_startingAt3, 2),
+        _ = _Region$_startingAt4[0],
+        boundaryPoints = _Region$_startingAt4[1];
 
     var surroundingColors = _utils2.default.unique(boundaryPoints.map(function (i) {
       return i.value;
@@ -1365,10 +1376,9 @@ Region.prototype = {
 
     return this.intersections.some(function (i) {
       return [[0, 0], [0, 1], [1, 0], [1, 1]].every(function (_ref) {
-        var _ref2 = _slicedToArray(_ref, 2);
-
-        var y = _ref2[0];
-        var x = _ref2[1];
+        var _ref2 = _slicedToArray(_ref, 2),
+            y = _ref2[0],
+            x = _ref2[1];
 
         var intersection = _this4.boardState.intersectionAt(i.y + y, i.x + x);
         return typeof intersection !== "undefined" && intersection.sameColorAs(i);
@@ -1382,10 +1392,9 @@ Region.prototype = {
     return this.intersections.some(function (i) {
       return [[[0, 0], [1, 0], [2, 0], [2, 1]], [[-1, 2], [0, 0], [0, 1], [0, 2]], [[0, 0], [0, 1], [1, 1], [2, 1]], [[-1, 0], [-1, 1], [-1, 2], [0, 0]], [[-2, 1], [-1, 1], [0, 0], [0, 1]], [[0, 0], [1, 0], [1, 1], [1, 2]], [[0, -1], [0, 0], [1, -1], [2, -1]], [[-1, -2], [-1, -1], [-1, 0], [0, 0]]].some(function (expectedPoints) {
         return expectedPoints.every(function (_ref3) {
-          var _ref4 = _slicedToArray(_ref3, 2);
-
-          var y = _ref4[0];
-          var x = _ref4[1];
+          var _ref4 = _slicedToArray(_ref3, 2),
+              y = _ref4[0],
+              x = _ref4[1];
 
           var intersection = _this5.boardState.intersectionAt(i.y + y, i.x + x);
           return typeof intersection !== "undefined" && intersection.sameColorAs(i);
@@ -1451,6 +1460,7 @@ Region.prototype = {
 exports.default = Region;
 
 
+
 },{"./utils":14}],10:[function(require,module,exports){
 "use strict";
 
@@ -1493,8 +1503,8 @@ function _interopRequireDefault(obj) {
 }
 
 var Renderer = function Renderer(boardElement, _ref) {
-  var hooks = _ref.hooks;
-  var options = _ref.options;
+  var hooks = _ref.hooks,
+      options = _ref.options;
 
   this.INTERSECTION_GAP_SIZE = 28;
   this.GUTTER_MARGIN = this.INTERSECTION_GAP_SIZE - 3;
@@ -1532,44 +1542,44 @@ Renderer.hoshiPositionsFor = function (boardSize) {
       // no hoshi
     }
   } else {
-      var hoshiOffset = boardSize > 11 ? 3 : 2;
+    var hoshiOffset = boardSize > 11 ? 3 : 2;
 
-      for (var hoshiY = 0; hoshiY < 3; hoshiY++) {
-        for (var hoshiX = 0; hoshiX < 3; hoshiX++) {
-          if ((boardSize === 7 || boardSize % 2 === 0) && (hoshiY === 1 || hoshiX === 1)) {
-            continue;
-          }
-
-          var _hoshi = {};
-
-          if (hoshiY === 0) {
-            _hoshi.top = hoshiOffset;
-          }
-
-          if (hoshiY === 1) {
-            _hoshi.top = (boardSize + 1) / 2 - 1;
-          }
-
-          if (hoshiY === 2) {
-            _hoshi.top = boardSize - hoshiOffset - 1;
-          }
-
-          if (hoshiX === 0) {
-            _hoshi.left = hoshiOffset;
-          }
-
-          if (hoshiX === 1) {
-            _hoshi.left = (boardSize + 1) / 2 - 1;
-          }
-
-          if (hoshiX === 2) {
-            _hoshi.left = boardSize - hoshiOffset - 1;
-          }
-
-          hoshiElements.push(_hoshi);
+    for (var hoshiY = 0; hoshiY < 3; hoshiY++) {
+      for (var hoshiX = 0; hoshiX < 3; hoshiX++) {
+        if ((boardSize === 7 || boardSize % 2 === 0) && (hoshiY === 1 || hoshiX === 1)) {
+          continue;
         }
+
+        var _hoshi = {};
+
+        if (hoshiY === 0) {
+          _hoshi.top = hoshiOffset;
+        }
+
+        if (hoshiY === 1) {
+          _hoshi.top = (boardSize + 1) / 2 - 1;
+        }
+
+        if (hoshiY === 2) {
+          _hoshi.top = boardSize - hoshiOffset - 1;
+        }
+
+        if (hoshiX === 0) {
+          _hoshi.left = hoshiOffset;
+        }
+
+        if (hoshiX === 1) {
+          _hoshi.left = (boardSize + 1) / 2 - 1;
+        }
+
+        if (hoshiX === 2) {
+          _hoshi.left = boardSize - hoshiOffset - 1;
+        }
+
+        hoshiElements.push(_hoshi);
       }
     }
+  }
 
   return hoshiElements;
 };
@@ -1630,6 +1640,9 @@ Renderer.prototype = {
 
     renderer.computeSizing();
 
+    // we'll potentially be zooming on touch devices
+    zoomContainer.style.willChange = "transform";
+
     window.addEventListener("optimizedResize", function () {
       renderer.computeSizing();
     });
@@ -1639,9 +1652,9 @@ Renderer.prototype = {
     renderer.touchmoveEventHandler = renderer.handleTouchMove.bind(renderer);
     renderer.touchendEventHandler = renderer.handleTouchEnd.bind(renderer);
 
-    _utils2.default.addEventListener(boardElement, "touchstart", renderer.touchstartEventHandler);
-    _utils2.default.addEventListener(boardElement, "touchend", renderer.touchendEventHandler);
-    _utils2.default.addEventListener(boardElement, "touchmove", renderer.touchmoveEventHandler);
+    _utils2.default.addEventListener(renderer.innerContainer, "touchstart", renderer.touchstartEventHandler);
+    _utils2.default.addEventListener(renderer.innerContainer, "touchend", renderer.touchendEventHandler);
+    _utils2.default.addEventListener(renderer.innerContainer, "touchmove", renderer.touchmoveEventHandler);
   },
 
   computeSizing: function computeSizing() {
@@ -1673,18 +1686,34 @@ Renderer.prototype = {
     var scaleY = innerContainer.parentNode.clientHeight / innerContainer.clientHeight;
     var scale = Math.min(scaleX, scaleY);
 
-    if (scale > 0 && scale < 1) {
-      _utils2.default.addClass(boardElement, "tenuki-scaled");
-      innerContainer.style["transform-origin"] = "top left";
-      innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
+    if (scale > 0) {
+      if (scale < 1) {
+        _utils2.default.addClass(boardElement, "tenuki-scaled");
+      } else {
+        _utils2.default.removeClass(boardElement, "tenuki-scaled");
+      }
 
-      // we'll potentially be zooming on touch devices
-      zoomContainer.style.willChange = "transform";
+      if (scale < 1 || scale > 1) {
+        innerContainer.style["transform-origin"] = "top left";
+        innerContainer.style.transform = "scale3d(" + scale + ", " + scale + ", 1)";
+      }
     }
 
     // reset the outer element's height to match, ensuring that we free up any lingering whitespace
     boardElement.style.width = innerContainer.getBoundingClientRect().width + "px";
     boardElement.style.height = innerContainer.getBoundingClientRect().height + "px";
+
+    // Work around lack of re-raster in Chrome. See https://github.com/w3c/csswg-drafts/issues/236
+    // and https://bugs.chromium.org/p/chromium/issues/detail?id=600482 for more
+    // information. This is preventing, e.g., horizontal/vertical line width
+    // mismatches after scaling. By adding this, lines are re-rastered and are
+    // all the same width, as if the user had hit refresh at the new viewport
+    // size.
+    zoomContainer.style.willChange = "";
+
+    window.requestAnimationFrame(function () {
+      zoomContainer.style.willChange = "transform";
+    });
   },
 
   addIntersectionEventListeners: function addIntersectionEventListeners(element, y, x) {
@@ -1897,10 +1926,9 @@ Renderer.prototype = {
   render: function render(boardState) {
     var _this = this;
 
-    var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-    var territory = _ref2.territory;
-    var deadStones = _ref2.deadStones;
+    var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        territory = _ref2.territory,
+        deadStones = _ref2.deadStones;
 
     if (!this._initialized) {
       this._setup(boardState);
@@ -1927,47 +1955,40 @@ Renderer.prototype = {
       });
 
       if (!alreadyShifted) {
-        (function () {
-          var possibleShifts = _utils2.default.cartesianProduct(verticalShiftClasses, horizontalShiftClasses);
+        var possibleShifts = _utils2.default.cartesianProduct(verticalShiftClasses, horizontalShiftClasses);
 
-          var _possibleShifts$Math$ = _slicedToArray(possibleShifts[Math.floor(Math.random() * possibleShifts.length)], 2);
+        var _possibleShifts$Math$ = _slicedToArray(possibleShifts[Math.floor(Math.random() * possibleShifts.length)], 2),
+            playedVerticalShift = _possibleShifts$Math$[0],
+            playedHorizontalShift = _possibleShifts$Math$[1];
 
-          var playedVerticalShift = _possibleShifts$Math$[0];
-          var playedHorizontalShift = _possibleShifts$Math$[1];
+        [[-1, 0], [0, -1], [0, 1], [1, 0]].forEach(function (_ref3) {
+          var _ref4 = _slicedToArray(_ref3, 2),
+              y = _ref4[0],
+              x = _ref4[1];
 
-          [[-1, 0], [0, -1], [0, 1], [1, 0]].forEach(function (_ref3) {
-            var _ref4 = _slicedToArray(_ref3, 2);
+          if (_this.grid[playedPoint.y + y] && _this.grid[playedPoint.y + y][playedPoint.x + x]) {
+            var neighboringElement = _this.grid[playedPoint.y + y][playedPoint.x + x];
 
-            var y = _ref4[0];
-            var x = _ref4[1];
+            if (!_utils2.default.hasClass(neighboringElement, "empty")) {
+              [[-1, 0, "v-shift-downdown", "v-shift-up", "v-shift-down"], [-1, 0, "v-shift-downdown", "v-shift-upup", "v-shift-none"], [-1, 0, "v-shift-down", "v-shift-upup", "v-shift-none"], [1, 0, "v-shift-upup", "v-shift-down", "v-shift-up"], [1, 0, "v-shift-upup", "v-shift-downdown", "v-shift-none"], [1, 0, "v-shift-up", "v-shift-downdown", "v-shift-none"], [0, -1, "h-shift-rightright", "h-shift-left", "h-shift-right"], [0, -1, "h-shift-rightright", "h-shift-leftleft", "h-shift-none"], [0, -1, "h-shift-right", "h-shift-leftleft", "h-shift-none"], [0, 1, "h-shift-leftleft", "h-shift-right", "h-shift-left"], [0, 1, "h-shift-leftleft", "h-shift-rightright", "h-shift-none"], [0, 1, "h-shift-left", "h-shift-rightright", "h-shift-none"]].forEach(function (_ref5) {
+                var _ref6 = _slicedToArray(_ref5, 5),
+                    requiredYOffset = _ref6[0],
+                    requiredXOffset = _ref6[1],
+                    requiredNeighborShift = _ref6[2],
+                    conflictingPlayedShift = _ref6[3],
+                    newNeighborShift = _ref6[4];
 
-            if (_this.grid[playedPoint.y + y] && _this.grid[playedPoint.y + y][playedPoint.x + x]) {
-              (function () {
-                var neighboringElement = _this.grid[playedPoint.y + y][playedPoint.x + x];
-
-                if (!_utils2.default.hasClass(neighboringElement, "empty")) {
-                  [[-1, 0, "v-shift-downdown", "v-shift-up", "v-shift-down"], [-1, 0, "v-shift-downdown", "v-shift-upup", "v-shift-none"], [-1, 0, "v-shift-down", "v-shift-upup", "v-shift-none"], [1, 0, "v-shift-upup", "v-shift-down", "v-shift-up"], [1, 0, "v-shift-upup", "v-shift-downdown", "v-shift-none"], [1, 0, "v-shift-up", "v-shift-downdown", "v-shift-none"], [0, -1, "h-shift-rightright", "h-shift-left", "h-shift-right"], [0, -1, "h-shift-rightright", "h-shift-leftleft", "h-shift-none"], [0, -1, "h-shift-right", "h-shift-leftleft", "h-shift-none"], [0, 1, "h-shift-leftleft", "h-shift-right", "h-shift-left"], [0, 1, "h-shift-leftleft", "h-shift-rightright", "h-shift-none"], [0, 1, "h-shift-left", "h-shift-rightright", "h-shift-none"]].forEach(function (_ref5) {
-                    var _ref6 = _slicedToArray(_ref5, 5);
-
-                    var requiredYOffset = _ref6[0];
-                    var requiredXOffset = _ref6[1];
-                    var requiredNeighborShift = _ref6[2];
-                    var conflictingPlayedShift = _ref6[3];
-                    var newNeighborShift = _ref6[4];
-
-                    if (y === requiredYOffset && x === requiredXOffset && _utils2.default.hasClass(neighboringElement, requiredNeighborShift) && (playedVerticalShift === conflictingPlayedShift || playedHorizontalShift === conflictingPlayedShift)) {
-                      _utils2.default.removeClass(neighboringElement, requiredNeighborShift);
-                      _utils2.default.addClass(neighboringElement, newNeighborShift);
-                    }
-                  });
+                if (y === requiredYOffset && x === requiredXOffset && _utils2.default.hasClass(neighboringElement, requiredNeighborShift) && (playedVerticalShift === conflictingPlayedShift || playedHorizontalShift === conflictingPlayedShift)) {
+                  _utils2.default.removeClass(neighboringElement, requiredNeighborShift);
+                  _utils2.default.addClass(neighboringElement, newNeighborShift);
                 }
-              })();
+              });
             }
-          });
+          }
+        });
 
-          _utils2.default.addClass(_this.grid[playedPoint.y][playedPoint.x], playedVerticalShift);
-          _utils2.default.addClass(_this.grid[playedPoint.y][playedPoint.x], playedHorizontalShift);
-        })();
+        _utils2.default.addClass(this.grid[playedPoint.y][playedPoint.x], playedVerticalShift);
+        _utils2.default.addClass(this.grid[playedPoint.y][playedPoint.x], playedHorizontalShift);
       }
     }
 
@@ -1985,8 +2006,8 @@ Renderer.prototype = {
   },
 
   updateMarkerPoints: function updateMarkerPoints(_ref7) {
-    var playedPoint = _ref7.playedPoint;
-    var koPoint = _ref7.koPoint;
+    var playedPoint = _ref7.playedPoint,
+        koPoint = _ref7.koPoint;
 
     var renderer = this;
 
@@ -2055,6 +2076,7 @@ Renderer.prototype = {
 exports.default = Renderer;
 
 
+
 },{"./utils":14}],11:[function(require,module,exports){
 "use strict";
 
@@ -2093,14 +2115,12 @@ Ruleset.prototype = {
       var koPoint = boardState.koPoint;
       isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
     } else {
-      (function () {
-        var newState = boardState.playAt(y, x, color);
-        var boardStates = existingStates;
+      var newState = boardState.playAt(y, x, color);
+      var boardStates = existingStates;
 
-        isKoViolation = existingStates.length > 0 && boardStates.some(function (existingState) {
-          return existingState.positionSameAs(newState);
-        });
-      })();
+      isKoViolation = existingStates.length > 0 && boardStates.some(function (existingState) {
+        return existingState.positionSameAs(newState);
+      });
     }
 
     return isKoViolation;
@@ -2143,6 +2163,7 @@ Ruleset.prototype = {
 };
 
 exports.default = Ruleset;
+
 
 
 },{}],12:[function(require,module,exports){
@@ -2373,9 +2394,9 @@ var AreaScoring = Object.freeze({
 });
 
 var Scorer = function Scorer() {
-  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-  var scoreBy = _ref.scoreBy;
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      scoreBy = _ref.scoreBy,
+      komi = _ref.komi;
 
   this._strategy = {
     "area": AreaScoring,
@@ -2383,8 +2404,18 @@ var Scorer = function Scorer() {
     "equivalence": AreaScoring
   }[scoreBy];
 
+  this._komi = komi;
+
   if (!this._strategy) {
     throw new Error("Unknown scoring type: " + scoreBy);
+  }
+
+  if (this._komi === null || typeof this._komi === "undefined") {
+    throw new Error("Error initializing scorer without a komi value");
+  }
+
+  if (typeof this._komi !== "number") {
+    throw new Error("Komi value given is not a number: " + komi);
   }
 
   this._usePassStones = scoreBy === "equivalence";
@@ -2395,6 +2426,7 @@ var Scorer = function Scorer() {
 Scorer.prototype = {
   score: function score(game) {
     var result = this._strategy.score(game);
+    result.white += this._komi;
 
     if (this._usePassStones) {
       return {
@@ -2418,6 +2450,7 @@ Scorer.prototype = {
 exports.default = Scorer;
 
 
+
 },{"./eye-point":5,"./intersection":7,"./region":9,"./utils":14}],13:[function(require,module,exports){
 "use strict";
 
@@ -2438,8 +2471,8 @@ function _interopRequireDefault(obj) {
 }
 
 var SVGRenderer = function SVGRenderer(boardElement, _ref) {
-  var hooks = _ref.hooks;
-  var options = _ref.options;
+  var hooks = _ref.hooks,
+      options = _ref.options;
 
   _renderer2.default.call(this, boardElement, { hooks: hooks, options: options });
   _utils2.default.addClass(boardElement, "tenuki-svg-renderer");
@@ -2703,6 +2736,21 @@ SVGRenderer.prototype.generateBoard = function (boardState) {
   renderer.svgElement.setAttribute("width", renderer.BOARD_LENGTH);
 };
 
+SVGRenderer.prototype.computeSizing = function () {
+  var _this2 = this;
+
+  _renderer2.default.prototype.computeSizing.call(this);
+
+  // In addition to the will-change re-raster in Renderer,
+  // the SVG element appears to sometimes need this to
+  // prevent blurriness on resize.
+  this.svgElement.style.transform = "none";
+
+  window.requestAnimationFrame(function () {
+    _this2.svgElement.style.transform = "";
+  });
+};
+
 SVGRenderer.prototype.setIntersectionClasses = function (intersectionEl, intersection, classes) {
   if (intersectionEl.getAttribute("class") !== classes.join(" ")) {
     intersectionEl.setAttribute("class", classes.join(" "));
@@ -2712,12 +2760,13 @@ SVGRenderer.prototype.setIntersectionClasses = function (intersectionEl, interse
     if (intersection.isEmpty()) {
       intersectionEl.querySelector(".stone").setAttribute("style", "");
     } else {
-      intersectionEl.querySelector(".stone").setAttribute("style", "fill: url(#" + this[intersection.value + "GradientID"] + ")");
+      intersectionEl.querySelector(".stone").setAttribute("style", "fill: url(" + window.location + "#" + this[intersection.value + "GradientID"] + ")");
     }
   }
 };
 
 exports.default = SVGRenderer;
+
 
 
 },{"./renderer":10,"./utils":14}],14:[function(require,module,exports){
@@ -2867,6 +2916,7 @@ exports.default = {
 };
 
 
+
 },{}],15:[function(require,module,exports){
 "use strict";
 
@@ -2908,6 +2958,7 @@ exports.default = {
     return h;
   }
 };
+
 
 
 },{}]},{},[1])(1)
