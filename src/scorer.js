@@ -174,8 +174,21 @@ Scorer.prototype = {
     result.white += this._komi;
 
     if (this._usePassStones) {
+      // Under equivalence scoring, 2 consecutive passes signals(!) the end of the
+      // game, but just prior to the end of the game, white must make one final
+      // pass move if the game didn't end on a white pass.
+      //
+      // However, instead of creating a 3rd consecutive pass in the board state,
+      // white's additional pass stone is handled by the scoring mechanism alone.
+      // The idea is that, under any game resumption, the additional white pass
+      // stone must not exist, so we shouldn't add it.
+      //
+      // NOTE: the final result should rely on this scoring function. Any calculations
+      // using raw board state pass stone numbers may be off by 1 in favor of black.
+      const needsFinalWhitePassStone = game.currentState().color !== "white";
+
       return {
-        black: result.black + game.currentState().whitePassStones,
+        black: result.black + game.currentState().whitePassStones + (needsFinalWhitePassStone ? 1 : 0),
         white: result.white + game.currentState().blackPassStones
       };
     } else {

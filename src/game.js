@@ -71,8 +71,6 @@ Game.prototype = {
       throw new Error("Unknown renderer: " + renderer);
     }
 
-    this._whiteMustPassLast = this._scorer.usingPassStones();
-
     this._ruleset = new Ruleset({
       koRule: koRule
     });
@@ -212,17 +210,10 @@ Game.prototype = {
       return false;
     }
 
-    if (this._whiteMustPassLast) {
-      const finalMove = this._moves[this._moves.length - 1];
-      const previousMove = this._moves[this._moves.length - 2];
+    const finalMove = this._moves[this._moves.length - 1];
+    const previousMove = this._moves[this._moves.length - 2];
 
-      return finalMove.pass && previousMove.pass && finalMove.color === "white";
-    } else {
-      const finalMove = this._moves[this._moves.length - 1];
-      const previousMove = this._moves[this._moves.length - 2];
-
-      return finalMove.pass && previousMove.pass;
-    }
+    return finalMove.pass && previousMove.pass;
   },
 
   toggleDeadAt: function(y, x) {
