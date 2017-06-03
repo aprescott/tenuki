@@ -877,8 +877,6 @@ Game.prototype = {
       throw new Error("Unknown renderer: " + renderer);
     }
 
-    this._whiteMustPassLast = this._scorer.usingPassStones();
-
     this._ruleset = new _ruleset2.default({
       koRule: koRule
     });
@@ -1022,17 +1020,10 @@ Game.prototype = {
       return false;
     }
 
-    if (this._whiteMustPassLast) {
-      var finalMove = this._moves[this._moves.length - 1];
-      var previousMove = this._moves[this._moves.length - 2];
+    var finalMove = this._moves[this._moves.length - 1];
+    var previousMove = this._moves[this._moves.length - 2];
 
-      return finalMove.pass && previousMove.pass && finalMove.color === "white";
-    } else {
-      var _finalMove = this._moves[this._moves.length - 1];
-      var _previousMove = this._moves[this._moves.length - 2];
-
-      return _finalMove.pass && _previousMove.pass;
-    }
+    return finalMove.pass && previousMove.pass;
   },
 
   toggleDeadAt: function toggleDeadAt(y, x) {
@@ -2083,7 +2074,7 @@ exports.default = Renderer;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var VALID_KO_OPTIONS = ["simple", "superko"];
+var VALID_KO_OPTIONS = ["simple", "positional-superko"];
 
 var Ruleset = function Ruleset(_ref) {
   var koRule = _ref.koRule;
@@ -2113,7 +2104,7 @@ Ruleset.prototype = {
 
     if (this.koRule === "simple") {
       var koPoint = boardState.koPoint;
-      isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
+      isKoViolation = Boolean(koPoint) && koPoint.y === y && koPoint.x === x;
     } else {
       var newState = boardState.playAt(y, x, color);
       var boardStates = existingStates;
@@ -2429,8 +2420,21 @@ Scorer.prototype = {
     result.white += this._komi;
 
     if (this._usePassStones) {
+      // Under equivalence scoring, 2 consecutive passes signals(!) the end of the
+      // game, but just prior to the end of the game, white must make one final
+      // pass move if the game didn't end on a white pass.
+      //
+      // However, instead of creating a 3rd consecutive pass in the board state,
+      // white's additional pass stone is handled by the scoring mechanism alone.
+      // The idea is that, under any game resumption, the additional white pass
+      // stone must not exist, so we shouldn't add it.
+      //
+      // NOTE: the final result should rely on this scoring function. Any calculations
+      // using raw board state pass stone numbers may be off by 1 in favor of black.
+      var needsFinalWhitePassStone = game.currentState().color !== "white";
+
       return {
-        black: result.black + game.currentState().whitePassStones,
+        black: result.black + game.currentState().whitePassStones + (needsFinalWhitePassStone ? 1 : 0),
         white: result.white + game.currentState().blackPassStones
       };
     } else {
