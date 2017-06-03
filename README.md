@@ -179,9 +179,9 @@ game.setup({
 });
 ```
 
-# Configuring scoring and komi
+# Configuring scoring
 
-The default scoring is territory scoring. The scoring can be given as part of the `setup()` options:
+The default scoring method is territory scoring. The scoring rule is configured by `setup()`:
 
 ```js
 game.setup({
@@ -191,10 +191,48 @@ game.setup({
 
 Valid scoring types are:
 
-  * `"area"` — Area scoring.
-  * `"territory"` — Territory scoring.
+  * `"area"`
+  * `"territory"`
+  * `"equivalence"`
 
-The default komi value is 0. To alter the value of white's score, pass `komi`:
+## Area scoring
+
+The score for each player under area scoring is the sum of two values:
+
+* The number of stones on the board.
+* The number of points of territory.
+
+Eyes in seki count as territory under area scoring.
+
+## Territory scoring
+
+The score for each player under territory scoring is simply the number of points of territory.
+
+Eyes in seki _do not_ count as points of territory.
+
+When territory scoring is in use, a simple detection algorithm attempts to correctly ignore each of the following as not-territory:
+
+1. Neutral points, consisting of intersections surrounded by neither player.
+2. Intersections which would be the point of capture for a group in atari, after filling in neutral points.
+3. Eyes in seki.
+
+Counting eyes in seki relies on a way of determining whether a group of stones is in seki. Tenuki detects seki by counting eyes, after filling in other neutral points.
+
+The more neutral points exist on the board, the more likely it is that seki detection will fail in some way.
+
+_It is strongly recommended that you fill in all neutral points before passing at the end of a game._
+
+## Equivalence scoring
+
+An explanation of equivalence scoring can be found at the [Sensei's Library Wiki](http://senseis.xmp.net/?EquivalenceScoring), and a longer explanation of the equivalence can be found in a [commentary appendix to the AGA Rules](https://www.cs.cmu.edu/~wjh/go/rules/AGA.commentary.html).
+
+In short, equivalence scoring implements pass stones, plus the requirement that white make one final pass prior to scoring, which makes the score from counting by area equivalent to the score from counting by territory.
+
+Note that using equivalence scoring does _not_ change how the game ends. The game will end with 2 consecutive passes, even if black makes the 2nd pass. The final white pass stone handed to black is implemented in Tenuki by the `game.score()` function, not a move by a player.
+
+# Komi
+
+The default komi value is 0. To alter the value of white's score, pass `komi` to `setup()`:
 
 ```js
 game.setup({

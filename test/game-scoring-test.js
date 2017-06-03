@@ -123,9 +123,6 @@ describe("scoring rules", function() {
 
       setupCaptures(game);
 
-      // pass once more for equivalence scoring
-      expect(game.pass()).to.be.true;
-
       expect(game.isOver()).to.be.true;
 
       // territory + stones on the board + 2 pass stones
@@ -149,8 +146,7 @@ describe("scoring rules", function() {
       expect(game.score().white).to.equal(9*19 + 1);
     });
 
-    // TODO: this requirement is incorrect in its implementation!
-    it("requires one final pass by white", function() {
+    it("adds one final pass stone by white if necessary", function() {
       var game = new Game();
       game.setup({ scoring: "equivalence" });
 
@@ -158,26 +154,25 @@ describe("scoring rules", function() {
       game.pass(); // w
 
       expect(game.isOver()).to.be.true;
+      expect(game.score().black).to.equal(1);
+      expect(game.score().white).to.equal(1);
 
       game = new Game();
       game.setup({ scoring: "equivalence" });
 
-      game.pass(); // b
-      game.pass(); // w
       game.playAt(1, 1); // b
       game.pass(); // w
       game.pass(); // b
 
-      expect(game.isOver()).to.be.false;
-
-      game.pass();
-
       expect(game.isOver()).to.be.true;
+      // area + extra pass stone
+      expect(game.score().black).to.equal(19*19 + 1 + 1);
+      expect(game.score().white).to.equal(1);
     });
   });
 
   describe("territory scoring", function() {
-    it("counts only territory, excluding stones played, plus captures, ", function() {
+    it("counts only territory, excluding stones played, plus captures", function() {
       var game = run("territory");
 
       expect(game.score().black).to.equal(9*19);
