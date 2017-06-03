@@ -4,7 +4,7 @@
   "description": "Tenuki is a web-based board and JavaScript library for the game of go/baduk/weiqi.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require source-map-support/register"
+    "test": "mocha --require source-map-support/register --require test/helpers.js"
   },
   "repository": {
     "type": "git",

@@ -49,10 +49,99 @@ describe("Game", function() {
       game.setup();
 
       game.playAt(5, 5);
-      expect(game.intersectionAt(5, 5).value).to.eq("black");
+      expect(game.intersectionAt(5, 5).value).to.equal("black");
 
       game.playAt(5, 6);
-      expect(game.intersectionAt(5, 6).value).to.eq("white");
+      expect(game.intersectionAt(5, 6).value).to.equal("white");
+    });
+  });
+
+  describe("capturing", function() {
+    it("removes black stones from the board", function() {
+      var game = new Game();
+      game.setup();
+
+      game.playAt(0, 0); // b
+      game.playAt(0, 1); // w
+      game.playAt(1, 1); // b
+      game.playAt(1, 0); // w, capturing
+
+      expect(game.intersectionAt(0, 0).isEmpty()).to.be.true;
+      expect(game.currentState().blackStonesCaptured).to.equal(1)
+      expect(game.currentState().whiteStonesCaptured).to.equal(0)
+    });
+
+    it("removes white stones from the board", function() {
+      var game = new Game();
+      game.setup();
+
+      game.pass(); // b
+      game.playAt(0, 0); // w
+      game.playAt(0, 1); // b
+      game.playAt(1, 1); // w
+      game.playAt(1, 0); // b, capturing
+
+      expect(game.intersectionAt(0, 0).isEmpty()).to.be.true;
+      expect(game.currentState().blackStonesCaptured).to.equal(0)
+      expect(game.currentState().whiteStonesCaptured).to.equal(1)
+    });
+
+    it("removes multi-stone groups from the board", function() {
+      var game = new Game();
+      game.setup();
+
+      game.playAt(0, 0); // b
+      game.playAt(0, 1); // w
+      game.playAt(1, 0); // b
+      game.playAt(1, 1); // w
+      game.playAt(5, 5); // b tenuki
+      game.playAt(2, 0); // w, capturing
+
+      expect(game.intersectionAt(0, 0).isEmpty()).to.be.true;
+      expect(game.intersectionAt(1, 0).isEmpty()).to.be.true;
+
+      expect(game.currentState().blackStonesCaptured).to.equal(2)
+      expect(game.currentState().whiteStonesCaptured).to.equal(0)
+    });
+
+    it("removes multi-stone groups that share a liberty, counting unique spaces", function() {
+      var game = new Game();
+      game.setup();
+
+      game.playAt(0, 1); // b
+      game.playAt(0, 2); // w
+      game.playAt(1, 1); // b
+      game.playAt(1, 2); // w
+      game.playAt(1, 0); // b
+      game.playAt(2, 1); // w
+      game.playAt(2, 2); // b
+      game.playAt(2, 0); // w
+      game.playAt(3, 3); // b
+      game.playAt(0, 0); // w
+
+      expect(game.currentState().blackStonesCaptured).to.equal(3)
+      expect(game.currentState().whiteStonesCaptured).to.equal(0)
+    });
+  });
+
+  describe("undo", function() {
+    it("removes the last played stone", function() {
+      var game = new Game();
+      game.setup();
+
+      game.playAt(5, 10); // b
+      game.playAt(5, 11); // w
+      game.playAt(5, 12); // b
+
+      expect(game.currentPlayer()).to.equal("white");
+      expect(game.intersectionAt(5, 12).value).to.equal("black");
+
+      game.undo();
+
+      expect(game.currentPlayer()).to.equal("black");
+      expect(game.intersectionAt(5, 10).value).to.equal("black");
+      expect(game.intersectionAt(5, 11).value).to.equal("white");
+      expect(game.intersectionAt(5, 12).value).to.equal("empty");
     });
   });
 
@@ -103,6 +192,8 @@ describe("Game", function() {
       game.setup();
 
       expect(game.handicapStones).to.equal(0);
+      expect(game.currentPlayer()).to.equal("black");
+
       var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
       expect(nonEmptyPoints.length).to.equal(0);
     });
@@ -117,17 +208,6 @@ describe("Game", function() {
         expect(nonEmptyPoints.length).to.equal(h);
         expect(game.currentPlayer()).to.equal("white");
       });
-
-      var game = new Game();
-      game.setup({ handicapStones: 2 });
-      expect(game.handicapStones).to.equal(2);
-      var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
-      expect(nonEmptyPoints.length).to.equal(2);
-      expect(nonEmptyPoints[0].value).to.equal("black");
-      expect(nonEmptyPoints[0].y).to.equal(3);
-      expect(nonEmptyPoints[0].x).to.equal(15);
-      expect(nonEmptyPoints[1].y).to.equal(15);
-      expect(nonEmptyPoints[1].x).to.equal(3);
     });
 
     it("does not allow invalid handicap stone values", function() {
@@ -140,7 +220,10 @@ describe("Game", function() {
     it("does not allow handicap stones on non-standard sizes", function() {
       var game = new Game();
       expect(function() { game.setup({ boardSize: 19, handicapStones: 2 }); }).to.not.throw(Error);
-      expect(function() { game.setup({ boardSize: 17, handicapStones: 2 }); }).to.throw(Error, "Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
+
+      [3, 5, 7, 11, 15, 17, 21].forEach(b => {
+        expect(function() { game.setup({ boardSize: b, handicapStones: 2 }); }).to.throw(Error, "Handicap stones not supported on sizes other than 9x9, 13x13 and 19x19");
+      });
     });
 
     it("treats handicap stone positions as illegal moves", function() {
@@ -151,115 +234,31 @@ describe("Game", function() {
     });
   });
 
-  describe("free handicap placement", function() {
-    it("is off by default", function() {
-      var game = new Game();
-      game.setup({ handicapStones: 2 });
-
-      game.playAt(18, 18);
-
-      var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
-      expect(nonEmptyPoints.length).to.equal(3);
-
-      expect(nonEmptyPoints[0].value).to.equal("black");
-      expect(nonEmptyPoints[0].y).to.equal(3);
-      expect(nonEmptyPoints[0].x).to.equal(15);
-
-      expect(nonEmptyPoints[1].value).to.equal("black");
-      expect(nonEmptyPoints[1].y).to.equal(15);
-      expect(nonEmptyPoints[1].x).to.equal(3);
-
-      expect(nonEmptyPoints[2].value).to.equal("white");
-      expect(nonEmptyPoints[2].y).to.equal(18);
-      expect(nonEmptyPoints[2].x).to.equal(18);
-    });
-
-    it("allows black to place stones for the first n moves", function() {
-      var game = new Game();
-      game.setup({ handicapStones: 2, freeHandicapPlacement: true });
-
-      var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
-      expect(nonEmptyPoints.length).to.equal(0);
-
-      expect(game.currentPlayer()).to.equal("black");
-      game.playAt(5, 5);
-      expect(game.currentPlayer()).to.equal("black");
-      game.playAt(6, 6);
-      expect(game.currentPlayer()).to.equal("white");
-      game.playAt(7, 7);
-
-      nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
-      expect(nonEmptyPoints.length).to.equal(3);
-
-      expect(nonEmptyPoints[0].value).to.equal("black");
-      expect(nonEmptyPoints[0].y).to.equal(5);
-      expect(nonEmptyPoints[0].x).to.equal(5);
-
-      expect(nonEmptyPoints[1].value).to.equal("black");
-      expect(nonEmptyPoints[1].y).to.equal(6);
-      expect(nonEmptyPoints[1].x).to.equal(6);
-
-      expect(nonEmptyPoints[2].value).to.equal("white");
-      expect(nonEmptyPoints[2].y).to.equal(7);
-      expect(nonEmptyPoints[2].x).to.equal(7);
-    });
-
-    it("is undoable", function() {
-      var game = new Game();
-      game.setup({ handicapStones: 2, freeHandicapPlacement: true });
-
-      expect(game.currentPlayer()).to.equal("black");
-      game.playAt(5, 5);
-      expect(game.currentPlayer()).to.equal("black");
-      game.playAt(6, 6);
-      expect(game.currentPlayer()).to.equal("white");
-      game.undo();
-      expect(game.currentPlayer()).to.equal("black");
-      game.undo();
-      expect(game.currentPlayer()).to.equal("black");
-
-      var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
-      expect(nonEmptyPoints.length).to.equal(0);
-
-      game.playAt(5, 5);
-      expect(game.currentPlayer()).to.equal("black");
-      game.playAt(6, 6);
-      expect(game.currentPlayer()).to.equal("white");
-
-      nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
-      expect(nonEmptyPoints.length).to.equal(2);
-
-      expect(nonEmptyPoints[0].value).to.equal("black");
-      expect(nonEmptyPoints[0].y).to.equal(5);
-      expect(nonEmptyPoints[0].x).to.equal(5);
-
-      expect(nonEmptyPoints[1].value).to.equal("black");
-      expect(nonEmptyPoints[1].y).to.equal(6);
-      expect(nonEmptyPoints[1].x).to.equal(6);
-    });
-  });
-
   describe("komi", function() {
-    var game = new Game();
-    game.setup();
-
-    game.pass();
-    game.pass();
-
-    expect(game.isOver()).to.be.true;
-
-    expect(game.score().black).to.equal(0);
-    expect(game.score().white).to.equal(0);
-
-    [0.5, 7, 7.5, 100].forEach(function(komiValue) {
+    it("does not add komi by default", function() {
       var game = new Game();
-      game.setup({ komi: komiValue });
+      game.setup();
 
       game.pass();
       game.pass();
+
+      expect(game.isOver()).to.be.true;
 
       expect(game.score().black).to.equal(0);
-      expect(game.score().white).to.equal(komiValue);
+      expect(game.score().white).to.equal(0);
+    });
+
+    it("supports integer and non-integer komi", function() {
+      [0.5, 7, 7.5, 100].forEach(function(komiValue) {
+        var game = new Game();
+        game.setup({ komi: komiValue });
+
+        game.pass();
+        game.pass();
+
+        expect(game.score().black).to.equal(0);
+        expect(game.score().white).to.equal(komiValue);
+      });
     });
   });
 
@@ -290,6 +289,31 @@ describe("Game", function() {
       expect(game.currentState().playedPoint.y).to.equal(2);
       game.currentState().playedPoint.y = 10;
       expect(game.currentState().playedPoint.y).to.equal(2);
+    });
+  });
+
+  describe("suicide restrictions", function() {
+    it("prevents suicide", function() {
+      var game = new Game();
+      game.setup();
+
+      // in the corner
+      expect(game.playAt(0, 1)).to.be.true; // b
+      expect(game.playAt(0, 2)).to.be.true; // w
+      expect(game.playAt(1, 0)).to.be.true; // b
+      expect(game.playAt(2, 0)).to.be.true; // w
+      expect(game.playAt(15, 15)).to.be.true; // b tenuki
+      expect(game.playAt(1, 1)).to.be.true; // w
+
+      expect(game.playAt(0, 0)).to.be.false;
+      expect(game.isIllegalAt(0, 0)).to.be.true;
+      expect(game.intersectionAt(0, 0).isEmpty()).to.be.true;
+      expect(game.isBlackPlaying()).to.be.true;
+
+      expect(game.playAt(9, 9)).to.be.true; // b tenuki
+      expect(game.playAt(0, 0)).to.be.true; // w
+
+      expect(game.intersectionAt(0, 0).isWhite()).to.be.true;
     });
   });
 });

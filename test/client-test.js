@@ -1,3 +1,4 @@
+var helpers = require("./helpers.js");
 var expect = require("chai").expect;
 var tenuki = require("../index.js");
 var Client = tenuki.Client;
@@ -9,19 +10,8 @@ var nullClientHooks = {
 };
 
 describe("Client", function() {
-  var JSDOM = require("jsdom").JSDOM;
-  var window = new JSDOM('<!doctype html><html><body><div id="test-board" class="tenuki-board"></div></body></html>').window;
-  var document = window.document;
-
-  global["document"] = document;
-  global["window"] = window;
-  // we don't really need this for these tests.
-  window.requestAnimationFrame = function() {};
-  global["navigator"] = { userAgent: "node.js" };
-  global["HTMLElement"] = global["window"].HTMLElement;
-
-  afterEach(function() {
-    document.querySelector("#test-board").innerHTML = "";
+  beforeEach(function() {
+    helpers.generateNewTestBoard()
   });
 
   describe("setup", function() {

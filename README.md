@@ -291,9 +291,7 @@ The game is set to run on a fixed 9x9 board.
 
 # Running tests
 
-For end-to-end tests on a real board, open [`test.html`](https://aprescott.github.io/tenuki.js/test.html) in your browser. If the tests all pass, you'll see "PASS" shown with black stones.
-
-For other tests, use `npm test`.
+Run tests with `npm test`.
 
 # Developing
 

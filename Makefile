@@ -19,7 +19,7 @@ clean:
 	rm -rf build tmp lib
 
 test: all
-	npm test && phantomjs phantomjs-test.js && eslint src
+	npm test && eslint src
 
 build/$(name).js: build $(compiled_js)
 	cat copyright_header.txt \

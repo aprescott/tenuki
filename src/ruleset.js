@@ -31,7 +31,7 @@ Ruleset.prototype = {
 
     if (this.koRule === "simple") {
       const koPoint = boardState.koPoint;
-      isKoViolation = koPoint && koPoint.y === y && koPoint.x === x;
+      isKoViolation = Boolean(koPoint) && koPoint.y === y && koPoint.x === x;
     } else {
       const newState = boardState.playAt(y, x, color);
       const boardStates = existingStates;
