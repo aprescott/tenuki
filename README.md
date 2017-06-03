@@ -206,7 +206,7 @@ Eyes in seki count as territory under area scoring.
 
 ## Territory scoring
 
-The score for each player under territory scoring is simply the number of points of territory.
+The score for each player under territory scoring is the number of points of territory, plus opponent stones you captured.
 
 Eyes in seki _do not_ count as points of territory.
 
