@@ -73,7 +73,7 @@ describe("ko restriction", function() {
   describe("with positional superko rules", function() {
     it("prevents repeating a previous position", function() {
       var game = new Game();
-      game.setup({ koRule: "superko" });
+      game.setup({ koRule: "positional-superko" });
 
       // cycle for ● repeatedly losing 2 stones
       // ┌─●─┬─○─●
@@ -110,7 +110,7 @@ describe("ko restriction", function() {
 
       expect(game.playAt(0, 0)).to.be.true; // b
 
-      expect(game.playAt(0, 1)).to.be.false; // w -- this move is not allowed with superko since it repeats (*)
+      expect(game.playAt(0, 1)).to.be.false; // w -- this move is not allowed with positional superko since it repeats (*)
       expect(game.isIllegalAt(0, 1)).to.be.true;
       expect(game.intersectionAt(0, 1).value).to.equal("empty");
       expect(game.currentPlayer()).to.equal("white");
@@ -120,7 +120,7 @@ describe("ko restriction", function() {
 
     it("prevents repetition with a triple ko", function() {
       var game = new Game();
-      game.setup({ koRule: "superko" });
+      game.setup({ koRule: "positional-superko" });
 
       var ponnukiOffsets = [
         [-1, 1],

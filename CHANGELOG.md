@@ -1,5 +1,6 @@
 # Next version
 
+* Change `"superko"` as a ko setting to `"positional-superko"` to be explicit.
 * `playAt` now returns `false` for a move which is illegal on the basis of ko. Previously it incorrectly returned `null`.
 
 # v0.2.2

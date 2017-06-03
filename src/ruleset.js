@@ -1,6 +1,6 @@
 const VALID_KO_OPTIONS = [
   "simple",
-  "superko"
+  "positional-superko"
 ];
 
 const Ruleset = function({ koRule }) {
