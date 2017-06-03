@@ -29,6 +29,7 @@ describe("Game", function() {
 
       expect(function() { game.setup({ boardSize: 19, koRule: "Simple" }); }).to.throw(Error, "Unknown ko rule: Simple");
       expect(function() { game.setup({ boardSize: 19, koRule: "SIMPLE" }); }).to.throw(Error, "Unknown ko rule: SIMPLE");
+      expect(function() { game.setup({ boardSize: 19, koRule: "superko" }); }).to.throw(Error, "Unknown ko rule: superko");
       expect(function() { game.setup({ boardSize: 19, koRule: "positional" }); }).to.throw(Error, "Unknown ko rule: positional");
       expect(function() { game.setup({ boardSize: 19, koRule: "gibberish" }); }).to.throw(Error, "Unknown ko rule: gibberish");
     });

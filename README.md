@@ -210,14 +210,14 @@ The default ko rule is the simple variant: immediately recreating the previous b
 
 ```js
 game.setup({
-  koRule: "superko" // default is "simple"
+  koRule: "positional-superko" // default is "simple"
 })
 ```
 
 Valid ko rule values are:
 
   * `"simple"` — Immediately recreating the previous board position is illegal.
-  * `"superko"` — Recreating any previous position is illegal. (Also known as "positional superko".)
+  * `"positional-superko"` — Recreating any previous position is illegal.
 
 # Usage outside of a browser
 
