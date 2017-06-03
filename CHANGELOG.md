@@ -1,6 +1,6 @@
 # Next version
 
-* ...
+* `playAt` now returns `false` for a move which is illegal on the basis of ko. Previously it incorrectly returned `null`.
 
 # v0.2.2
 
