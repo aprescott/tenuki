@@ -157,11 +157,11 @@ BoardState.prototype = {
 
   intersectionAt: function(y, x) {
     if (y >= this.boardSize || x >= this.boardSize) {
-      throw new Error(`Intersection at (${y}, ${x}) would be outside the board`)
+      throw new Error(`Intersection at (${y}, ${x}) would be outside the board`);
     }
 
     if (y < 0 || x < 0) {
-      throw new Error(`Intersection position cannot be negative, but was given (4, -1)`)
+      throw new Error(`Intersection position cannot be negative, but was given (4, -1)`);
     }
 
     return this.intersections[y*this.boardSize + x];
