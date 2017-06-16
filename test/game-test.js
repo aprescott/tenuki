@@ -33,6 +33,14 @@ describe("Game", function() {
       expect(function() { game.setup({ boardSize: 19, koRule: "positional" }); }).to.throw(Error, "Unknown ko rule: positional");
       expect(function() { game.setup({ boardSize: 19, koRule: "gibberish" }); }).to.throw(Error, "Unknown ko rule: gibberish");
     });
+
+    it("does not allow any explicitly-given values which are null or undefined", function() {
+      var game = new Game();
+
+      expect(function() { game.setup({boardSize: undefined}) }).to.throw(Error, "Game option boardSize must not be set as null or undefined");
+      expect(function() { game.setup({boardSize: null}) }).to.throw(Error, "Game option boardSize must not be set as null or undefined");
+      expect(function() { game.setup({koRule: null}) }).to.throw(Error, "Game option koRule must not be set as null or undefined");
+    });
   });
 
   describe("playAt", function() {

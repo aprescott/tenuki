@@ -32,6 +32,20 @@ const Game = function(boardElement) {
 };
 
 Game.prototype = {
+  _validateOptions: function(options) {
+    for (let key in options) {
+      if (options.hasOwnProperty(key)) {
+        if (VALID_GAME_OPTIONS.indexOf(key) < 0) {
+          throw new Error("Unrecognized game option: " + key);
+        }
+
+        if (typeof options[key] === "undefined" || options[key] === null) {
+          throw new Error(`Game option ${key} must not be set as null or undefined`);
+        }
+      }
+    }
+  },
+
   _configureOptions: function({ boardSize = this._defaultBoardSize, komi = 0, handicapStones = 0, freeHandicapPlacement = false, scoring = this._defaultScoring, koRule = this._defaultKoRule, renderer = this._defaultRenderer } = {}) {
     if (typeof boardSize !== "number") {
       throw new Error("Board size must be a number, but was: " + typeof boardSize);
@@ -87,12 +101,7 @@ Game.prototype = {
   },
 
   setup: function(options = {}) {
-    for (let key in options) {
-      if (options.hasOwnProperty(key) && VALID_GAME_OPTIONS.indexOf(key) < 0) {
-        throw new Error("Unrecognized game option: " + key);
-      }
-    }
-
+    this._validateOptions(options);
     this._configureOptions(options);
 
     if (this._boardElement) {

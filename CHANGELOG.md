@@ -4,6 +4,7 @@
 * Two consecutive passes will now always end the game under equivalence scoring. Previously, the requirement that white "pass" last was implemented as a game-ending requirement. Now, the game will always end after 2 passes, with the score handling the extra white pass stone to represent a "pass" move. (#30)
 * `playAt` now returns `false` for a move which is illegal on the basis of ko. Previously it incorrectly returned `null`.
 * `intersectionAt` will now throw an error if given intersection values are not on the board.
+* `setup` will throw an error for valid option keys but where the value is given as null or undefined. This is to prevent defaults from unknowingly being used.
 
 # v0.2.2
 
