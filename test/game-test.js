@@ -57,6 +57,31 @@ describe("Game", function() {
     });
   });
 
+  describe("intersectionAt", function() {
+    it("returns the intersection for the given point", function() {
+      var game = new Game();
+      game.setup();
+
+      expect(game.intersectionAt(4, 5).value).to.equal("empty");
+      expect(game.intersectionAt(4, 5).y).to.equal(4);
+      expect(game.intersectionAt(4, 5).x).to.equal(5);
+
+      game.playAt(4, 5);
+      game.playAt(5, 6);
+
+      expect(game.intersectionAt(4, 5).value).to.equal("black");
+      expect(game.intersectionAt(5, 6).value).to.equal("white");
+    });
+
+    it("errors when trying to retrieve values outside of the board", function() {
+      var game = new Game();
+      game.setup({ boardSize: 9 });
+
+      expect(function() { game.intersectionAt(5, 14); }).to.throw(Error, "Intersection at (5, 14) would be outside the board");
+      expect(function() { game.intersectionAt(4, -1); }).to.throw(Error, "Intersection position cannot be negative, but was given (4, -1)");
+    });
+  });
+
   describe("capturing", function() {
     it("removes black stones from the board", function() {
       var game = new Game();
