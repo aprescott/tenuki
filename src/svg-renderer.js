@@ -229,6 +229,11 @@ const constructSVG = function(renderer, boardState, { hasCoordinates, smallerSto
           height: 11
         }
       }));
+
+      renderer.grid[y] = renderer.grid[y] || [];
+      renderer.grid[y][x] = intersectionGroup;
+
+      renderer.addIntersectionEventListeners(intersectionGroup, y, x);
     }
   }
 
@@ -244,17 +249,6 @@ SVGRenderer.prototype.generateBoard = function(boardState, { hasCoordinates, sma
   this.svgElement = svg;
   this.svgElement.setAttribute("height", this.BOARD_LENGTH);
   this.svgElement.setAttribute("width", this.BOARD_LENGTH);
-
-  const intersectionGroups = svg.querySelectorAll(".intersection");
-  intersectionGroups.forEach((intersectionGroup) => {
-    const y = Number(intersectionGroup.getAttribute("data-intersection-y"));
-    const x = Number(intersectionGroup.getAttribute("data-intersection-x"));
-
-    this.grid[y] = this.grid[y] || [];
-    this.grid[y][x] = intersectionGroup;
-
-    this.addIntersectionEventListeners(intersectionGroup, y, x);
-  });
 
   return svg;
 };
