@@ -22,31 +22,29 @@ DOMRenderer.prototype._setup = function(boardState) {
 };
 
 DOMRenderer.prototype.generateBoard = function(boardState) {
-  const renderer = this;
-  const boardElement = this.boardElement;
-  const zoomContainer = renderer.zoomContainer;
+  const contentsContainer = utils.createElement("div");
 
-  utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines horizontal" }));
-  utils.appendElement(zoomContainer, utils.createElement("div", { class: "lines vertical" }));
-  utils.appendElement(zoomContainer, utils.createElement("div", { class: "hoshi-points" }));
-  utils.appendElement(zoomContainer, utils.createElement("div", { class: "intersections" }));
+  utils.appendElement(contentsContainer, utils.createElement("div", { class: "lines horizontal" }));
+  utils.appendElement(contentsContainer, utils.createElement("div", { class: "lines vertical" }));
+  utils.appendElement(contentsContainer, utils.createElement("div", { class: "hoshi-points" }));
+  utils.appendElement(contentsContainer, utils.createElement("div", { class: "intersections" }));
 
   Renderer.hoshiPositionsFor(boardState.boardSize).forEach(h => {
     const hoshi = utils.createElement("div", { class: "hoshi" });
-    hoshi.style.left = (h.left * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
-    hoshi.style.top = (h.top * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
+    hoshi.style.left = (h.left * (this.INTERSECTION_GAP_SIZE + 1)) + "px";
+    hoshi.style.top = (h.top * (this.INTERSECTION_GAP_SIZE + 1)) + "px";
 
-    utils.appendElement(boardElement.querySelector(".hoshi-points"), hoshi);
+    utils.appendElement(contentsContainer.querySelector(".hoshi-points"), hoshi);
   });
 
   for (let y = 0; y < boardState.boardSize; y++) {
     const horizontalLine = utils.createElement("div", { class: "line horizontal" });
     horizontalLine.setAttribute("data-left-gutter", boardState.yCoordinateFor(y));
-    utils.appendElement(boardElement.querySelector(".lines.horizontal"), horizontalLine);
+    utils.appendElement(contentsContainer.querySelector(".lines.horizontal"), horizontalLine);
 
     const verticalLine = utils.createElement("div", { class: "line vertical" });
     verticalLine.setAttribute("data-top-gutter", boardState.xCoordinateFor(y));
-    utils.appendElement(boardElement.querySelector(".lines.vertical"), verticalLine);
+    utils.appendElement(contentsContainer.querySelector(".lines.vertical"), verticalLine);
 
     for (let x = 0; x < boardState.boardSize; x++) {
       const intersectionElement = utils.createElement("div", { class: "intersection empty" });
@@ -56,30 +54,32 @@ DOMRenderer.prototype.generateBoard = function(boardState) {
       intersectionElement.setAttribute("data-position-x", x);
       intersectionElement.setAttribute("data-position-y", y);
 
-      intersectionElement.style.left = (x * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
-      intersectionElement.style.top = (y * (renderer.INTERSECTION_GAP_SIZE + 1)) + "px";
+      intersectionElement.style.left = (x * (this.INTERSECTION_GAP_SIZE + 1)) + "px";
+      intersectionElement.style.top = (y * (this.INTERSECTION_GAP_SIZE + 1)) + "px";
 
-      utils.appendElement(boardElement.querySelector(".intersections"), intersectionElement);
+      utils.appendElement(contentsContainer.querySelector(".intersections"), intersectionElement);
 
-      renderer.grid[y] = renderer.grid[y] || [];
-      renderer.grid[y][x] = intersectionElement;
+      this.grid[y] = this.grid[y] || [];
+      this.grid[y][x] = intersectionElement;
 
       this.addIntersectionEventListeners(intersectionElement, y, x);
     }
   }
 
   // prevent the text-selection cursor
-  utils.addEventListener(boardElement.querySelector(".lines.horizontal"), "mousedown", function(e) {
+  utils.addEventListener(contentsContainer.querySelector(".lines.horizontal"), "mousedown", function(e) {
     e.preventDefault();
   });
-  utils.addEventListener(boardElement.querySelector(".lines.vertical"), "mousedown", function(e) {
+  utils.addEventListener(contentsContainer.querySelector(".lines.vertical"), "mousedown", function(e) {
     e.preventDefault();
   });
 
-  boardElement.querySelector(".lines.horizontal").style.width = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
-  boardElement.querySelector(".lines.horizontal").style.height = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
-  boardElement.querySelector(".lines.vertical").style.width = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
-  boardElement.querySelector(".lines.vertical").style.height = ((renderer.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+  contentsContainer.querySelector(".lines.horizontal").style.width = ((this.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+  contentsContainer.querySelector(".lines.horizontal").style.height = ((this.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+  contentsContainer.querySelector(".lines.vertical").style.width = ((this.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+  contentsContainer.querySelector(".lines.vertical").style.height = ((this.INTERSECTION_GAP_SIZE * (boardState.boardSize - 1)) + boardState.boardSize) + "px";
+
+  return contentsContainer;
 };
 
 DOMRenderer.prototype.setIntersectionClasses = function(intersectionEl, intersection, classes) {

@@ -9,18 +9,10 @@ const SVGRenderer = function(boardElement, { hooks, options }) {
 SVGRenderer.prototype = Object.create(Renderer.prototype);
 SVGRenderer.prototype.constructor = SVGRenderer;
 
-SVGRenderer.prototype.generateBoard = function(boardState) {
-  const renderer = this;
-  const zoomContainer = renderer.zoomContainer;
-
+const constructSVG = function(renderer, boardState, { hasCoordinates, smallerStones, texturedStones }) {
   const svg = utils.createSVGElement("svg");
-  renderer.svgElement = svg;
-
   const defs = utils.createSVGElement("defs");
   utils.appendElement(svg, defs);
-
-  renderer.blackGradientID = utils.randomID("black-gradient");
-  renderer.whiteGradientID = utils.randomID("white-gradient");
 
   const blackGradient = utils.createSVGElement("radialGradient", {
     attributes: {
@@ -67,9 +59,10 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
   const contentsContainer = utils.createSVGElement("g", {
     attributes: {
       class: "contents",
-      transform: `translate(${this.MARGIN}, ${this.MARGIN})`
+      transform: `translate(${renderer.MARGIN}, ${renderer.MARGIN})`
     }
   });
+  utils.appendElement(svg, contentsContainer);
 
   const lines = utils.createSVGElement("g", {
     attributes: {
@@ -82,10 +75,10 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
     for (let x = 0; x < boardState.boardSize - 1; x++) {
       const lineBox = utils.createSVGElement("rect", {
         attributes: {
-          y: y * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
-          x: x * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
-          width: this.INTERSECTION_GAP_SIZE + 1,
-          height: this.INTERSECTION_GAP_SIZE + 1,
+          y: y * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
+          x: x * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
+          width: renderer.INTERSECTION_GAP_SIZE + 1,
+          height: renderer.INTERSECTION_GAP_SIZE + 1,
           class: "line-box"
         }
       });
@@ -101,8 +94,8 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
     const hoshi = utils.createSVGElement("circle", {
       attributes: {
         class: "hoshi",
-        cy: h.top * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
-        cx: h.left * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
+        cy: h.top * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
+        cx: h.left * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
         r: 2
       }
     });
@@ -113,43 +106,41 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
   const intersections = utils.createSVGElement("g", { attributes: { class: "intersections" }});
   utils.appendElement(contentsContainer, intersections);
 
-  if (this.hasCoordinates) {
+  if (hasCoordinates) {
     const coordinateContainer = utils.createSVGElement("g", {
       attributes: {
         class: "coordinates",
-        transform: `translate(${this.MARGIN}, ${this.MARGIN})`
+        transform: `translate(${renderer.MARGIN}, ${renderer.MARGIN})`
       }
     });
 
     for (let y = 0; y < boardState.boardSize; y++) {
-      if (this.hasCoordinates) {
-        // TODO: 16 is for the rendered height _on my browser_. not reliable...
+      // TODO: 16 is for the rendered height _on my browser_. not reliable...
 
-        [16/2 + 1 - (16 + 16/2 + 16/(2*2) + 16/(2*2*2)), 16/2 + 1 + (16 + 16/2) + (boardState.boardSize - 1)*(this.INTERSECTION_GAP_SIZE + 1)].forEach(verticalOffset => {
-          utils.appendElement(coordinateContainer, utils.createSVGElement("text", {
-            text: boardState.xCoordinateFor(y),
-            attributes: {
-              "text-anchor": "middle",
-              y: verticalOffset - 0.5,
-              x: y * (this.INTERSECTION_GAP_SIZE + 1) - 0.5
-            }
-          }));
-        });
+      [16/2 + 1 - (16 + 16/2 + 16/(2*2) + 16/(2*2*2)), 16/2 + 1 + (16 + 16/2) + (boardState.boardSize - 1)*(renderer.INTERSECTION_GAP_SIZE + 1)].forEach(verticalOffset => {
+        utils.appendElement(coordinateContainer, utils.createSVGElement("text", {
+          text: boardState.xCoordinateFor(y),
+          attributes: {
+            "text-anchor": "middle",
+            y: verticalOffset - 0.5,
+            x: y * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5
+          }
+        }));
+      });
 
 
-        [-1*(16 + 16/2 + 16/(2*2)), (16 + 16/2 + 16/(2*2)) + (boardState.boardSize - 1)*(this.INTERSECTION_GAP_SIZE + 1)].forEach(horizontalOffset => {
-          utils.appendElement(coordinateContainer, utils.createSVGElement("text", {
-            text: boardState.yCoordinateFor(y),
-            attributes: {
-              "text-anchor": "middle",
-              y: y * (this.INTERSECTION_GAP_SIZE + 1) - 0.5 + 16/(2*2),
-              x: horizontalOffset - 0.5
-            }
-          }));
-        });
+      [-1*(16 + 16/2 + 16/(2*2)), (16 + 16/2 + 16/(2*2)) + (boardState.boardSize - 1)*(renderer.INTERSECTION_GAP_SIZE + 1)].forEach(horizontalOffset => {
+        utils.appendElement(coordinateContainer, utils.createSVGElement("text", {
+          text: boardState.yCoordinateFor(y),
+          attributes: {
+            "text-anchor": "middle",
+            y: y * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5 + 16/(2*2),
+            x: horizontalOffset - 0.5
+          }
+        }));
+      });
 
-        utils.appendElement(svg, coordinateContainer);
-      }
+      utils.appendElement(svg, coordinateContainer);
     }
   }
 
@@ -160,6 +151,8 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
           class: "intersection"
         }
       });
+      intersectionGroup.setAttribute("data-intersection-y", y);
+      intersectionGroup.setAttribute("data-intersection-x", x);
       utils.appendElement(intersections, intersectionGroup);
 
       const intersectionInnerContainer = utils.createSVGElement("g", {
@@ -171,37 +164,33 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
 
       const intersectionBox = utils.createSVGElement("rect", {
         attributes: {
-          y: y * (this.INTERSECTION_GAP_SIZE + 1) - this.INTERSECTION_GAP_SIZE/2 - 0.5,
-          x: x * (this.INTERSECTION_GAP_SIZE + 1) - this.INTERSECTION_GAP_SIZE/2 - 0.5,
-          width: this.INTERSECTION_GAP_SIZE,
-          height: this.INTERSECTION_GAP_SIZE
+          y: y * (renderer.INTERSECTION_GAP_SIZE + 1) - renderer.INTERSECTION_GAP_SIZE/2 - 0.5,
+          x: x * (renderer.INTERSECTION_GAP_SIZE + 1) - renderer.INTERSECTION_GAP_SIZE/2 - 0.5,
+          width: renderer.INTERSECTION_GAP_SIZE,
+          height: renderer.INTERSECTION_GAP_SIZE
         }
       });
       utils.appendElement(intersectionInnerContainer, intersectionBox);
 
-      let stoneRadius = this.INTERSECTION_GAP_SIZE / 2;
+      let stoneRadius = renderer.INTERSECTION_GAP_SIZE / 2;
 
-      if (this.smallerStones) {
+      if (smallerStones) {
         stoneRadius -= 1;
       }
 
       const stoneAttributes = {
         class: "stone",
-        cy: y * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
-        cx: x * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
-        width: this.INTERSECTION_GAP_SIZE + 1,
-        height: this.INTERSECTION_GAP_SIZE + 1,
+        cy: y * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
+        cx: x * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
         r: stoneRadius
       };
 
-      if (this.texturedStones) {
+      if (texturedStones) {
         utils.appendElement(intersectionInnerContainer, utils.createSVGElement("circle", {
           attributes: {
             class: "stone-shadow",
             cy: stoneAttributes["cy"] + 2,
             cx: stoneAttributes["cx"],
-            width: stoneAttributes["width"],
-            height: stoneAttributes["height"],
             r: stoneRadius
           }
         }));
@@ -215,10 +204,8 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
       utils.appendElement(intersectionInnerContainer, utils.createSVGElement("circle", {
         attributes: {
           class: "marker",
-          cy: y * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
-          cx: x * (this.INTERSECTION_GAP_SIZE + 1) - 0.5,
-          width: this.INTERSECTION_GAP_SIZE + 1,
-          height: this.INTERSECTION_GAP_SIZE + 1,
+          cy: y * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
+          cx: x * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
           r: 4.5
         }
       }));
@@ -226,8 +213,8 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
       utils.appendElement(intersectionInnerContainer, utils.createSVGElement("rect", {
         attributes: {
           class: "ko-marker",
-          y: y * (this.INTERSECTION_GAP_SIZE + 1) - 6 - 0.5,
-          x: x * (this.INTERSECTION_GAP_SIZE + 1) - 6 - 0.5,
+          y: y * (renderer.INTERSECTION_GAP_SIZE + 1) - 6 - 0.5,
+          x: x * (renderer.INTERSECTION_GAP_SIZE + 1) - 6 - 0.5,
           width: 12,
           height: 12
         }
@@ -236,25 +223,40 @@ SVGRenderer.prototype.generateBoard = function(boardState) {
       utils.appendElement(intersectionInnerContainer, utils.createSVGElement("rect", {
         attributes: {
           class: "territory-marker",
-          y: y * (this.INTERSECTION_GAP_SIZE + 1) - 6,
-          x: x * (this.INTERSECTION_GAP_SIZE + 1) - 6,
+          y: y * (renderer.INTERSECTION_GAP_SIZE + 1) - 6,
+          x: x * (renderer.INTERSECTION_GAP_SIZE + 1) - 6,
           width: 11,
           height: 11
         }
       }));
-
-      this.grid[y] = this.grid[y] || [];
-      this.grid[y][x] = intersectionGroup;
-
-      this.addIntersectionEventListeners(intersectionGroup, y, x);
     }
   }
 
-  utils.appendElement(svg, contentsContainer);
-  utils.appendElement(zoomContainer, svg);
+  return svg;
+};
 
-  renderer.svgElement.setAttribute("height", renderer.BOARD_LENGTH);
-  renderer.svgElement.setAttribute("width", renderer.BOARD_LENGTH);
+SVGRenderer.prototype.generateBoard = function(boardState, { hasCoordinates, smallerStones, texturedStones }) {
+  this.blackGradientID = utils.randomID("black-gradient");
+  this.whiteGradientID = utils.randomID("white-gradient");
+
+  const svg = constructSVG(this, boardState, { hasCoordinates, smallerStones, texturedStones });
+
+  this.svgElement = svg;
+  this.svgElement.setAttribute("height", this.BOARD_LENGTH);
+  this.svgElement.setAttribute("width", this.BOARD_LENGTH);
+
+  const intersectionGroups = svg.querySelectorAll(".intersection");
+  intersectionGroups.forEach((intersectionGroup) => {
+    const y = Number(intersectionGroup.getAttribute("data-intersection-y"));
+    const x = Number(intersectionGroup.getAttribute("data-intersection-x"));
+
+    this.grid[y] = this.grid[y] || [];
+    this.grid[y][x] = intersectionGroup;
+
+    this.addIntersectionEventListeners(intersectionGroup, y, x);
+  });
+
+  return svg;
 };
 
 SVGRenderer.prototype.computeSizing = function() {

@@ -129,7 +129,12 @@ Renderer.prototype = {
 
     throttle("resize", "optimizedResize");
 
-    this.generateBoard(boardState);
+    const specificRendererBoard = this.generateBoard(boardState, {
+      hasCoordinates: this.hasCoordinates,
+      smallerStones: this.smallerStones,
+      texturedStones: this.texturedStones
+    });
+    utils.appendElement(zoomContainer, specificRendererBoard);
 
     renderer.computeSizing();
 
