@@ -18,6 +18,5 @@
 
 <script>
   boardElement = document.querySelector(".tenuki-board");
-  window.board = new tenuki.Game(boardElement);
-  window.board.setup();
+  window.board = new tenuki.Game({ element: boardElement });
 </script>

@@ -3,8 +3,7 @@ var tenuki = require("../index.js");
 var Game = tenuki.Game;
 
 var run = function(scoring) {
-  var game = new Game();
-  game.setup({ scoring: scoring });
+  var game = new Game({ scoring: scoring });
 
   // divide the board down the middle, black on the right
   game.playAt(0, 9); // b
@@ -147,8 +146,7 @@ describe("scoring rules", function() {
     });
 
     it("adds one final pass stone by white if necessary", function() {
-      var game = new Game();
-      game.setup({ scoring: "equivalence" });
+      var game = new Game({ scoring: "equivalence" });
 
       game.pass(); // b
       game.pass(); // w
@@ -157,8 +155,7 @@ describe("scoring rules", function() {
       expect(game.score().black).to.equal(1);
       expect(game.score().white).to.equal(1);
 
-      game = new Game();
-      game.setup({ scoring: "equivalence" });
+      game = new Game({ scoring: "equivalence" });
 
       game.playAt(1, 1); // b
       game.pass(); // w
@@ -208,7 +205,6 @@ describe("scoring rules", function() {
   describe("toggling multi-stone groups as dead", function() {
     it("treats the whole group as dead when a single stone is marked", function() {
       var game = new Game();
-      game.setup();
 
       game.playAt(0, 9); // b
       game.playAt(0, 8); // w
@@ -242,7 +238,6 @@ describe("scoring rules", function() {
   describe("territory marking where two stones are alive on the board with nothing else", function() {
     it("leads to no territory being marked", function() {
       var game = new Game();
-      game.setup();
 
       game.playAt(0, 9); // b
       game.playAt(0, 10); // w

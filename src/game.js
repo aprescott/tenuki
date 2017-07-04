@@ -6,6 +6,7 @@ import Ruleset from "./ruleset";
 import Scorer from "./scorer";
 
 const VALID_GAME_OPTIONS = [
+  "element",
   "boardSize",
   "scoring",
   "handicapStones",
@@ -17,18 +18,22 @@ const VALID_GAME_OPTIONS = [
   "freeHandicapPlacement"
 ];
 
-const Game = function(boardElement) {
+const Game = function(options = {}) {
+  this._validateOptions(options);
+
   this._defaultBoardSize = 19;
   this.boardSize = null;
   this._moves = [];
   this.callbacks = {
     postRender: function() {}
   };
-  this._boardElement = boardElement;
+  this._boardElement = options["element"];
   this._defaultScoring = "territory";
   this._defaultKoRule = "simple";
   this._defaultRenderer = "svg";
   this._deadPoints = [];
+
+  this._setup(options);
 };
 
 Game.prototype = {
@@ -100,7 +105,7 @@ Game.prototype = {
     return this._freeHandicapPlacement && this.handicapStones > 0 && this._moves.length < this.handicapStones;
   },
 
-  setup: function(options = {}) {
+  _setup: function(options = {}) {
     this._validateOptions(options);
     this._configureOptions(options);
 

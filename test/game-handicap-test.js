@@ -6,7 +6,6 @@ describe("handicap stones", function() {
   describe("default placement on 19x19", function() {
     it("is at the correct hoshi points", function() {
       var game = new Game();
-      game.setup();
 
       expect(game.isBlackPlaying()).to.be.true;
 
@@ -74,9 +73,8 @@ describe("handicap stones", function() {
       };
 
       Object.keys(o).forEach(k => {
-        var game = new Game();
         var handicapStoneCount = Number(k);
-        game.setup({ handicapStones: handicapStoneCount });
+        var game = new Game({ handicapStones: handicapStoneCount });
 
         var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
         expect(nonEmptyPoints.length).to.equal(o[k].length);
@@ -90,8 +88,7 @@ describe("handicap stones", function() {
 
   describe("default placement on 13x13", function() {
     it("is at the correct hoshi points", function() {
-      var game = new Game();
-      game.setup({ boardSize: 13 });
+      var game = new Game({ boardSize: 13 });
 
       expect(game.isBlackPlaying()).to.be.true;
 
@@ -159,9 +156,8 @@ describe("handicap stones", function() {
       };
 
       Object.keys(o).forEach(k => {
-        var game = new Game();
         var handicapStoneCount = Number(k);
-        game.setup({ boardSize: 13, handicapStones: handicapStoneCount });
+        var game = new Game({ boardSize: 13, handicapStones: handicapStoneCount });
 
         var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
 
@@ -176,8 +172,7 @@ describe("handicap stones", function() {
 
   describe("default placement on 9x9", function() {
     it("is at the correct hoshi points", function() {
-      var game = new Game();
-      game.setup({ boardSize: 9 });
+      var game = new Game({ boardSize: 9 });
 
       expect(game.isBlackPlaying()).to.be.true;
 
@@ -245,9 +240,8 @@ describe("handicap stones", function() {
       };
 
       Object.keys(o).forEach(k => {
-        var game = new Game();
         var handicapStoneCount = Number(k);
-        game.setup({ boardSize: 9, handicapStones: handicapStoneCount });
+        var game = new Game({ boardSize: 9, handicapStones: handicapStoneCount });
 
         var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
 
@@ -281,8 +275,7 @@ describe("handicap stones", function() {
           expectedScore: { white: 2+2, black: 1+5+2 }
         }
       ].forEach(function({ handicap, scoring, initialScore, expectedScore }) {
-        var game = new Game();
-        game.setup({ handicapStones: handicap, scoring: scoring });
+        var game = new Game({ handicapStones: handicap, scoring: scoring });
 
         game.pass(); // w
         game.pass(); // b
@@ -321,8 +314,7 @@ describe("handicap stones", function() {
 
   describe("free handicap placement", function() {
     it("is off by default", function() {
-      var game = new Game();
-      game.setup({ handicapStones: 2 });
+      var game = new Game({ handicapStones: 2 });
 
       game.playAt(18, 18);
 
@@ -343,8 +335,7 @@ describe("handicap stones", function() {
     });
 
     it("allows black to place stones for the first n moves", function() {
-      var game = new Game();
-      game.setup({ handicapStones: 2, freeHandicapPlacement: true });
+      var game = new Game({ handicapStones: 2, freeHandicapPlacement: true });
 
       var nonEmptyPoints = game.currentState().intersections.filter(i => !i.isEmpty());
       expect(nonEmptyPoints.length).to.equal(0);
@@ -373,8 +364,7 @@ describe("handicap stones", function() {
     });
 
     it("is undoable", function() {
-      var game = new Game();
-      game.setup({ handicapStones: 2, freeHandicapPlacement: true });
+      var game = new Game({ handicapStones: 2, freeHandicapPlacement: true });
 
       expect(game.currentPlayer()).to.equal("black");
       game.playAt(5, 5);

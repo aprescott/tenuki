@@ -13,8 +13,7 @@ describe("SVG renderer", function() {
     it("updates board state", function() {
       var testBoardElement = document.querySelector("#test-board");
 
-      var game = new Game(testBoardElement);
-      game.setup({ boardSize: 5 });
+      var game = new Game({ element: testBoardElement, boardSize: 5 });
 
       expect(testBoardElement.querySelectorAll(".intersection.empty").length).to.equal(25);
 
@@ -31,8 +30,7 @@ describe("SVG renderer", function() {
     it("starts with an empty board", function() {
       var testBoardElement = document.querySelector("#test-board");
 
-      var game = new Game(testBoardElement);
-      game.setup({ boardSize: 5 });
+      var game = new Game({ element: testBoardElement, boardSize: 5 });
 
       expect(testBoardElement.querySelectorAll(".intersection").length).to.equal(25);
       expect(testBoardElement.querySelectorAll(".intersection.empty").length).to.equal(25);
@@ -41,8 +39,7 @@ describe("SVG renderer", function() {
     it("is bound to moves on the game", function() {
       var testBoardElement = document.querySelector("#test-board");
 
-      var game = new Game(testBoardElement);
-      game.setup({ boardSize: 5 });
+      var game = new Game({ element: testBoardElement, boardSize: 5 });
 
       game.playAt(3, 2);
       expect(testBoardElement.querySelectorAll(".intersection").length).to.equal(25);
@@ -62,8 +59,7 @@ describe("SVG renderer", function() {
     it("undoes state correctly", function() {
       var testBoardElement = document.querySelector("#test-board");
 
-      var game = new Game(testBoardElement);
-      game.setup({ boardSize: 5 });
+      var game = new Game({ element: testBoardElement, boardSize: 5 });
 
       game.playAt(3, 2);
       game.undo();
@@ -75,8 +71,7 @@ describe("SVG renderer", function() {
     it("removes captured stones", function() {
       var testBoardElement = document.querySelector("#test-board");
 
-      var game = new Game(testBoardElement);
-      game.setup({ boardSize: 5 });
+      var game = new Game({ element: testBoardElement, boardSize: 5 });
 
       game.playAt(0, 0);
       game.playAt(0, 1);
@@ -95,8 +90,7 @@ describe("SVG renderer", function() {
       it(`is correct for ${b}x${b}`, function() {
         var testBoardElement = document.querySelector("#test-board");
 
-        var game = new Game(testBoardElement);
-        game.setup({ boardSize: b });
+        var game = new Game({ element: testBoardElement, boardSize: b });
 
         expect(testBoardElement.querySelectorAll(".lines").length).to.equal(1);
         expect(testBoardElement.querySelectorAll(".line-box").length).to.equal((b - 1) * (b - 1));
@@ -132,8 +126,7 @@ describe("SVG renderer", function() {
       it(`is the correct number for ${b}x${b}`, function() {
         var testBoardElement = document.querySelector("#test-board");
 
-        var game = new Game(testBoardElement);
-        game.setup({ boardSize: b });
+        var game = new Game({ element: testBoardElement, boardSize: b });
 
         expect(testBoardElement.querySelectorAll("circle.hoshi").length).to.equal(expectedNumber);
       });

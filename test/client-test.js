@@ -14,16 +14,14 @@ describe("Client", function() {
     helpers.generateNewTestBoard()
   });
 
-  describe("setup", function() {
+  describe("game options", function() {
     it("accepts a black or white player configuration", function() {
-      ["black", "white"].forEach(function(player) {
-        var client = new Client();
-        expect(function() { client.setup({ player: player, gameOptions: { boardSize: 9 }, hooks: nullClientHooks }); }).to.not.throw(Error);
+      ["black", "white"].forEach((player) => {
+        expect(() => { new Client({ player: player, gameOptions: { boardSize: 9 }, hooks: nullClientHooks }); }).to.not.throw(Error);
       });
 
-      ["Black", "White", "gibberish"].forEach(function(player) {
-        var client = new Client();
-        expect(function() { client.setup({ player: player, gameOptions: { boardSize: 9 }, hooks: nullClientHooks }); }).to.throw(Error, "Player must be either black or white, but was given: " + player);
+      ["Black", "White", "gibberish"].forEach((player) => {
+        expect(() => { new Client({ player: player, gameOptions: { boardSize: 9 }, hooks: nullClientHooks }); }).to.throw(Error, "Player must be either black or white, but was given: " + player);
       });
     });
   });
@@ -32,8 +30,8 @@ describe("Client", function() {
     it("handles playing at a given point when the board element is clicked", function(done) {
       var testBoardElement = document.querySelector("#test-board");
 
-      var client = new Client(testBoardElement);
-      client.setup({
+      var client = new Client({
+        element: testBoardElement,
         player: "black",
         gameOptions: { boardSize: 9 },
         hooks: {
@@ -64,8 +62,8 @@ describe("Client", function() {
     it("plays a white move if the player is white", function(done) {
       var testBoardElement = document.querySelector("#test-board");
 
-      var client = new Client(testBoardElement);
-      client.setup({
+      var client = new Client({
+        element: testBoardElement,
         player: "white",
         gameOptions: { boardSize: 9 },
         hooks: {
@@ -99,8 +97,8 @@ describe("Client", function() {
     it("handles passing when client.pass() is called", function(done) {
       var testBoardElement = document.querySelector("#test-board");
 
-      var client = new Client(testBoardElement);
-      client.setup({
+      var client = new Client({
+        element: testBoardElement,
         player: "black",
         gameOptions: { boardSize: 9 },
         hooks: {
@@ -131,8 +129,8 @@ describe("Client", function() {
     it("toggles stones dead when the game is over and a stone is clicked", function(done) {
       var testBoardElement = document.querySelector("#test-board");
 
-      var client = new Client(testBoardElement);
-      client.setup({
+      var client = new Client({
+        element: testBoardElement,
         player: "black",
         gameOptions: { boardSize: 9 },
         hooks: {

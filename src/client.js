@@ -1,11 +1,12 @@
 import Game from "./game";
 
-const Client = function(boardElement) {
-  this._boardElement = boardElement;
+const Client = function(options = {}) {
+  this._boardElement = options["element"];
+  this._setup(options);
 };
 
 Client.prototype = {
-  setup: function({ player, gameOptions, hooks }) {
+  _setup: function({ player, gameOptions, hooks }) {
     this._player = player;
     this._hooks = hooks;
 
@@ -65,8 +66,11 @@ Client.prototype = {
       }
     };
 
-    this._game = new Game(this._boardElement);
-    this._game.setup(gameOptions);
+    if (this._boardElement) {
+      this._game = new Game(Object.assign({ element: this._boardElement }, gameOptions));
+    } else {
+      this._game = new Game(...gameOptions);
+    }
   },
 
   isOver: function() {

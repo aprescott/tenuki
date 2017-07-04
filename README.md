@@ -61,7 +61,7 @@ It's also possible to clone this repo and run `make` against the latest commit, 
 
 # Simple usage
 
-Create a new `tenuki.Game` instance with a DOM element, then call `setup()`, which displays the board itself and configures click handlers on each intersection:
+Create a new `tenuki.Game` instance, which displays the board itself and configures click handlers on each intersection:
 
 ```html
 <link rel="stylesheet" href="build/tenuki.css">
@@ -71,8 +71,7 @@ Create a new `tenuki.Game` instance with a DOM element, then call `setup()`, whi
 
 <script>
   var boardElement = document.querySelector(".tenuki-board");
-  var game = new tenuki.Game(boardElement);
-  game.setup();
+  var game = new tenuki.Game({ element: boardElement });
 </script>
 ```
 
@@ -93,7 +92,7 @@ For a textured board, add the class `tenuki-board-textured`:
 For fuzzy stone placement, pass `fuzzyStonePlacement: true` as a game option:
 
 ```js
-game.setup({
+new tenuki.Game({
   fuzzyStonePlacement: true
 });
 ```
@@ -150,12 +149,12 @@ The default renderer uses SVG to display the board. If this is a problem, you ca
 
 # Board sizes other than 19x19
 
-You can pass a second argument to `new tenuki.Game` to specify the board size. If no size is given, the default of 19 is used. All sizes between 1x1 and 19x19 should work. Sizes above 19x19 will error and won't render.
+You can pass a `boardSize` option to specify the board size. If no size is given, the default of 19 is used. All sizes between 1x1 and 19x19 should work. Sizes above 19x19 will error and won't render.
 
 ```js
-var game = new tenuki.Game(boardElement);
-// use a 13x13 board
-game.setup({
+var game = new tenuki.Game({
+  element: boardElement,
+  // use a 13x13 board
   boardSize: 13
 });
 ```
@@ -165,7 +164,7 @@ game.setup({
 Handicap stones (2 through 9) are supported on sizes 9x9, 13x13 and 19x19.
 
 ```js
-game.setup({
+new tenuki.Game({
   handicapStones: 5
 });
 ```
@@ -173,7 +172,7 @@ game.setup({
 By default, handicap placement is fixed at the traditional star points. To allow free handicap placement, set `freeHandicapPlacement: true`:
 
 ```js
-game.setup({
+new tenuki.Game({
   handicapStones: 5,
   freeHandicapPlacement: true
 });
@@ -181,10 +180,10 @@ game.setup({
 
 # Configuring scoring
 
-The default scoring method is territory scoring. The scoring rule is configured by `setup()`:
+The default scoring method is territory scoring. The scoring rule is configured as a setup option:
 
 ```js
-game.setup({
+new tenuki.Game({
   scoring: "area" // default is "territory"
 });
 ```
@@ -232,10 +231,10 @@ Note that using equivalence scoring does _not_ change how the game ends. The gam
 
 # Komi
 
-The default komi value is 0. To alter the value of white's score, pass `komi` to `setup()`:
+The default komi value is 0. To alter the value of white's score, specify `komi` as an option:
 
 ```js
-game.setup({
+new tenuki.Game({
   komi: 6.5
 });
 ```
@@ -247,7 +246,7 @@ Komi is not automatically chosen based on the scoring type.
 The default ko rule is the simple variant: immediately recreating the previous board position is not allowed. Superko is also supported with the `koRule` configuration option:
 
 ```js
-game.setup({
+new tenuki.Game({
   koRule: "positional-superko" // default is "simple"
 })
 ```
@@ -264,7 +263,6 @@ The full browser environment is not required in order to use the representation 
 ```js
 var Game = require("tenuki").Game;
 game = new Game();
-game.setup();
 ```
 
 From there, the JavaScript interface is the same as in a browser console:
@@ -303,7 +301,6 @@ This is useful if you want to update some other state:
 
 ```js
 var game = new tenuki.Game(boardElement);
-game.setup();
 
 game.callbacks.postRender = function(game) {
   if (game.currentState().pass) {

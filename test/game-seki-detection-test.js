@@ -5,7 +5,6 @@ var Game = tenuki.Game;
 describe("seki detection", function() {
   it("does not count a false eye in seki as territory", function() {
     var game = new Game();
-    game.setup();
 
     // ┌─○─┬─●─○─┬─
     // ●─○─●─●─○─┼─
@@ -39,7 +38,6 @@ describe("seki detection", function() {
 
   it("does not count two false eyes in a seki as territory", function() {
     var game = new Game();
-    game.setup();
 
     // ┌─○─┬─●─○─┬─┬─┬─
     // ●─○─●─●─○─┼─┼─┼─
@@ -78,8 +76,7 @@ describe("seki detection", function() {
   });
 
   it("does not count seki with two 1-eyed groups", function() {
-    var game = new Game();
-    game.setup({ boardSize: 9 });
+    var game = new Game({ boardSize: 9 });
 
     // ┌─○─┬─●─┬─●─○─┬─○
     // ○─○─○─●─●─●─○─○─┤
@@ -139,7 +136,6 @@ describe("seki detection", function() {
 
   it("merges territories across 'thick' boundaries and skips what would otherwise be seki", function() {
     var game = new Game();
-    game.setup();
 
     // ┌─○─○─┬─○─●─┬─┬─
     // ○─○─○─○─○─●─┼─┼─
@@ -172,7 +168,6 @@ describe("seki detection", function() {
 
   it("does _not_ ignore false-looking eyes in groups that are alive after filling those false-looking eyes", function() {
     var game = new Game();
-    game.setup();
 
     // ┌─○─┬─○─┬─○─┬─○─●─┬─┬─
     // ○─○─○─●─○─○─○─○─●─┼─┼─
@@ -212,7 +207,6 @@ describe("seki detection", function() {
 
   it("does not ignore false eyes that should be filled in under correct play if the sequence is not sufficiently played out", function() {
     var game = new Game();
-    game.setup();
 
     // ┌─○─┬─○─┬─┬─○─●─┬─┬─
     // ○─○─○─●─○─○─○─●─┼─┼─
@@ -250,7 +244,6 @@ describe("seki detection", function() {
 
   it("ignores false eyes which will disappear due to direct atari, after filling neutral points, which can affect the status of live groups", function() {
     var game = new Game();
-    game.setup();
 
     // ┌─○─○─┬─┬─○─┬─┬─○─┬─┬─○─┬─●─┬─
     // ●─●─●─○─○─●─○─○─●─○─○─●─○─●─┼─
@@ -305,7 +298,6 @@ describe("seki detection", function() {
 
   it("ignores false eyes that are the last remaining points after filling dame", function() {
     var game = new Game();
-    game.setup();
 
     // ┌─○─○─┬─┬─○─┬─○─┬─○─●─┬─┬─┬─
     // ●─●─●─○─○─○─○─○─○─○─●─┼─┼─┼─
@@ -346,8 +338,7 @@ describe("seki detection", function() {
   });
 
   it("ignores false eyes in the corner", function() {
-    var game = new Game();
-    game.setup({ boardSize: 9 });
+    var game = new Game({ boardSize: 9 });
 
     game.playAt(1, 0);
     game.playAt(2, 0);
@@ -379,7 +370,6 @@ describe("seki detection", function() {
 
   it("counts eyepoints as territory for groups separated by bamboo-type connections", function() {
     var game = new Game();
-    game.setup();
 
     var run = function(game) {
       // ●─●─●─●─●─●─●─●─●─┬─
@@ -449,7 +439,6 @@ describe("seki detection", function() {
     // to test the alternating pattern behavior
 
     game = new Game();
-    game.setup();
 
     game.pass();
     run(game);
@@ -461,8 +450,7 @@ describe("seki detection", function() {
   });
 
   it("ignores territory for two 1-eyed groups that can't connect out to live groups", function() {
-    var game = new Game();
-    game.setup({ boardSize: 9 });
+    var game = new Game({ boardSize: 9 });
 
     // ●─┬─●─○─┬─┬─○─●─┐
     // ├─●─●─○─┼─┼─○─●─●
@@ -555,8 +543,7 @@ describe("seki detection", function() {
     // test the same thing, but now by symmetry against white
     // to test the alternating pattern behavior
 
-    game = new Game();
-    game.setup({ boardSize: 9 });
+    game = new Game({ boardSize: 9 });
 
     game.pass();
     run(game);
@@ -570,7 +557,6 @@ describe("seki detection", function() {
 
   it("ignores eyes in seki, but accounts for dead stone marking correctly", function() {
     var game = new Game();
-    game.setup();
 
     // ┌─○─●─┬─●─○─┬─┬─
     // ○─┼─●─●─●─○─┼─┼─

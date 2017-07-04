@@ -28,8 +28,7 @@
 
 <script>
 var boardElement = document.querySelector(".tenuki-board");
-var game = new tenuki.Game(boardElement);
-game.setup({ fuzzyStonePlacement: true });
+var game = new tenuki.Game({ element: boardElement, fuzzyStonePlacement: true });
 
 var controlElement = document.querySelector(".controls");
 var controls = new ExampleGameControls(controlElement, game);

@@ -18,8 +18,7 @@ app.use(bodyParser.json()); // for parsing application/json
 var tenuki = require("../build/tenuki");
 var Game = tenuki.Game;
 
-var game = new Game();
-game.setup({ boardSize: 9 });
+var game = new Game({ boardSize: 9 });
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");

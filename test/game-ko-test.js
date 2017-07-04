@@ -5,7 +5,6 @@ var Game = tenuki.Game;
 describe("ko restriction", function() {
   it("prevents simple ko by default", function() {
     var game = new Game();
-    game.setup();
 
     expect(game.playAt(3, 3)).to.be.true; // b
     expect(game.playAt(3, 2)).to.be.true; // w
@@ -28,7 +27,6 @@ describe("ko restriction", function() {
 
   it("is removed by a pass", function() {
     var game = new Game();
-    game.setup();
 
     expect(game.playAt(3, 3)).to.be.true; // b
     expect(game.playAt(3, 2)).to.be.true; // w
@@ -51,7 +49,6 @@ describe("ko restriction", function() {
 
   it("is undone by an undo", function() {
     var game = new Game();
-    game.setup();
 
     expect(game.playAt(0, 0)).to.be.true; // b
     expect(game.playAt(0, 1)).to.be.true; // w
@@ -72,8 +69,7 @@ describe("ko restriction", function() {
 
   describe("with positional superko rules", function() {
     it("prevents repeating a previous position", function() {
-      var game = new Game();
-      game.setup({ koRule: "positional-superko" });
+      var game = new Game({ koRule: "positional-superko" });
 
       // cycle for ● repeatedly losing 2 stones
       // ┌─●─┬─○─●
@@ -119,8 +115,7 @@ describe("ko restriction", function() {
     });
 
     it("prevents repetition with a triple ko", function() {
-      var game = new Game();
-      game.setup({ koRule: "positional-superko" });
+      var game = new Game({ koRule: "positional-superko" });
 
       var ponnukiOffsets = [
         [-1, 1],
