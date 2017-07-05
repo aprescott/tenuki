@@ -47,7 +47,7 @@ Client.prototype = {
 
           this._hooks.submitPlay(y, x, result => {
             if (result) {
-              this._game.playAt(y, x, this._player);
+              this._game.playAt(y, x);
             }
 
             this._busy = false;
