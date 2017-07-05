@@ -1,6 +1,8 @@
 const VALID_KO_OPTIONS = [
   "simple",
-  "positional-superko"
+  "positional-superko",
+  "situational-superko",
+  "natural-situational-superko"
 ];
 
 const Ruleset = function({ koRule }) {
@@ -16,35 +18,50 @@ const Ruleset = function({ koRule }) {
 Ruleset.prototype = {
   isIllegal: function(y, x, game) {
     const boardState = game.currentState();
-    const nextColor = game.currentPlayer();
     const intersection = boardState.intersectionAt(y, x);
 
     const result = !intersection.isEmpty() ||
-      this._wouldBeSuicide(y, x, nextColor, boardState) ||
-      this._isKoViolation(y, x, nextColor, boardState, game._moves);
+      this._wouldBeSuicide(y, x, boardState) ||
+      this._isKoViolation(y, x, boardState, game._moves);
 
     return result;
   },
 
-  _isKoViolation: function(y, x, color, boardState, existingStates) {
+  _isKoViolation: function(y, x, boardState, existingStates) {
     let isKoViolation = false;
 
     if (this.koRule === "simple") {
-      const koPoint = boardState.koPoint;
-      isKoViolation = Boolean(koPoint) && koPoint.y === y && koPoint.x === x;
+      const simpleKoPoint = boardState._simpleKoPoint();
+      isKoViolation = Boolean(simpleKoPoint) && y === simpleKoPoint.y && x === simpleKoPoint.x;
     } else {
-      const newState = boardState.playAt(y, x, color);
-      const boardStates = existingStates;
+      const newState = boardState.playAt(y, x, boardState.nextColor());
 
-      isKoViolation = existingStates.length > 0 && boardStates.some(existingState => {
-        return existingState.positionSameAs(newState);
-      });
+      const hasDuplicatePosition = (condition) => {
+        return existingStates.length > 0 && existingStates.some(existingState => {
+          return condition(existingState) && existingState.positionSameAs(newState);
+        });
+      };
+
+      if (this.koRule === "positional-superko") {
+        isKoViolation = hasDuplicatePosition(() => true);
+      } else if (this.koRule === "situational-superko") {
+        isKoViolation = hasDuplicatePosition((state) => {
+          return state.color === newState.color;
+        });
+      } else if (this.koRule === "natural-situational-superko") {
+        isKoViolation = hasDuplicatePosition((state) => {
+          return !state.pass && state.color === newState.color;
+        });
+      } else {
+        throw new Error(`Unimplemented ko rule ${this.koRule}`);
+      }
     }
 
     return isKoViolation;
   },
 
-  _wouldBeSuicide: function(y, x, color, boardState) {
+  _wouldBeSuicide: function(y, x, boardState) {
+    const color = boardState.nextColor();
     const intersection = boardState.intersectionAt(y, x);
     const surroundedEmptyPoint = intersection.isEmpty() && boardState.neighborsFor(intersection.y, intersection.x).filter(neighbor => neighbor.isEmpty()).length === 0;
 

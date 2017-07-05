@@ -164,13 +164,7 @@ Game.prototype = {
       return "black";
     }
 
-    const lastMoveColor = this.currentState().color;
-
-    if (lastMoveColor === "black") {
-      return "white";
-    } else {
-      return "black";
-    }
+    return this.currentState().nextColor();
   },
 
   isWhitePlaying: function() {
@@ -198,7 +192,13 @@ Game.prototype = {
       return false;
     }
 
-    const newState = this.currentState().playAt(y, x, this.currentPlayer());
+    let newState = this.currentState().playAt(y, x, this.currentPlayer());
+    const { koPoint } = newState;
+
+    if (koPoint && !this._ruleset._isKoViolation(koPoint.y, koPoint.x, newState, this._moves.concat(newState))) {
+      newState = newState.copyWithAttributes({ koPoint: null });
+    }
+
     this._moves.push(newState);
 
     this.render();

@@ -253,8 +253,10 @@ new tenuki.Game({
 
 Valid ko rule values are:
 
-  * `"simple"` — Immediately recreating the previous board position is illegal.
-  * `"positional-superko"` — Recreating any previous position is illegal.
+* `"simple"` — Immediately recreating the previous board position is illegal.
+* `"positional-superko"` — Recreating _any_ previous position is illegal.
+* `"situational-superko"` — Is it illegal for a player to recreate any previous position which that same player was responsible for creating. This is like positional superko, but takes into account the creator of the position.
+* `"natural-situational-superko"` — The same as situational superko, except a player may place a stone to recreate a previous position, provided that previous position was created by a pass. This is like natural situational superko, but distinguishes between passes and board plays. More details can be found at [Sensei's Library](http://senseis.xmp.net/?NaturalSituationalSuperko).
 
 # Usage outside of a browser
 
