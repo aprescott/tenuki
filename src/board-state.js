@@ -21,6 +21,14 @@ const BoardState = function({ moveNumber, playedPoint, color, pass, blackPassSto
 };
 
 BoardState.prototype = {
+  copyWithAttributes: function(attrs) {
+    const retrieveProperties = ({ moveNumber, playedPoint, color, pass, blackPassStones, whitePassStones, intersections, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize }) => ({ moveNumber, playedPoint, color, pass, blackPassStones, whitePassStones, intersections, blackStonesCaptured, whiteStonesCaptured, capturedPositions, koPoint, boardSize });
+    const existingAttrs = retrieveProperties(this);
+    const newAttrs = retrieveProperties(Object.assign(existingAttrs, attrs));
+
+    return new BoardState(newAttrs);
+  },
+
   _capturesFrom: function(y, x, color) {
     const capturedNeighbors = this.neighborsFor(y, x).filter(neighbor => {
       // TODO: this value of 1 is potentially weird.
@@ -80,6 +88,14 @@ BoardState.prototype = {
     return newState;
   },
 
+  nextColor: function() {
+    if (this.color === "black") {
+      return "white";
+    } else {
+      return "black";
+    }
+  },
+
   yCoordinateFor: function(y) {
     return this.boardSize - y;
   },
@@ -113,6 +129,20 @@ BoardState.prototype = {
     return newState;
   },
 
+  _simpleKoPoint: function() {
+    let simpleKoPoint = null;
+
+    if (this.playedPoint) {
+      const { y, x } = this.playedPoint;
+
+      if (this.capturedPositions.length === 1 && this.groupAt(y, x).length === 1 && this.inAtari(y, x)) {
+        simpleKoPoint = this.capturedPositions[0];
+      }
+    }
+
+    return simpleKoPoint;
+  },
+
   playAt: function(y, x, playedColor) {
     const capturedPositions = this._capturesFrom(y, x, playedColor);
     let playedPoint = this.intersectionAt(y, x);
@@ -144,10 +174,11 @@ BoardState.prototype = {
     };
 
     const withPlayedPoint = new BoardState(moveInfo);
-    const hasKoPoint = capturedPositions.length === 1 && withPlayedPoint.groupAt(y, x).length === 1 && withPlayedPoint.inAtari(y, x);
 
-    if (hasKoPoint) {
-      moveInfo["koPoint"] = { y: capturedPositions[0].y, x: capturedPositions[0].x };
+    const possibleKoPoint = withPlayedPoint._simpleKoPoint();
+
+    if (possibleKoPoint) {
+      moveInfo["koPoint"] = { y: possibleKoPoint.y, x: possibleKoPoint.x };
     } else {
       moveInfo["koPoint"] = null;
     }
