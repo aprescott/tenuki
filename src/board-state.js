@@ -70,22 +70,7 @@ BoardState.prototype = {
   },
 
   _withNewPoints: function(newPoints) {
-    const newState = new BoardState({
-      moveNumber: this.moveNumber,
-      playedPoint: this.playedPoint,
-      color: this.color,
-      pass: this.pass,
-      blackPassStones: this.blackPassStones,
-      whitePassStones: this.whitePassStones,
-      intersections: newPoints,
-      blackStonesCaptured: this.blackStonesCaptured,
-      whiteStonesCaptured: this.whiteStonesCaptured,
-      capturedPositions: this.capturedPositions,
-      koPoint: this.koPoint,
-      boardSize: this.boardSize
-    });
-
-    return newState;
+    return this.copyWithAttributes({ intersections: newPoints });
   },
 
   nextColor: function() {
@@ -161,7 +146,7 @@ BoardState.prototype = {
 
     const moveInfo = {
       moveNumber: this.moveNumber + 1,
-      playedPoint: playedPoint,
+      playedPoint: Object.freeze({ y, x }),
       color: playedColor,
       pass: false,
       blackPassStones: this.blackPassStones,
