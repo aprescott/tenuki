@@ -39,7 +39,7 @@ Client.prototype = {
             this._busy = false;
           });
         } else {
-          if (this._player !== this.currentPlayer()) {
+          if (this._player !== this.currentPlayer() || this._game.isIllegalAt(y, x)) {
             this._busy = false;
 
             return;
@@ -121,7 +121,7 @@ Client.prototype = {
   },
 
   pass: function() {
-    if (this._busy || this._player !== this.currentPlayer()) {
+    if (this._busy || this._player !== this.currentPlayer() || this.isOver()) {
       return;
     }
 
