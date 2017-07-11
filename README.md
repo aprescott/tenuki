@@ -65,7 +65,7 @@ Create a new `tenuki.Game` instance, which displays the board itself and configu
 
 ```html
 <link rel="stylesheet" href="build/tenuki.css">
-<script src="build/tenuki"></script>
+<script src="build/tenuki.js"></script>
 
 <div class="tenuki-board"></div>
 

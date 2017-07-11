@@ -15,7 +15,7 @@ app.set('etag', false); // turn off etags which affects caching
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(bodyParser.json()); // for parsing application/json
 
-var tenuki = require("../build/tenuki");
+var tenuki = require("../build/tenuki.js");
 var Game = tenuki.Game;
 
 var game = new Game({ boardSize: 9 });
