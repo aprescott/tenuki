@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aprescott/tenuki.js.git"
+    "url": "git+https://github.com/aprescott/tenuki.git"
   },
   "keywords": [
     "go",
@@ -25,9 +25,9 @@
   "author": "Adam Prescott",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/aprescott/tenuki.js/issues"
+    "url": "https://github.com/aprescott/tenuki/issues"
   },
-  "homepage": "https://github.com/aprescott/tenuki.js#readme",
+  "homepage": "https://github.com/aprescott/tenuki#readme",
   "devDependencies": {
     "babel-cli": "^6.7.7",
     "babel-preset-es2015": "*",

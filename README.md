@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/aprescott/tenuki.js.svg?branch=master)](https://travis-ci.org/aprescott/tenuki.js)
+[![Build Status](https://travis-ci.org/aprescott/tenuki.svg?branch=master)](https://travis-ci.org/aprescott/tenuki)
 
 Tenuki is a web-based board and JavaScript library for the game of go/baduk/weiqi.
 
@@ -13,7 +13,7 @@ The JavaScript engine is not dependent on the renderer and works stand-alone. Yo
 
 The go board interface is intended to be a robust, functional component that can be embedded in a web page. By using the JavaScript API you could then build your own custom controls for undo/pass/etc.
 
-<img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board.png" width="124" height="124">
+<img src="https://raw.githubusercontent.com/aprescott/tenuki/master/examples/screenshots/board.png" width="124" height="124">
 
 Features:
 
@@ -36,11 +36,11 @@ Features:
 
 For live examples, see `examples/`, or view them on GitHub:
 
-* [`example_with_simple_controls.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls.html) — Board with an example of simple custom controls and updating game info.
-* [`example_fuzzy_placement.html`](https://aprescott.github.io/tenuki.js/examples/example_fuzzy_placement.html) — Fuzzy stone placement.
-* [`example_with_simple_controls_and_gutter.html`](https://aprescott.github.io/tenuki.js/examples/example_with_simple_controls_and_gutter.html) — A19 to T1 coordinates in the margins.
-* [`example_multiboard.html`](https://aprescott.github.io/tenuki.js/examples/example_multiboard.html) — Multiple independent 9x9 boards on a single page.
-* [`example.html`](https://aprescott.github.io/tenuki.js/examples/example.html) — Just the board.
+* [`example_with_simple_controls.html`](https://aprescott.github.io/tenuki/examples/example_with_simple_controls.html) — Board with an example of simple custom controls and updating game info.
+* [`example_fuzzy_placement.html`](https://aprescott.github.io/tenuki/examples/example_fuzzy_placement.html) — Fuzzy stone placement.
+* [`example_with_simple_controls_and_gutter.html`](https://aprescott.github.io/tenuki/examples/example_with_simple_controls_and_gutter.html) — A19 to T1 coordinates in the margins.
+* [`example_multiboard.html`](https://aprescott.github.io/tenuki/examples/example_multiboard.html) — Multiple independent 9x9 boards on a single page.
+* [`example.html`](https://aprescott.github.io/tenuki/examples/example.html) — Just the board.
 
 These examples are also set up to work on mobile/touch displays, because the board is set to fit within the browser window.
 
@@ -55,7 +55,7 @@ Here are some screenshots and GIFs:
 
 # Installation
 
-If you use npm, then `npm install tenuki`. Otherwise, you can download the files you need from [the latest release](https://github.com/aprescott/tenuki.js/releases).
+If you use npm, then `npm install tenuki`. Otherwise, you can download the files you need from [the latest release](https://github.com/aprescott/tenuki/releases).
 
 It's also possible to clone this repo and run `make` against the latest commit, which will generate files in `build/`.
 
@@ -65,7 +65,7 @@ Create a new `tenuki.Game` instance, which displays the board itself and configu
 
 ```html
 <link rel="stylesheet" href="build/tenuki.css">
-<script src="build/tenuki.js"></script>
+<script src="build/tenuki"></script>
 
 <div class="tenuki-board"></div>
 
@@ -85,7 +85,7 @@ For a textured board, add the class `tenuki-board-textured`:
 <div class="tenuki-board tenuki-board-textured"></div>
 ```
 
-<img src="https://raw.githubusercontent.com/aprescott/tenuki.js/master/examples/screenshots/board-textured.png" width="124" height="124">
+<img src="https://raw.githubusercontent.com/aprescott/tenuki/master/examples/screenshots/board-textured.png" width="124" height="124">
 
 # Fuzzy stone placement
 
