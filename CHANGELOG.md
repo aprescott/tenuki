@@ -4,7 +4,7 @@
 * Support situational and natural situational superko variants. (#31)
 * Two consecutive passes will now always end the game under equivalence scoring. Previously, the requirement that white "pass" last was implemented as a game-ending requirement. Now, the game will always end after 2 passes, with the score handling the extra white pass stone to represent a "pass" move. (#30)
 * `playAt` now returns `false` for a move which is illegal on the basis of ko. Previously it incorrectly returned `null`.
-* `intersectionAt` will now throw an error if given intersection values are not on the board.
+* `playAt` and `intersectionAt` will now throw an error if given intersection values are not on the board.
 * `Game` creation will throw an error for option keys which are valid, but where the value is given as null or undefined. This is to prevent defaults from unknowingly being used.
 * Calling `setup()` on a `Game` is removed. Setup should now happen in the constructor, e.g., `new Game({ element: el, boardSize: 13 })`. Similarly for `Client`.
 

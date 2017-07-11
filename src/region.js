@@ -140,9 +140,13 @@ Region.prototype = {
       return [
         [0, 0], [0, 1],
         [1, 0], [1, 1]
-      ].every(([y, x]) => {
-        const intersection = this.boardState.intersectionAt(i.y + y, i.x + x);
-        return typeof intersection !== "undefined" && intersection.sameColorAs(i);
+      ].every(([yOffset, xOffset]) => {
+        const y = i.y + yOffset;
+        const x = i.x + xOffset;
+
+        const onTheBoard = y >= 0 && y < this.boardState.boardSize && x >= 0 && x < this.boardState.boardSize;
+
+        return onTheBoard && this.boardState.intersectionAt(y, x).sameColorAs(i);
       });
     });
   },
@@ -187,9 +191,13 @@ Region.prototype = {
                               [0, 0]
         ]
       ].some(expectedPoints => {
-        return expectedPoints.every(([y, x]) => {
-          const intersection = this.boardState.intersectionAt(i.y + y, i.x + x);
-          return typeof intersection !== "undefined" && intersection.sameColorAs(i);
+        return expectedPoints.every(([yOffset, xOffset]) => {
+          const y = i.y + yOffset;
+          const x = i.x + xOffset;
+
+          const onTheBoard = y >= 0 && y < this.boardState.boardSize && x >= 0 && x < this.boardState.boardSize;
+
+          return onTheBoard && this.boardState.intersectionAt(y, x).sameColorAs(i);
         });
       });
     });

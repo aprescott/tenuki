@@ -72,10 +72,15 @@ describe("Game", function() {
     });
 
     it("errors when trying to retrieve values outside of the board", function() {
-      var game = new Game({ boardSize: 9 });
+      var game = new Game({ boardSize: 13 });
 
+      expect(function() { game.intersectionAt(5, 13); }).to.throw(Error, "Intersection at (5, 13) would be outside the board");
       expect(function() { game.intersectionAt(5, 14); }).to.throw(Error, "Intersection at (5, 14) would be outside the board");
+      expect(function() { game.intersectionAt(13, 5); }).to.throw(Error, "Intersection at (13, 5) would be outside the board");
+      expect(function() { game.intersectionAt(14, 5); }).to.throw(Error, "Intersection at (14, 5) would be outside the board");
+
       expect(function() { game.intersectionAt(4, -1); }).to.throw(Error, "Intersection position cannot be negative, but was given (4, -1)");
+      expect(function() { game.intersectionAt(-1, 4); }).to.throw(Error, "Intersection position cannot be negative, but was given (-1, 4)");
     });
   });
 

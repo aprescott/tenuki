@@ -177,7 +177,7 @@ BoardState.prototype = {
     }
 
     if (y < 0 || x < 0) {
-      throw new Error(`Intersection position cannot be negative, but was given (4, -1)`);
+      throw new Error(`Intersection position cannot be negative, but was given (${y}, ${x})`);
     }
 
     return this.intersections[y*this.boardSize + x];
