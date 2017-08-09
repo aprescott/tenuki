@@ -10,13 +10,13 @@ describe("renderer", function() {
   });
 
   ["svg", "dom"].forEach(renderer => {
-    [
-      "simple",
-      "positional-superko",
-      "situational-superko",
-      "natural-situational-superko"
-    ].forEach(koRule => {
-      describe(renderer, function() {
+    describe(renderer, function() {
+      [
+        "simple",
+        "positional-superko",
+        "situational-superko",
+        "natural-situational-superko"
+      ].forEach(koRule => {
         describe("ko markers", function() {
           it(`displays a ko marker for regular illegal ko moves under ${koRule}`, function() {
             var testBoardElement = document.querySelector("#test-board");
@@ -72,6 +72,27 @@ describe("renderer", function() {
             // 0, 1 _is_ allowed, so this isn't a ko
             expect(utils.hasClass(testBoardElement.querySelectorAll(".intersection")[1], "ko"), "expected the intersection to not be marked as a ko").to.be.false;
           });
+        });
+      });
+
+      describe("dead stone marking", function() {
+        it("marks two dead stones of opposing color, with nothing else, as dead", function() {
+          var testBoardElement = document.querySelector("#test-board");
+
+          var game = new Game({ element: testBoardElement, boardSize: 13, renderer: renderer });
+
+          game.playAt(0, 5); // b
+          game.playAt(0, 6); // w
+          game.pass();
+          game.pass();
+
+          expect(testBoardElement.querySelectorAll(".intersection.dead").length).to.equal(0);
+
+          game.toggleDeadAt(0, 5);
+          expect(testBoardElement.querySelectorAll(".intersection.dead").length).to.equal(1);
+
+          game.toggleDeadAt(0, 6);
+          expect(testBoardElement.querySelectorAll(".intersection.dead").length).to.equal(2);
         });
       });
     });

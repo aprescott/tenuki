@@ -235,8 +235,8 @@ describe("scoring rules", function() {
     });
   });
 
-  describe("territory marking where two stones are alive on the board with nothing else", function() {
-    it("leads to no territory being marked", function() {
+  describe("territory marking with whole-board edge cases", function() {
+    it("scores two live stones of opposing color, with nothing else, as no points", function() {
       var game = new Game();
 
       game.playAt(0, 9); // b
@@ -246,6 +246,21 @@ describe("scoring rules", function() {
 
       expect(game.score().black).to.equal(0);
       expect(game.score().white).to.equal(0);
+    });
+
+    it("scores two dead stones of opposing color, with nothing else, as 1 point each under territory scoring", function() {
+      var game = new Game();
+
+      game.playAt(0, 9); // b
+      game.playAt(0, 10); // w
+      game.pass();
+      game.pass();
+
+      game.toggleDeadAt(0, 9);
+      game.toggleDeadAt(0, 10);
+
+      expect(game.score().black).to.equal(1);
+      expect(game.score().white).to.equal(1);
     });
   });
 });

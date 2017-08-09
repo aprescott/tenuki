@@ -498,7 +498,7 @@ Renderer.prototype = {
       }
     }
 
-    if (territory) {
+    if (deadStones.length > 0 || territory.black.length > 0 || territory.white.length > 0) {
       this.renderTerritory(territory, deadStones);
     }
   },
