@@ -4,6 +4,8 @@ const Region = function(boardState, intersections) {
   this.boardState = boardState;
   this.intersections = intersections;
 
+  this._computed = {};
+
   Object.freeze(this);
 };
 
@@ -109,18 +111,30 @@ Region.prototype = {
   },
 
   boundaryStones: function() {
+    if (this._computed.boundaryStones) {
+      return this._computed.boundaryStones;
+    }
+
     if (!this.isEmpty()) {
       throw new Error("Attempted to obtain boundary stones for non-empty region");
     }
 
-    return this.exterior().filter(i => !i.sameColorAs(this.intersections[0]));
+    this._computed.boundaryStones = this.exterior().filter(i => !i.sameColorAs(this.intersections[0]));
+
+    return this._computed.boundaryStones;
   },
 
   expandedBoundaryStones: function() {
+    if (this._computed.expandedBoundaryStones) {
+      return this._computed.expandedBoundaryStones;
+    }
+
     const boundaryStones = this.boundaryStones();
     const regions = Region.allFor(this.boardState).filter(r => r.intersections.some(i => boundaryStones.indexOf(i) > -1));
 
-    return utils.flatMap(regions, r => r.intersections);
+    this._computed.expandedBoundaryStones = utils.flatMap(regions, r => r.intersections);
+
+    return this._computed.expandedBoundaryStones;
   },
 
   lengthOfTerritoryBoundary: function() {
