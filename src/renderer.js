@@ -136,10 +136,12 @@ Renderer.prototype = {
     });
     utils.appendElement(zoomContainer, specificRendererBoard);
 
-    renderer.computeSizing();
+    window.requestAnimationFrame(() => {
+      // we'll potentially be zooming on touch devices
+      zoomContainer.style.willChange = "transform";
 
-    // we'll potentially be zooming on touch devices
-    zoomContainer.style.willChange = "transform";
+      renderer.computeSizing();
+    });
 
     window.addEventListener("optimizedResize", () => {
       renderer.computeSizing();
