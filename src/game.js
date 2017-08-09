@@ -234,18 +234,36 @@ Game.prototype = {
     return finalMove.pass && previousMove.pass;
   },
 
+  markDeadAt: function(y, x, { render = true } = {}) {
+    if (this._isDeadAt(y, x)) {
+      return true;
+    }
+
+    return this._setDeadStatus(y, x, true, { render });
+  },
+
+  unmarkDeadAt: function(y, x, { render = true } = {}) {
+    if (!this._isDeadAt(y, x)) {
+      return true;
+    }
+
+    return this._setDeadStatus(y, x, false, { render });
+  },
+
   toggleDeadAt: function(y, x, { render = true } = {}) {
+    return this._setDeadStatus(y, x, !this._isDeadAt(y, x), { render });
+  },
+
+  _setDeadStatus: function(y, x, markingDead, { render = true } = {}) {
     if (this.intersectionAt(y, x).isEmpty()) {
       return;
     }
 
-    const alreadyDead = this._isDeadAt(y, x);
-
     this.currentState().groupAt(y, x).forEach(intersection => {
-      if (alreadyDead) {
-        this._deadPoints = this._deadPoints.filter(dead => !(dead.y === intersection.y && dead.x === intersection.x));
-      } else {
+      if (markingDead) {
         this._deadPoints.push({ y: intersection.y, x: intersection.x });
+      } else {
+        this._deadPoints = this._deadPoints.filter(dead => !(dead.y === intersection.y && dead.x === intersection.x));
       }
     });
 

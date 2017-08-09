@@ -291,7 +291,7 @@ Note that all functions which take two integer coordinates (`y` and `x`) are mea
 * `pass()`: passes for the current player.
 * `playAt(y, x)`: attempts to play a stone at `(y, x)` for the current player. If the move is illegal (because of ko, suicide, etc.), then nothing will happen. Returns `true` if the move is successful, otherwise `false`.
 * `isOver()`: returns `true` if the most recent 2 moves were passes, indicating the game is over, otherwise `false`.
-* `toggleDeadAt(y, x)`: sets the group of stones at `(y, x)` to be dead as part of marking territory. Only useful if `isOver()` is `true`.
+* `markDeadAt(y, x)`, `unmarkDeadAt(y, x)` and `toggleDeadAt(y, x)`: set the group of stones at `(y, x)` to dead or undead as part of marking territory. Only useful if the game is over.
 * `score()` returns scoring information, e.g., `{ black: 150, white: 130 }`. Only useful if `isOver()` is `true`, since proper scoring requires dead stone marking at the end of the game. Scoring is dependent on the scoring rules in use.
 * `undo()`: undo the most recent move.
 
