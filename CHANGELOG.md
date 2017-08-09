@@ -8,6 +8,8 @@
 * `Game` creation will throw an error for option keys which are valid, but where the value is given as null or undefined. This is to prevent defaults from unknowingly being used.
 * Calling `setup()` on a `Game` is removed. Setup should now happen in the constructor, e.g., `new Game({ element: el, boardSize: 13 })`. Similarly for `Client`.
 * Dead stone marking is now faster in cases where there are many groups.
+* `playAt`, `pass` and `toggleDeadAt` now accept `{ render: false }` as an argument, which skips board rendering. This allows, e.g., playing N moves without rendering the board, then manually rendering once each has been played.
+* Some general improvements to board rendering.
 
 # v0.2.2
 
