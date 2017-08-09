@@ -97,7 +97,6 @@ describe("scoring rules", function() {
 
       // mark dead stones
       game.toggleDeadAt(1, 1);
-      game.toggleDeadAt(0, 2);
 
       // 2 dead stones are now ignored because they're marked dead
       expect(game.score().black).to.equal(10*19);
@@ -131,7 +130,6 @@ describe("scoring rules", function() {
 
       // mark dead stones
       game.toggleDeadAt(1, 1);
-      game.toggleDeadAt(0, 2);
 
       // 2 dead stones are now ignored because they're marked dead
       // plus 2 pass stones
@@ -191,7 +189,6 @@ describe("scoring rules", function() {
 
       // mark dead stones
       game.toggleDeadAt(1, 1);
-      game.toggleDeadAt(0, 2);
 
       expect(game.score().black).to.equal(9*19);
       // rectangle territory, 8*19

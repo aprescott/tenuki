@@ -255,11 +255,25 @@ Game.prototype = {
   },
 
   _setDeadStatus: function(y, x, markingDead, { render = true } = {}) {
-    if (this.intersectionAt(y, x).isEmpty()) {
+    const selectedIntersection = this.intersectionAt(y, x);
+
+    if (selectedIntersection.isEmpty()) {
       return;
     }
 
-    this.currentState().groupAt(y, x).forEach(intersection => {
+    const chosenDead = [];
+
+    const [candidates] = this.currentState().partitionTraverse(selectedIntersection, intersection => {
+      return intersection.isEmpty() || intersection.sameColorAs(selectedIntersection);
+    });
+
+    candidates.forEach(sameColorOrEmpty => {
+      if (!sameColorOrEmpty.isEmpty()) {
+        chosenDead.push(sameColorOrEmpty);
+      }
+    });
+
+    chosenDead.forEach(intersection => {
       if (markingDead) {
         this._deadPoints.push({ y: intersection.y, x: intersection.x });
       } else {

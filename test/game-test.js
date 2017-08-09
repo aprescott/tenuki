@@ -292,6 +292,57 @@ describe("Game", function() {
       expect(game.unmarkDeadAt(5, 6)).to.equal.true;
       expect(game.score()).to.deep.equal({ black: 0, white: 0 });
     });
+
+    it("sets dead stone state in bulk based on the region of the chosen stone", function() {
+      var game = new Game({ boardSize: 9 });
+
+      // ┌─┬─○─●─┬─┬─┬─┬─┐
+      // ○─○─○─●─┼─┼─┼─┼─┤
+      // ├─●─○─●─┼─┼─┼─┼─┤
+      // ●─○─○─●─┼─┼─┼─┼─┤
+      // ●─┼─○─●─┼─┼─┼─┼─┤
+      // ├─┼─○─●─┼─┼─┼─┼─┤
+      // ├─┼─○─●─┼─┼─┼─┼─┤
+      // ├─┼─○─●─┼─┼─┼─┼─┤
+      // └─┴─○─●─┴─┴─┴─┴─┘
+      game.playAt(0, 2);
+      game.playAt(0, 3);
+      game.playAt(1, 2);
+      game.playAt(1, 3);
+      game.playAt(2, 2);
+      game.playAt(2, 3);
+      game.playAt(3, 2);
+      game.playAt(3, 3);
+      game.playAt(4, 2);
+      game.playAt(4, 3);
+      game.playAt(5, 2);
+      game.playAt(5, 3);
+      game.playAt(6, 2);
+      game.playAt(6, 3);
+      game.playAt(7, 2);
+      game.playAt(7, 3);
+      game.playAt(8, 2);
+      game.playAt(8, 3);
+      game.playAt(1, 1);
+      game.playAt(4, 0);
+      game.playAt(1, 0);
+      game.playAt(2, 1);
+      game.playAt(3, 1);
+      game.playAt(3, 0);
+
+      game.pass();
+      game.pass();
+
+      expect(game.score().black).to.equal(0);
+
+      game.markDeadAt(2, 1);
+
+      expect(game.score().black).to.equal(18);
+
+      game.unmarkDeadAt(4, 0);
+
+      expect(game.score().black).to.equal(0);
+    });
   });
 
   describe("toggleDeadAt", function() {
