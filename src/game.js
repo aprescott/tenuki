@@ -187,7 +187,7 @@ Game.prototype = {
     return this.currentState().moveNumber;
   },
 
-  playAt: function(y, x) {
+  playAt: function(y, x, { render = true } = {}) {
     if (this.isIllegalAt(y, x)) {
       return false;
     }
@@ -201,12 +201,14 @@ Game.prototype = {
 
     this._moves.push(newState);
 
-    this.render();
+    if (render) {
+      this.render();
+    }
 
     return true;
   },
 
-  pass: function() {
+  pass: function({ render = true } = {}) {
     if (this.isOver()) {
       return false;
     }
@@ -214,7 +216,9 @@ Game.prototype = {
     const newState = this.currentState().playPass(this.currentPlayer());
     this._moves.push(newState);
 
-    this.render();
+    if (render) {
+      this.render();
+    }
 
     return true;
   },
@@ -230,7 +234,7 @@ Game.prototype = {
     return finalMove.pass && previousMove.pass;
   },
 
-  toggleDeadAt: function(y, x) {
+  toggleDeadAt: function(y, x, { render = true } = {}) {
     if (this.intersectionAt(y, x).isEmpty()) {
       return;
     }
@@ -245,7 +249,9 @@ Game.prototype = {
       }
     });
 
-    this.render();
+    if (render) {
+      this.render();
+    }
 
     return true;
   },

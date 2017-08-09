@@ -295,6 +295,8 @@ Note that all functions which take two integer coordinates (`y` and `x`) are mea
 * `score()` returns scoring information, e.g., `{ black: 150, white: 130 }`. Only useful if `isOver()` is `true`, since proper scoring requires dead stone marking at the end of the game. Scoring is dependent on the scoring rules in use.
 * `undo()`: undo the most recent move.
 
+When rendering to a HTML board element, changing the game state will re-render the board. `pass`, `playAt`, `markDeadAt`, `unmarkDeadAt` and `toggleDeadAt` all support `{ render: false }` as an option, which will skip the board rendering step. To manually render the board with `render: false`, call `game.render()` explicitly.
+
 # Post-render callbacks
 
 There is a configurable callback, `postRender`, which is fired each time the board is rendered, e.g., after every move.

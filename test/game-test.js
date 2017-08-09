@@ -54,6 +54,38 @@ describe("Game", function() {
       game.playAt(5, 6);
       expect(game.intersectionAt(5, 6).value).to.equal("white");
     });
+
+    it("allows skipping a call to render", function() {
+      var game = new Game();
+
+      let calledRender = false;
+      game.render = function() {
+        calledRender = true;
+      }
+
+      game.playAt(5, 5, { render: false });
+      expect(calledRender).to.be.false;
+
+      game.playAt(5, 6);
+      expect(calledRender).to.be.true;
+    });
+  });
+
+  describe("pass", function() {
+    it("allows skipping a call to render", function() {
+      var game = new Game();
+
+      let calledRender = false;
+      game.render = function() {
+        calledRender = true;
+      }
+
+      game.pass({ render: false });
+      expect(calledRender).to.be.false;
+
+      game.pass();
+      expect(calledRender).to.be.true;
+    });
   });
 
   describe("intersectionAt", function() {
@@ -204,6 +236,27 @@ describe("Game", function() {
       game.toggleDeadAt(5, 6);
 
       expect(game.score()).to.deep.equal({ black: 0, white: 0 });
+    });
+
+    it("allows skipping a call to render", function() {
+      var game = new Game();
+
+      game.playAt(5, 5);
+      game.playAt(5, 6);
+
+      game.pass();
+      game.pass();
+
+      let calledRender = false;
+      game.render = function() {
+        calledRender = true;
+      }
+
+      game.toggleDeadAt(5, 5, { render: false });
+      expect(calledRender).to.be.false;
+
+      game.toggleDeadAt(5, 6);
+      expect(calledRender).to.be.true;
     });
   });
 
