@@ -136,10 +136,12 @@ Renderer.prototype = {
     });
     utils.appendElement(zoomContainer, specificRendererBoard);
 
-    renderer.computeSizing();
+    window.requestAnimationFrame(() => {
+      // we'll potentially be zooming on touch devices
+      zoomContainer.style.willChange = "transform";
 
-    // we'll potentially be zooming on touch devices
-    zoomContainer.style.willChange = "transform";
+      renderer.computeSizing();
+    });
 
     window.addEventListener("optimizedResize", () => {
       renderer.computeSizing();
@@ -498,7 +500,7 @@ Renderer.prototype = {
       }
     }
 
-    if (territory) {
+    if (deadStones.length > 0 || territory.black.length > 0 || territory.white.length > 0) {
       this.renderTerritory(territory, deadStones);
     }
   },

@@ -54,6 +54,38 @@ describe("Game", function() {
       game.playAt(5, 6);
       expect(game.intersectionAt(5, 6).value).to.equal("white");
     });
+
+    it("allows skipping a call to render", function() {
+      var game = new Game();
+
+      let calledRender = false;
+      game.render = function() {
+        calledRender = true;
+      }
+
+      game.playAt(5, 5, { render: false });
+      expect(calledRender).to.be.false;
+
+      game.playAt(5, 6);
+      expect(calledRender).to.be.true;
+    });
+  });
+
+  describe("pass", function() {
+    it("allows skipping a call to render", function() {
+      var game = new Game();
+
+      let calledRender = false;
+      game.render = function() {
+        calledRender = true;
+      }
+
+      game.pass({ render: false });
+      expect(calledRender).to.be.false;
+
+      game.pass();
+      expect(calledRender).to.be.true;
+    });
   });
 
   describe("intersectionAt", function() {
@@ -185,6 +217,83 @@ describe("Game", function() {
     });
   });
 
+  describe("markDeadAt", function() {
+    it("allows skipping a call to render", function() {
+      var game = new Game();
+
+      game.playAt(5, 5);
+      game.playAt(5, 6);
+
+      game.pass();
+      game.pass();
+
+      let calledRender = false;
+      game.render = function() {
+        calledRender = true;
+      }
+
+      game.markDeadAt(5, 5, { render: false });
+      expect(calledRender).to.be.false;
+
+      game.markDeadAt(5, 6);
+      expect(calledRender).to.be.true;
+    });
+  });
+
+  describe("unmarkDeadAt", function() {
+    it("allows skipping a call to render", function() {
+      var game = new Game();
+
+      game.playAt(5, 5);
+      game.playAt(5, 6);
+
+      game.pass();
+      game.pass();
+
+      game.markDeadAt(5, 5);
+      game.markDeadAt(5, 6);
+
+      let calledRender = false;
+      game.render = function() {
+        calledRender = true;
+      }
+
+      game.unmarkDeadAt(5, 5, { render: false });
+      expect(calledRender).to.be.false;
+
+      game.unmarkDeadAt(5, 6);
+      expect(calledRender).to.be.true;
+    });
+  });
+
+  describe("dead stone marking with markDeadAt and unmarkDeadAt", function() {
+    it("mark stones as dead as part of the scoring calculation", function() {
+      var game = new Game();
+
+      game.playAt(5, 5);
+      game.playAt(5, 6);
+
+      game.pass();
+      game.pass();
+
+      expect(game.score()).to.deep.equal({ black: 0, white: 0 });
+
+      expect(game.markDeadAt(5, 6)).to.equal.true;
+      expect(game.score()).to.deep.equal({ black: 361, white: 0 });
+
+      // no change
+      expect(game.markDeadAt(5, 6)).to.equal.true;
+      expect(game.score()).to.deep.equal({ black: 361, white: 0 });
+
+      expect(game.unmarkDeadAt(5, 6)).to.equal.true;
+      expect(game.score()).to.deep.equal({ black: 0, white: 0 });
+
+      // no change
+      expect(game.unmarkDeadAt(5, 6)).to.equal.true;
+      expect(game.score()).to.deep.equal({ black: 0, white: 0 });
+    });
+  });
+
   describe("toggleDeadAt", function() {
     it("toggles stones dead as part of the scoring calculation", function() {
       var game = new Game();
@@ -204,6 +313,27 @@ describe("Game", function() {
       game.toggleDeadAt(5, 6);
 
       expect(game.score()).to.deep.equal({ black: 0, white: 0 });
+    });
+
+    it("allows skipping a call to render", function() {
+      var game = new Game();
+
+      game.playAt(5, 5);
+      game.playAt(5, 6);
+
+      game.pass();
+      game.pass();
+
+      let calledRender = false;
+      game.render = function() {
+        calledRender = true;
+      }
+
+      game.toggleDeadAt(5, 5, { render: false });
+      expect(calledRender).to.be.false;
+
+      game.toggleDeadAt(5, 6);
+      expect(calledRender).to.be.true;
     });
   });
 

@@ -187,7 +187,7 @@ Game.prototype = {
     return this.currentState().moveNumber;
   },
 
-  playAt: function(y, x) {
+  playAt: function(y, x, { render = true } = {}) {
     if (this.isIllegalAt(y, x)) {
       return false;
     }
@@ -201,12 +201,14 @@ Game.prototype = {
 
     this._moves.push(newState);
 
-    this.render();
+    if (render) {
+      this.render();
+    }
 
     return true;
   },
 
-  pass: function() {
+  pass: function({ render = true } = {}) {
     if (this.isOver()) {
       return false;
     }
@@ -214,7 +216,9 @@ Game.prototype = {
     const newState = this.currentState().playPass(this.currentPlayer());
     this._moves.push(newState);
 
-    this.render();
+    if (render) {
+      this.render();
+    }
 
     return true;
   },
@@ -230,22 +234,42 @@ Game.prototype = {
     return finalMove.pass && previousMove.pass;
   },
 
-  toggleDeadAt: function(y, x) {
+  markDeadAt: function(y, x, { render = true } = {}) {
+    if (this._isDeadAt(y, x)) {
+      return true;
+    }
+
+    return this._setDeadStatus(y, x, true, { render });
+  },
+
+  unmarkDeadAt: function(y, x, { render = true } = {}) {
+    if (!this._isDeadAt(y, x)) {
+      return true;
+    }
+
+    return this._setDeadStatus(y, x, false, { render });
+  },
+
+  toggleDeadAt: function(y, x, { render = true } = {}) {
+    return this._setDeadStatus(y, x, !this._isDeadAt(y, x), { render });
+  },
+
+  _setDeadStatus: function(y, x, markingDead, { render = true } = {}) {
     if (this.intersectionAt(y, x).isEmpty()) {
       return;
     }
 
-    const alreadyDead = this._isDeadAt(y, x);
-
     this.currentState().groupAt(y, x).forEach(intersection => {
-      if (alreadyDead) {
-        this._deadPoints = this._deadPoints.filter(dead => !(dead.y === intersection.y && dead.x === intersection.x));
-      } else {
+      if (markingDead) {
         this._deadPoints.push({ y: intersection.y, x: intersection.x });
+      } else {
+        this._deadPoints = this._deadPoints.filter(dead => !(dead.y === intersection.y && dead.x === intersection.x));
       }
     });
 
-    this.render();
+    if (render) {
+      this.render();
+    }
 
     return true;
   },
