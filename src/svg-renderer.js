@@ -9,7 +9,11 @@ const SVGRenderer = function(boardElement, { hooks, options }) {
 SVGRenderer.prototype = Object.create(Renderer.prototype);
 SVGRenderer.prototype.constructor = SVGRenderer;
 
+const CACHED_CONSTRUCTED_LINES = {};
+
 const constructSVG = function(renderer, boardState, { hasCoordinates, smallerStones, texturedStones }) {
+  const cacheKey = [boardState.boardSize, hasCoordinates, smallerStones, texturedStones].toString();
+
   const svg = utils.createSVGElement("svg");
   const defs = utils.createSVGElement("defs");
   utils.appendElement(svg, defs);
@@ -64,28 +68,37 @@ const constructSVG = function(renderer, boardState, { hasCoordinates, smallerSto
   });
   utils.appendElement(svg, contentsContainer);
 
-  const lines = utils.createSVGElement("g", {
-    attributes: {
-      class: "lines"
-    }
-  });
-  utils.appendElement(contentsContainer, lines);
+  let lines;
 
-  for (let y = 0; y < boardState.boardSize - 1; y++) {
-    for (let x = 0; x < boardState.boardSize - 1; x++) {
-      const lineBox = utils.createSVGElement("rect", {
-        attributes: {
-          y: y * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
-          x: x * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
-          width: renderer.INTERSECTION_GAP_SIZE + 1,
-          height: renderer.INTERSECTION_GAP_SIZE + 1,
-          class: "line-box"
-        }
-      });
+  if (CACHED_CONSTRUCTED_LINES[cacheKey]) {
+    lines = utils.clone(CACHED_CONSTRUCTED_LINES[cacheKey]);
+  } else {
+    lines = utils.createSVGElement("g", {
+      attributes: {
+        class: "lines"
+      }
+    });
 
-      utils.appendElement(lines, lineBox);
+    for (let y = 0; y < boardState.boardSize - 1; y++) {
+      for (let x = 0; x < boardState.boardSize - 1; x++) {
+        const lineBox = utils.createSVGElement("rect", {
+          attributes: {
+            y: y * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
+            x: x * (renderer.INTERSECTION_GAP_SIZE + 1) - 0.5,
+            width: renderer.INTERSECTION_GAP_SIZE + 1,
+            height: renderer.INTERSECTION_GAP_SIZE + 1,
+            class: "line-box"
+          }
+        });
+
+        utils.appendElement(lines, lineBox);
+      }
     }
+
+    CACHED_CONSTRUCTED_LINES[cacheKey] = lines;
   }
+
+  utils.appendElement(contentsContainer, lines);
 
   const hoshiPoints = utils.createSVGElement("g", { attributes: { class: "hoshi" }});
   utils.appendElement(contentsContainer, hoshiPoints);
@@ -102,9 +115,6 @@ const constructSVG = function(renderer, boardState, { hasCoordinates, smallerSto
 
     utils.appendElement(hoshiPoints, hoshi);
   });
-
-  const intersections = utils.createSVGElement("g", { attributes: { class: "intersections" }});
-  utils.appendElement(contentsContainer, intersections);
 
   if (hasCoordinates) {
     const coordinateContainer = utils.createSVGElement("g", {
@@ -143,6 +153,8 @@ const constructSVG = function(renderer, boardState, { hasCoordinates, smallerSto
       utils.appendElement(svg, coordinateContainer);
     }
   }
+
+  const intersections = utils.createSVGElement("g", { attributes: { class: "intersections" }});
 
   for (let y = 0; y < boardState.boardSize; y++) {
     for (let x = 0; x < boardState.boardSize; x++) {
@@ -236,6 +248,8 @@ const constructSVG = function(renderer, boardState, { hasCoordinates, smallerSto
       renderer.addIntersectionEventListeners(intersectionGroup, y, x);
     }
   }
+
+  utils.appendElement(contentsContainer, intersections);
 
   return svg;
 };

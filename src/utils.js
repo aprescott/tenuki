@@ -19,6 +19,10 @@ export default {
     return `${prefix}-${str}`;
   },
 
+  clone: function(element) {
+    return element.cloneNode(true);
+  },
+
   createElement: function(elementName, options) {
     const element = document.createElement(elementName);
 
@@ -65,6 +69,10 @@ export default {
   },
 
   removeClass: function(el, className) {
+    if (!this.hasClass(el, className)) {
+      return;
+    }
+
     if (el.classList && el.classList.remove) {
       el.classList.remove(className);
       return;
