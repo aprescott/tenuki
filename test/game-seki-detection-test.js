@@ -615,7 +615,6 @@ describe("seki detection", function() {
 
     // mark both black stones dead
     game.toggleDeadAt(0, 1);
-    game.toggleDeadAt(1, 0);
 
     expect(game.score().black).to.equal(0);
 
