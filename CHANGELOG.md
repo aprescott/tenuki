@@ -11,6 +11,7 @@
 * `playAt`, `pass` and `toggleDeadAt` now accept `{ render: false }` as an argument, which skips board rendering. This allows, e.g., playing N moves without rendering the board, then manually rendering once each has been played.
 * Some general improvements to board rendering.
 * Dead stone marking now happens in bulk based on regions.
+* Board and stone colors have been lightened.
 
 # v0.2.2
 

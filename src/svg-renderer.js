@@ -21,20 +21,20 @@ const constructSVG = function(renderer, boardState, { hasCoordinates, smallerSto
   const blackGradient = utils.createSVGElement("radialGradient", {
     attributes: {
       id: renderer.blackGradientID,
-      cy: "0",
-      r: "55%"
+      cy: "15%",
+      r: "50%"
     }
   });
   utils.appendElement(blackGradient, utils.createSVGElement("stop", {
     attributes: {
       offset: "0%",
-      "stop-color": "#848484"
+      "stop-color": "hsl(0, 0%, 38%)"
     }
   }));
   utils.appendElement(blackGradient, utils.createSVGElement("stop", {
     attributes: {
       offset: "100%",
-      "stop-color": "hsl(0, 0%, 20%)"
+      "stop-color": "#39363D"
     }
   }));
   utils.appendElement(defs, blackGradient);
@@ -42,20 +42,20 @@ const constructSVG = function(renderer, boardState, { hasCoordinates, smallerSto
   const whiteGradient = utils.createSVGElement("radialGradient", {
     attributes: {
       id: renderer.whiteGradientID,
-      cy: "0",
-      r: "70%"
+      cy: "15%",
+      r: "50%"
     }
   });
   utils.appendElement(whiteGradient, utils.createSVGElement("stop", {
     attributes: {
       offset: "0%",
-      "stop-color": "white"
+      "stop-color": "#FFFFFF"
     }
   }));
   utils.appendElement(whiteGradient, utils.createSVGElement("stop", {
     attributes: {
       offset: "100%",
-      "stop-color": "#DDDDDD"
+      "stop-color": "#fafdfc"
     }
   }));
   utils.appendElement(defs, whiteGradient);
