@@ -13,22 +13,22 @@ The JavaScript engine is not dependent on the renderer and works stand-alone. Yo
 
 The go board interface is intended to be a robust, functional component that can be embedded in a web page. By using the JavaScript API you could then build your own custom controls for undo/pass/etc.
 
-Features:
+The game engine supports playing an entire game and has various features and configuration settings:
 
-  * Simple ko and superko.
-  * Pass.
-  * Undo.
+  * Both Simple ko and superko rules.
   * Handicap stones, with or without free placement.
   * End-game functionality: dead stone marking and scoring.
   * Different scoring rules: territory, area, equivalence (with pass stones).
   * Komi.
   * Seki detection for territory scoring rules.
-  * Support for playing against a server.
-  * For the visual interface:
-    - Built-in mobile support for touch devices and small screens.
-    - Automatic board resizing and responsiveness.
-    - Optional coordinate markers for points A19 through T1.
-    - Optional fuzzy stone placement with collision movement animations.
+
+The board UI also has its own features:
+
+  * A responsive UI for comfortably playing on touch devices and small screens.
+  * Automatic board resizing to fit the layout.
+  * Ko point markers.
+  * Optional coordinate markers for points A19 through T1.
+  * Optional fuzzy stone placement with collision movement animations.
 
 # Live examples
 
@@ -303,17 +303,6 @@ game.callbacks.postRender = function(game) {
   }
 };
 ```
-
-# Using `Client` to play against a server
-
-The `Game` interface is only useful for local play. For play against a remote server, there is the `Client` interface.
-
-For an example of how to use `Client`, the `test-server/` directory contains a demo client and server setup.
-
-  * `cd test-server/` and run `node server.js`.
-  * Open `test-server/client.html` in a browser.
-
-The game is set to run on a fixed 9x9 board.
 
 # Running tests
 
