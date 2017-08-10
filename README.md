@@ -42,15 +42,6 @@ For live examples, see `examples/`, or view them on GitHub:
 
 These examples are also set up to work on mobile/touch displays, because the board is set to fit within the browser window.
 
-Here are some screenshots and GIFs:
-
-* [Top-right corner of the board, with some stones](https://i.imgur.com/w6D33pf.png)
-* [GIF: Desktop gameplay on a full-sized board](https://i.imgur.com/7cQkoaf.gif)
-* [GIF: Desktop gameplay with a smaller board](https://i.imgur.com/N0YgjJD.gif)
-* [GIF: Touch-screen gameplay on a mobile device (zooming)](https://i.imgur.com/7UDNTJM.gif)
-* [GIF: Touch-screen gameplay (dragging)](https://i.imgur.com/YaIZIkV.gif)
-* [GIF: Pinch-zooming yourself on a mobile device](https://i.imgur.com/wvsifZg.gif)
-
 # Installation
 
 If you use npm, then `npm install tenuki`. Otherwise, you can download the files you need from [the latest release](https://github.com/aprescott/tenuki/releases).
