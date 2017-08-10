@@ -12,6 +12,7 @@
 * Some general improvements to board rendering.
 * Dead stone marking now happens in bulk based on regions.
 * Board and stone colors have been lightened.
+* `.tenuki-board-textured` is now the default. To use flat stone styling with no gradients or shadows, set `.tenuki-board-flat` as the class name.
 
 # v0.2.2
 

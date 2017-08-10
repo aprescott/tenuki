@@ -13,8 +13,6 @@ The JavaScript engine is not dependent on the renderer and works stand-alone. Yo
 
 The go board interface is intended to be a robust, functional component that can be embedded in a web page. By using the JavaScript API you could then build your own custom controls for undo/pass/etc.
 
-<img src="https://raw.githubusercontent.com/aprescott/tenuki/master/examples/screenshots/board.png" width="124" height="124">
-
 Features:
 
   * Simple ko and superko.
@@ -77,15 +75,13 @@ Create a new `tenuki.Game` instance, which displays the board itself and configu
 
 There are no other dependencies.
 
-# Textured styling
+# Flat stone styling
 
-For a textured board, add the class `tenuki-board-textured`:
+For a completely flat board with no stone shadows or gradients, add the class `tenuki-board-flat`:
 
 ```html
-<div class="tenuki-board tenuki-board-textured"></div>
+<div class="tenuki-board tenuki-board-flat"></div>
 ```
-
-<img src="https://raw.githubusercontent.com/aprescott/tenuki/master/examples/screenshots/board-textured.png" width="124" height="124">
 
 # Fuzzy stone placement
 
@@ -97,7 +93,7 @@ new tenuki.Game({
 });
 ```
 
-When enabled, stones are set to textured styling, and played stones will be randomly placed slightly off-center. If stones overlap after placement, existing stones are bumped out of the way.
+When enabled, played stones will be randomly placed slightly off-center. If stones overlap after placement, existing stones are bumped out of the way.
 
 # Auto-scaling and responsiveness
 

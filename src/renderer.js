@@ -14,12 +14,15 @@ const Renderer = function(boardElement, { hooks, options }) {
 
   if (this._options["fuzzyStonePlacement"]) {
     utils.addClass(boardElement, "tenuki-fuzzy-placement");
-    utils.addClass(boardElement, "tenuki-board-textured");
+    utils.removeClass(boardElement, "tenuki-board-flat");
+    utils.addClass(boardElement, "tenuki-board-nonflat");
     this.smallerStones = true;
   }
 
-  if (utils.hasClass(boardElement, "tenuki-board-textured")) {
-    this.texturedStones = true;
+  this.flatStones = utils.hasClass(boardElement, "tenuki-board-flat");
+
+  if (!this.flatStones) {
+    utils.addClass(boardElement, "tenuki-board-nonflat");
   }
 };
 
@@ -132,7 +135,7 @@ Renderer.prototype = {
     const specificRendererBoard = this.generateBoard(boardState, {
       hasCoordinates: this.hasCoordinates,
       smallerStones: this.smallerStones,
-      texturedStones: this.texturedStones
+      flatStones: this.flatStones
     });
     utils.appendElement(zoomContainer, specificRendererBoard);
 

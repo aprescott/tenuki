@@ -11,8 +11,8 @@ SVGRenderer.prototype.constructor = SVGRenderer;
 
 const CACHED_CONSTRUCTED_LINES = {};
 
-const constructSVG = function(renderer, boardState, { hasCoordinates, smallerStones, texturedStones }) {
-  const cacheKey = [boardState.boardSize, hasCoordinates, smallerStones, texturedStones].toString();
+const constructSVG = function(renderer, boardState, { hasCoordinates, smallerStones, flatStones }) {
+  const cacheKey = [boardState.boardSize, hasCoordinates, smallerStones, flatStones].toString();
 
   const svg = utils.createSVGElement("svg");
   const defs = utils.createSVGElement("defs");
@@ -197,7 +197,7 @@ const constructSVG = function(renderer, boardState, { hasCoordinates, smallerSto
         r: stoneRadius
       };
 
-      if (texturedStones) {
+      if (!flatStones) {
         utils.appendElement(intersectionInnerContainer, utils.createSVGElement("circle", {
           attributes: {
             class: "stone-shadow",
@@ -254,11 +254,11 @@ const constructSVG = function(renderer, boardState, { hasCoordinates, smallerSto
   return svg;
 };
 
-SVGRenderer.prototype.generateBoard = function(boardState, { hasCoordinates, smallerStones, texturedStones }) {
+SVGRenderer.prototype.generateBoard = function(boardState, { hasCoordinates, smallerStones, flatStones }) {
   this.blackGradientID = utils.randomID("black-gradient");
   this.whiteGradientID = utils.randomID("white-gradient");
 
-  const svg = constructSVG(this, boardState, { hasCoordinates, smallerStones, texturedStones });
+  const svg = constructSVG(this, boardState, { hasCoordinates, smallerStones, flatStones });
 
   this.svgElement = svg;
   this.svgElement.setAttribute("height", this.BOARD_LENGTH);
@@ -285,7 +285,7 @@ SVGRenderer.prototype.setIntersectionClasses = function(intersectionEl, intersec
     intersectionEl.setAttribute("class", classes.join(" "));
   }
 
-  if (this.texturedStones) {
+  if (!this.flatStones) {
     if (intersection.isEmpty()) {
       intersectionEl.querySelector(".stone").setAttribute("style", "");
     } else {
