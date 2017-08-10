@@ -27,7 +27,7 @@
   }
 
   &.tenuki-board .tenuki-inner-container {
-    background-color: rgb(225, 188, 106);
+    background-color: rgb(235, 201, 138);
   }
 
   &.tenuki-board .tenuki-zoom-container {
@@ -51,8 +51,9 @@
   }
 
   &.tenuki-board .intersection.hovered .stone,
-  &.tenuki-board .intersection.dead .stone {
-    opacity: 0.5;
+  &.tenuki-board .intersection.dead .stone,
+  &.tenuki-board-textured .intersection.white .stone-shadow {
+    opacity: 0.7;
   }
 
   &.tenuki-board .intersection.dead.white .stone,
@@ -101,12 +102,12 @@
   &.tenuki-board-textured .intersection.black .stone,
   &.tenuki-board-textured .intersection.dead.black .stone,
   &.tenuki-board-textured .intersection.hovered.black .stone {
-    stroke: hsl(0, 0%, 20%);
+    stroke: hsl(0, 0%, 28%);
   }
 
   &.tenuki-board-textured .intersection.black .stone-shadow,
   &.tenuki-board-textured .intersection.white .stone-shadow {
-    fill: hsla(0, 0%, 24%, 0.38);
+    fill: hsla(0, 0%, 24%, 0.38 / 2);
   }
 
   &.tenuki-board-textured .intersection.hovered.white .stone-shadow,
