@@ -292,6 +292,10 @@ $board-margin: $base-margin + $gutter-margin;
 
   &.tenuki-board .intersection.empty.hovered .stone,
   &.tenuki-board .intersection.dead .stone {
+    opacity: 0.5;
+  }
+
+  &.tenuki-board-textured .intersection.dead .stone {
     opacity: 0.7;
   }
 
