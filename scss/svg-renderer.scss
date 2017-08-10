@@ -52,7 +52,7 @@
 
   &.tenuki-board .intersection.hovered .stone,
   &.tenuki-board .intersection.dead .stone,
-  &.tenuki-board-textured .intersection.white .stone-shadow {
+  &.tenuki-board .intersection.dead .stone-shadow {
     opacity: 0.7;
   }
 
@@ -107,6 +107,10 @@
 
   &.tenuki-board-textured .intersection.black .stone-shadow,
   &.tenuki-board-textured .intersection.white .stone-shadow {
+    fill: hsla(0, 0%, 24%, 0.38);
+  }
+
+  &.tenuki-board-textured .intersection.dead .stone-shadow {
     fill: hsla(0, 0%, 24%, 0.38 / 2);
   }
 
