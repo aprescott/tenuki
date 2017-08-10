@@ -11,13 +11,12 @@
 </head>
 
 <div class="example-heading">
-  <p>This is an example showing a minimal board with no extra controls.</p>
+  <p>This is an example showing the default board.</p>
 </div>
 
 <div class="tenuki-board"></div>
 
 <script>
   boardElement = document.querySelector(".tenuki-board");
-  window.board = new tenuki.Game(boardElement);
-  window.board.setup();
+  window.board = new tenuki.Game({ element: boardElement });
 </script>

@@ -11,7 +11,7 @@
 </head>
 
 <div class="example-heading">
-  <p>This is an example board with fuzzy stone placement, where stones are randomly placed slightly off-center and push other stones out of the way. The button controls (e.g., undo) are not part of the Tenuki library — you can configure and style them however you like.</p>
+  <p>This is an example board with fuzzy stone placement, where stones are randomly placed slightly off-center and push other stones out of the way. The button controls are not part of Tenuki, but are an example of the sort of controls you can build yourself.</p>
 </div>
 
 <div class="tenuki-board"></div>
@@ -28,8 +28,7 @@
 
 <script>
 var boardElement = document.querySelector(".tenuki-board");
-var game = new tenuki.Game(boardElement);
-game.setup({ fuzzyStonePlacement: true });
+var game = new tenuki.Game({ element: boardElement, fuzzyStonePlacement: true });
 
 var controlElement = document.querySelector(".controls");
 var controls = new ExampleGameControls(controlElement, game);

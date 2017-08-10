@@ -1,5 +1,5 @@
 /*!
- * tenuki v0.2.2 (https://github.com/aprescott/tenuki.js)
+ * Tenuki v0.2.2 (https://github.com/aprescott/tenuki)
  * Copyright © 2016 Adam Prescott.
  * Licensed under the MIT license.
  */
@@ -13,7 +13,7 @@
 }
 
 .tenuki-dom-renderer.tenuki-board .tenuki-inner-container {
-  background: #e2bc6a;
+  background: #ebc98a;
 }
 
 .tenuki-dom-renderer.tenuki-board .tenuki-zoom-container {
@@ -168,57 +168,57 @@
   height: 29px;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured,
-.tenuki-dom-renderer.tenuki-board-textured .tenuki-inner-container,
-.tenuki-dom-renderer.tenuki-board-textured .tenuki-zoom-container,
-.tenuki-dom-renderer.tenuki-board-textured .intersections {
+.tenuki-dom-renderer.tenuki-board-nonflat,
+.tenuki-dom-renderer.tenuki-board-nonflat .tenuki-inner-container,
+.tenuki-dom-renderer.tenuki-board-nonflat .tenuki-zoom-container,
+.tenuki-dom-renderer.tenuki-board-nonflat .intersections {
   /* scale(1) is for the same iOS 9 reason as above */
   transform: scale(1) translate3d(0, 0, 0);
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-smaller-stones .intersection {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-smaller-stones .intersection {
   width: 27px;
   height: 27px;
   border: 1px solid transparent;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .occupied {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .occupied {
   transition: 0.1s margin;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.played {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.played {
   transition: none;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-up {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.v-shift-up {
   margin-top: -1px;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-upup {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.v-shift-upup {
   margin-top: -2px;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-down {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.v-shift-down {
   margin-top: 1px;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-downdown {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.v-shift-downdown {
   margin-top: 2px;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-left {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.h-shift-left {
   margin-left: -1px;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-leftleft {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.h-shift-leftleft {
   margin-left: -2px;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-right {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.h-shift-right {
   margin-left: 1px;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-rightright {
+.tenuki-dom-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.h-shift-rightright {
   margin-left: 2px;
 }
 
@@ -283,8 +283,13 @@
   background: black;
 }
 
-.tenuki-dom-renderer.tenuki-board .intersection.empty.hovered .stone {
+.tenuki-dom-renderer.tenuki-board .intersection.empty.hovered .stone,
+.tenuki-dom-renderer.tenuki-board .intersection.dead .stone {
   opacity: 0.5;
+}
+
+.tenuki-dom-renderer.tenuki-board-nonflat .intersection.dead .stone {
+  opacity: 0.7;
 }
 
 .tenuki-dom-renderer.tenuki-board .intersection.ko .stone {
@@ -335,21 +340,25 @@
   background: white;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured .occupied .stone {
+.tenuki-dom-renderer.tenuki-board-nonflat .occupied .stone {
   box-shadow: 0px 1.5px 0px rgba(62, 62, 62, 0.38);
 }
 
-.tenuki-dom-renderer.tenuki-board-textured .occupied.black .stone,
-.tenuki-dom-renderer.tenuki-board-textured .empty.hovered.black .stone {
-  border-color: #333333;
+.tenuki-dom-renderer.tenuki-board-nonflat .intersection.dead .stone {
+  box-shadow: 0px 1.5px 0px rgba(62, 62, 62, 0.19);
 }
 
-.tenuki-dom-renderer.tenuki-board-textured .occupied.white .stone,
-.tenuki-dom-renderer.tenuki-board-textured .empty.hovered.white .stone {
+.tenuki-dom-renderer.tenuki-board-nonflat .occupied.black .stone,
+.tenuki-dom-renderer.tenuki-board-nonflat .empty.hovered.black .stone {
+  border-color: #474747;
+}
+
+.tenuki-dom-renderer.tenuki-board-nonflat .occupied.white .stone,
+.tenuki-dom-renderer.tenuki-board-nonflat .empty.hovered.white .stone {
   border-color: #DEDEDE;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured .occupied .stone:before {
+.tenuki-dom-renderer.tenuki-board-nonflat .occupied .stone:before {
   content: "";
   position: absolute;
   top: 0;
@@ -360,12 +369,12 @@
   z-index: 2;
 }
 
-.tenuki-dom-renderer.tenuki-board-textured .occupied.black .stone:before {
-  background: radial-gradient(circle at 50% 0px, #848484, #333333 50%);
+.tenuki-dom-renderer.tenuki-board-nonflat .occupied.black .stone:before {
+  background: radial-gradient(circle at 50% 15%, #616161, #39363D 50%);
 }
 
-.tenuki-dom-renderer.tenuki-board-textured .occupied.white .stone:before {
-  background: radial-gradient(circle at 50% 0px, #FFFFFF, #DDDDDD 70%);
+.tenuki-dom-renderer.tenuki-board-nonflat .occupied.white .stone:before {
+  background: radial-gradient(circle at 50% 15%, #FFFFFF, #fafdfc 70%);
 }
 .tenuki-board.tenuki-scaled .cancel-zoom.visible {
   background: #B95858;
@@ -396,7 +405,7 @@
   position: absolute;
   z-index: 1;
   bottom: 48px;
-  background: rgba(226, 188, 106, 0.81);
+  background: rgba(235, 201, 138, 0.81);
   border-radius: 50%;
   width: 100px;
   height: 100px;
@@ -414,9 +423,9 @@
   cursor: default;
 }
 
-.tenuki-svg-renderer.tenuki-board-textured svg,
-.tenuki-svg-renderer.tenuki-board-textured .tenuki-zoom-container,
-.tenuki-svg-renderer.tenuki-board-textured .intersections {
+.tenuki-svg-renderer.tenuki-board-nonflat svg,
+.tenuki-svg-renderer.tenuki-board-nonflat .tenuki-zoom-container,
+.tenuki-svg-renderer.tenuki-board-nonflat .intersections {
   transform: translate3d(0, 0, 0);
 }
 
@@ -437,7 +446,7 @@
 }
 
 .tenuki-svg-renderer.tenuki-board .tenuki-inner-container {
-  background-color: #e1bc6a;
+  background-color: #ebc98a;
 }
 
 .tenuki-svg-renderer.tenuki-board .tenuki-zoom-container {
@@ -461,8 +470,14 @@
 }
 
 .tenuki-svg-renderer.tenuki-board .intersection.hovered .stone,
-.tenuki-svg-renderer.tenuki-board .intersection.dead .stone {
+.tenuki-svg-renderer.tenuki-board .intersection.dead .stone,
+.tenuki-svg-renderer.tenuki-board .intersection.dead .stone-shadow {
   opacity: 0.5;
+}
+
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.dead .stone,
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.dead .stone-shadow {
+  opacity: 0.7;
 }
 
 .tenuki-svg-renderer.tenuki-board .intersection.dead.white .stone,
@@ -503,72 +518,76 @@
   visibility: visible;
 }
 
-.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.black .stone,
-.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.white .stone {
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.hovered.black .stone,
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.hovered.white .stone {
   filter: none !important;
 }
 
-.tenuki-svg-renderer.tenuki-board-textured .intersection.black .stone,
-.tenuki-svg-renderer.tenuki-board-textured .intersection.dead.black .stone,
-.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.black .stone {
-  stroke: #333333;
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.black .stone,
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.dead.black .stone,
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.hovered.black .stone {
+  stroke: #474747;
 }
 
-.tenuki-svg-renderer.tenuki-board-textured .intersection.black .stone-shadow,
-.tenuki-svg-renderer.tenuki-board-textured .intersection.white .stone-shadow {
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.black .stone-shadow,
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.white .stone-shadow {
   fill: rgba(61, 61, 61, 0.38);
 }
 
-.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.white .stone-shadow,
-.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.black .stone-shadow {
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.dead .stone-shadow {
+  fill: rgba(61, 61, 61, 0.19);
+}
+
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.hovered.white .stone-shadow,
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.hovered.black .stone-shadow {
   fill: none;
 }
 
-.tenuki-svg-renderer.tenuki-board-textured .intersection.white .stone,
-.tenuki-svg-renderer.tenuki-board-textured .intersection.dead.white .stone,
-.tenuki-svg-renderer.tenuki-board-textured .intersection.hovered.white .stone {
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.white .stone,
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.dead.white .stone,
+.tenuki-svg-renderer.tenuki-board-nonflat .intersection.hovered.white .stone {
   stroke: #DEDEDE;
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.occupied,
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.occupied .intersection-inner-container {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.occupied,
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.occupied .intersection-inner-container {
   transition: 0.1s transform;
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.played,
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.played .intersection-inner-container {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.played,
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.played .intersection-inner-container {
   transition: none;
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-up {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.v-shift-up {
   transform: translateY(-1px);
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-upup {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.v-shift-upup {
   transform: translateY(-2px);
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-down {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.v-shift-down {
   transform: translateY(1px);
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.v-shift-downdown {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.v-shift-downdown {
   transform: translateY(2px);
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-left .intersection-inner-container {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.h-shift-left .intersection-inner-container {
   transform: translateX(-1px);
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-leftleft .intersection-inner-container {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.h-shift-leftleft .intersection-inner-container {
   transform: translateX(-2px);
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-right .intersection-inner-container {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.h-shift-right .intersection-inner-container {
   transform: translateX(1px);
 }
 
-.tenuki-svg-renderer.tenuki-board-textured.tenuki-fuzzy-placement .intersection.h-shift-rightright .intersection-inner-container {
+.tenuki-svg-renderer.tenuki-board-nonflat.tenuki-fuzzy-placement .intersection.h-shift-rightright .intersection-inner-container {
   transform: translateX(2px);
 }
 
