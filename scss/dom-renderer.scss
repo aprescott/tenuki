@@ -290,7 +290,8 @@ $board-margin: $base-margin + $gutter-margin;
     background: black;
   }
 
-  &.tenuki-board .intersection.empty.hovered .stone {
+  &.tenuki-board .intersection.empty.hovered .stone,
+  &.tenuki-board .intersection.dead .stone {
     opacity: 0.5;
   }
 
