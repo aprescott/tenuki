@@ -3,6 +3,9 @@ $gutter-margin: $intersection-gap - 3px;
 $base-margin: $intersection-gap - 10px;
 $board-margin: $base-margin + $gutter-margin;
 
+$board-lighter-color: hsl(41, 36%, 44%);
+$board-darker-color: hsl(41, 36%, 40%);
+
 .tenuki-dom-renderer {
   &.tenuki-board {
     position: relative;
@@ -47,7 +50,7 @@ $board-margin: $base-margin + $gutter-margin;
   }
 
   &.tenuki-board .line {
-    background: rgb(135, 113, 63);
+    background: $board-lighter-color;
     float: left;
     position: relative;
   }
@@ -80,7 +83,7 @@ $board-margin: $base-margin + $gutter-margin;
     /* gutter margin, less 5px */
     line-height: $gutter-margin - 5px;
     font-family: sans-serif;
-    color: rgb(135, 113, 63);
+    color: $board-darker-color;
     display: block;
     font-size: 14px;
   }
@@ -145,7 +148,7 @@ $board-margin: $base-margin + $gutter-margin;
     width: calc(2 * 2px + 1px);
     height: calc(2 * 2px + 1px);
     border-radius: 50%;
-    background: rgb(135, 113, 63);
+    background: $board-darker-color;
     position: absolute;
   }
 

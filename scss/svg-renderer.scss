@@ -1,3 +1,6 @@
+$board-lighter-color: hsl(41, 36%, 44%);
+$board-darker-color: hsl(41, 36%, 40%);
+
 .tenuki-svg-renderer {
   -webkit-user-select: none;
   user-select: none;
@@ -17,13 +20,13 @@
   }
 
   &.tenuki-board .line-box {
-    stroke: rgb(135, 113, 63);
+    stroke: $board-lighter-color;
     fill: transparent;
   }
 
   &.tenuki-board .hoshi {
-    stroke: rgb(135, 113, 63);
-    fill: rgb(135, 113, 63);
+    stroke: $board-darker-color;
+    fill: $board-darker-color;
   }
 
   &.tenuki-board .tenuki-inner-container {
@@ -179,7 +182,7 @@
   }
 
   .coordinates {
-    fill: rgb(135, 113, 63);
+    fill: $board-darker-color;
     font-family: sans-serif;
     font-size: 14px;
   }
