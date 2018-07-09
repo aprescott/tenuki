@@ -3,3 +3,5 @@
 /*.sublime-*
 /build
 /tmp
+/package-lock.json
+/yarn.lock
