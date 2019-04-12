@@ -33,7 +33,7 @@
     "babel-preset-es2015": "*",
     "babelify": "*",
     "body-parser": "^1.15.1",
-    "browserify": "*",
+    "browserify": "8",
     "chai": "^3.5.0",
     "clean-css-cli": "*",
     "eslint": "*",
