@@ -1,13 +1,13 @@
 /*!
- * Tenuki v0.2.2 (https://github.com/aprescott/tenuki)
- * Copyright © 2016 Adam Prescott.
+ * Tenuki v0.3.1 (https://github.com/aprescott/tenuki)
+ * Copyright © 2016-2019 Adam Prescott.
  * Licensed under the MIT license.
  */
 .tenuki-dom-renderer.tenuki-board {
   position: relative;
   -webkit-user-select: none;
   user-select: none;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   overflow: hidden;
   cursor: default;
 }
@@ -46,7 +46,7 @@
 }
 
 .tenuki-dom-renderer.tenuki-board .line {
-  background: #87713f;
+  background: #997f48;
   float: left;
   position: relative;
 }
@@ -79,7 +79,7 @@
   /* gutter margin, less 5px */
   line-height: 20px;
   font-family: sans-serif;
-  color: #87713f;
+  color: #8b7341;
   display: block;
   font-size: 14px;
 }
@@ -144,7 +144,7 @@
   width: calc(2 * 2px + 1px);
   height: calc(2 * 2px + 1px);
   border-radius: 50%;
-  background: #87713f;
+  background: #8b7341;
   position: absolute;
 }
 
@@ -432,17 +432,17 @@
 .tenuki-svg-renderer.tenuki-board {
   position: relative;
   overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 .tenuki-svg-renderer.tenuki-board .line-box {
-  stroke: #87713f;
+  stroke: #997f48;
   fill: transparent;
 }
 
 .tenuki-svg-renderer.tenuki-board .hoshi {
-  stroke: #87713f;
-  fill: #87713f;
+  stroke: #8b7341;
+  fill: #8b7341;
 }
 
 .tenuki-svg-renderer.tenuki-board .tenuki-inner-container {
@@ -592,7 +592,7 @@
 }
 
 .tenuki-svg-renderer .coordinates {
-  fill: #87713f;
+  fill: #8b7341;
   font-family: sans-serif;
   font-size: 14px;
 }
