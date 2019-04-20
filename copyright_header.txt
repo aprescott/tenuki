@@ -1,5 +1,5 @@
 /*!
- * Tenuki v0.2.2 (https://github.com/aprescott/tenuki)
- * Copyright © 2016 Adam Prescott.
+ * Tenuki v0.3.1 (https://github.com/aprescott/tenuki)
+ * Copyright © 2016-2019 Adam Prescott.
  * Licensed under the MIT license.
  */

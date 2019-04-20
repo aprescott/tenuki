@@ -1,5 +1,9 @@
 # Next version
 
+* ...
+
+# v0.3.1
+
 * Change `"superko"` as a ko setting to `"positional-superko"` to be explicit.
 * Support situational and natural situational superko variants. (#31)
 * Two consecutive passes will now always end the game under equivalence scoring. Previously, the requirement that white "pass" last was implemented as a game-ending requirement. Now, the game will always end after 2 passes, with the score handling the extra white pass stone to represent a "pass" move. (#30)
