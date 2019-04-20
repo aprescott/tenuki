@@ -13,6 +13,7 @@
 * Dead stone marking now happens in bulk based on regions.
 * Board and stone colors have been lightened.
 * `.tenuki-board-textured` is now the default. To use flat stone styling with no gradients or shadows, set `.tenuki-board-flat` as the class name.
+* Allow the SVG renderer to function properly when the URL has a URI fragment / hash. (#38, maackle)
 
 # v0.2.2
 
