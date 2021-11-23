@@ -44,7 +44,7 @@ These examples are also set up to work on mobile/touch displays, because the boa
 
 # Installation
 
-If you use npm, then `npm install tenuki`. Otherwise, you can download the files you need from [the latest release](https://github.com/aprescott/tenuki/releases).
+If you use npm, then `npm install tenuki`. Otherwise, you can download [tagged releases from GitHub](https://github.com/aprescott/tenuki/tags).
 
 It's also possible to clone this repo and run `make` against the latest commit, which will generate files in `build/`.
 
