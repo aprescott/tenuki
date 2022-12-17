@@ -69,7 +69,7 @@ Client.prototype = {
     if (this._boardElement) {
       this._game = new Game(Object.assign({ element: this._boardElement }, gameOptions));
     } else {
-      this._game = new Game(...gameOptions);
+      this._game = new Game({...gameOptions});
     }
   },
 
