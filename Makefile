@@ -1,5 +1,5 @@
 PATH  := node_modules/.bin:$(PATH)
-SHELL := /bin/bash
+SHELL := env PATH=$(PATH) /bin/bash
 
 name := tenuki
 
@@ -23,7 +23,7 @@ test: all
 
 build/$(name).js: build $(compiled_js)
 	cat copyright_header.txt \
-		<(browserify index.js --standalone $(name) -t [ babelify --presets [ es2015 ] ]) \
+		<(browserify index.js --standalone $(name) -t [ babelify --presets [ @babel/preset-env ] ]) \
 		> $@
 
 build/$(name).min.js: build/$(name).js
@@ -44,7 +44,7 @@ build/$(name).min.css: build/$(name).css
 lib/%.js: src/%.js
 	babel \
 		--source-maps \
-		--presets es2015 \
+		--presets @babel/preset-env \
 		--out-file $@ \
 		$<
 
